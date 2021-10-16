@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 # from rest_framework import authentication, permissions
 from rest_framework import status
-from .models import Posts
+from .models import Post
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -18,14 +18,14 @@ class ListPosts(APIView):
     # permission_classes = [permissions.IsAdminUser]
 
     @swagger_auto_schema(
-        operation_description="GET /posts/",
+        operation_description="GET /post/",
         responses={
             "200": openapi.Response(
                 description="OK",
                 examples={
                     "application/json": {
                         "total": 2,
-                        "posts": [
+                        "post": [
                             {
                                 "author": "Author A",
                                 "data_type": "jpeg",
@@ -48,7 +48,7 @@ class ListPosts(APIView):
         """
         Return a list of all posts
         """
-        posts = Posts.objects.all()
+        posts = Post.objects.all()
 
         post_list = []
 
