@@ -49,28 +49,30 @@ class Post(models.Model):
     unlisted = models.BooleanField()
     # unlisted means it is public if you know the post name -- use this for images, it's so images don't show up in timelines
 
-
+# GET List of Posts
 class Inbox(models.Model):
     '''
+    Retrieves all new posts sent to this author
+
     Inbox model:
-        id          PRIMARY KEY
-        author      FOREIGN KEY Reference to Author
-        post
-        follow
-        like
-        comments
-        published 
-    
+        author/sender      Who's Inbox this is
     '''
-    # Suppose to be Author? Instead of User
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    # Suppose to be Author or User?
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     
     # I'm retrieving these items? Could group items into a JSONField
-    post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_id')
+    # post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_id')
 
+    # follow = models.ForeignKey(Follow, on_delete=models.CASCADE, related_name='follow')
+    # like = models.ForeignKey(Like, on_delete=models.CASCADE, related_name='like')
+    # comments = models.ForeignKey(Comments, on_delete=models.CASCADE, related_name='comments')
+    # # automatically sets the timestamp of when the object was first created. 
+    # published = models.DateTimeField(auto_now_add=True)
 
-    follow = models.ForeignKey(Follow, on_delete=models.CASCADE, related_name='follow')
-    like = models.ForeignKey(Like, on_delete=models.CASCADE, related_name='like')
-    comments = models.ForeignKey(Comments, on_delete=models.CASCADE, related_name='comments')
-    # automatically sets the timestamp of when the object was first created. 
-    published = models.DateTimeField(auto_now_add=True)
+# For POSTing all posts
+class Inbox_Item(models.model):
+    inbox_id = models.ForeignKey(Inbox, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    reciever = models.ForeignKey(User, on_delete=models.CASCADE)
+    item_type = models.CharField(max_length=255)
+    item_id = models.ForeignKey(item_type, on_delete=models.CASCADE, related_name='item_id')
