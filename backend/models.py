@@ -62,12 +62,13 @@ class Inbox(models.Model):
         published 
     
     '''
-    id = models.UUIDField(unique=True, primary_key=True, default=uuid.uuid4, editabable = False, max_length=100)
     # Suppose to be Author? Instead of User
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     
     # I'm retrieving these items? Could group items into a JSONField
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post')
+    post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_id')
+
+
     follow = models.ForeignKey(Follow, on_delete=models.CASCADE, related_name='follow')
     like = models.ForeignKey(Like, on_delete=models.CASCADE, related_name='like')
     comments = models.ForeignKey(Comments, on_delete=models.CASCADE, related_name='comments')
