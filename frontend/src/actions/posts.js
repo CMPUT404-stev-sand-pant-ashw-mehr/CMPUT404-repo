@@ -1,6 +1,12 @@
 import axios from "axios";
 
-import { GET_POSTS, DELETE_POST, CREATE_POST } from "./types";
+import {
+  GET_POSTS,
+  DELETE_POST,
+  CREATE_POST,
+  GET_ALERTS,
+  CREATE_ALERT,
+} from "./types";
 
 export const getPosts = () => (dispatch) => {
   axios
@@ -11,19 +17,44 @@ export const getPosts = () => (dispatch) => {
         payload: res.data,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const alert = {
+        msg: err.response.data,
+        status: err.response.status,
+      };
+      dispatch({
+        type: GET_ALERTS,
+        payload: alert,
+      });
+    });
 };
 
 export const deletePost = (id) => (dispatch) => {
   axios
     .delete(`/backend/posts/${id}`)
-    .then(() => {
+    .then((res) => {
+      dispatch({
+        type: CREATE_ALERT,
+        payload: {
+          msg: { success: "Post has been deleted!" },
+          status: res.status,
+        },
+      });
       dispatch({
         type: DELETE_POST,
         payload: id,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const alert = {
+        msg: err.response.data,
+        status: err.response.status,
+      };
+      dispatch({
+        type: GET_ALERTS,
+        payload: alert,
+      });
+    });
 };
 
 export const createPost = (post) => (dispatch) => {
@@ -31,9 +62,25 @@ export const createPost = (post) => (dispatch) => {
     .post(`/backend/posts/`, post)
     .then((res) => {
       dispatch({
+        type: CREATE_ALERT,
+        payload: {
+          msg: { success: "Post has been created!" },
+          status: res.status,
+        },
+      });
+      dispatch({
         type: CREATE_POST,
         payload: res.data,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const alert = {
+        msg: err.response.data,
+        status: err.response.status,
+      };
+      dispatch({
+        type: GET_ALERTS,
+        payload: alert,
+      });
+    });
 };
