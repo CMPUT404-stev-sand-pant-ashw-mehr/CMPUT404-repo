@@ -8,9 +8,11 @@ import {
   CREATE_ALERT,
 } from "./types";
 
-export const getPosts = () => (dispatch) => {
+import { tokenConfig } from "./auth";
+
+export const getPosts = () => (dispatch, getState) => {
   axios
-    .get(`/backend/posts`)
+    .get(`/backend/posts`, tokenConfig(getState))
     .then((res) => {
       dispatch({
         type: GET_POSTS,
@@ -29,9 +31,9 @@ export const getPosts = () => (dispatch) => {
     });
 };
 
-export const deletePost = (id) => (dispatch) => {
+export const deletePost = (id) => (dispatch, getState) => {
   axios
-    .delete(`/backend/posts/${id}`)
+    .delete(`/backend/posts/${id}`, tokenConfig(getState))
     .then((res) => {
       dispatch({
         type: CREATE_ALERT,
@@ -57,9 +59,9 @@ export const deletePost = (id) => (dispatch) => {
     });
 };
 
-export const createPost = (post) => (dispatch) => {
+export const createPost = (post) => (dispatch, getState) => {
   axios
-    .post(`/backend/posts/`, post)
+    .post(`/backend/posts/`, post, tokenConfig(getState))
     .then((res) => {
       dispatch({
         type: CREATE_ALERT,

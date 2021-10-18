@@ -4,8 +4,14 @@ from .serializers import PostSerializer
 
 # Viewset for Post
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated
     ]
+
     serializer_class = PostSerializer
+
+    def get_queryset(self):
+        return self.request.user.posts.all()
+        
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
