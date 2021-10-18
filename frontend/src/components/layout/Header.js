@@ -1,7 +1,38 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
+import { Link } from "react-router-dom";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
+import { logout } from "../../actions/auth";
 
 export class Header extends Component {
   render() {
+    const { isAuthenticated, user } = this.props.auth;
+    const authLinks = (
+      <Fragment>
+        <a className="me-3 py-2 text-dark text-decoration-none" href="#">
+          {user ? user.username : ""}
+        </a>
+        <a
+          href="#"
+          className="btn btn-outline-primary me-2"
+          onClick={this.props.logout}
+        >
+          Logout
+        </a>
+      </Fragment>
+    );
+
+    const guestLinks = (
+      <Fragment>
+        <Link to="/login" className="btn btn-outline-primary me-2">
+          Login
+        </Link>
+        <Link to="/register" className="btn btn-primary">
+          Register
+        </Link>
+      </Fragment>
+    );
+
     return (
       <div>
         <div className="col-lg-9 mx-auto pt-4">
@@ -36,16 +67,8 @@ export class Header extends Component {
                 >
                   About
                 </a>
-                <a
-                  href=""
-                  type="button"
-                  className="btn btn-outline-primary me-2"
-                >
-                  Login
-                </a>
-                <a href="" type="button" className="btn btn-primary">
-                  Signup
-                </a>
+
+                {isAuthenticated ? authLinks : guestLinks}
               </nav>
             </div>
           </header>
@@ -53,6 +76,15 @@ export class Header extends Component {
       </div>
     );
   }
+
+  static propTypes = {
+    auth: PropTypes.object.isRequired,
+    logout: PropTypes.func.isRequired,
+  };
 }
 
-export default Header;
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+});
+
+export default connect(mapStateToProps, { logout })(Header);
