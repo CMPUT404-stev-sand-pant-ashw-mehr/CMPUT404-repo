@@ -14,7 +14,7 @@ import styled from "styled-components";
 import store from "../store";
 
 const options = {
-  timeout: 3000,
+  timeout: 5000,
   position: "top center",
 };
 
