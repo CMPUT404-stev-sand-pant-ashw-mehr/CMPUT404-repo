@@ -12,11 +12,9 @@ export class Alert extends Component {
           alert.success(`${alerts.msg[msg]}`);
         } else {
           if (alerts.msg[msg] instanceof Array) {
-            alert.error(
-              `${msg}: ${alerts.msg[msg].join(", ")} (Status: ${alerts.status})`
-            );
+            alert.error(`${alerts.msg[msg].join(", ")}`);
           } else {
-            alert.error(`${msg}: ${alerts.msg[msg]}`);
+            alert.error(`${alerts.msg[msg]}`);
           }
         }
         break;
