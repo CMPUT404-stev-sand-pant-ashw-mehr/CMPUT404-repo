@@ -16,6 +16,20 @@ export class Create extends Component {
     unlisted: false,
   };
 
+  resetForm() {
+    this.setState({
+      type: "",
+      title: "",
+      source: "",
+      origin: "",
+      description: "",
+      contentType: "",
+      content: "",
+      visibility: "",
+      unlisted: false,
+    });
+  }
+
   onChange = (e) =>
     this.setState({
       [e.target.name]: e.target.value,
@@ -46,6 +60,7 @@ export class Create extends Component {
       unlisted: false,
     };
     this.props.createPost(post);
+    this.resetForm();
   };
 
   render() {
@@ -63,7 +78,7 @@ export class Create extends Component {
     return (
       <div>
         <form onSubmit={this.onSubmit}>
-          <div class="form-group">
+          <div className="form-group">
             <label>Type</label>
             <input
               className="form-control"
@@ -73,7 +88,7 @@ export class Create extends Component {
               value={type}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <label>Title</label>
             <input
               className="form-control"
@@ -83,7 +98,7 @@ export class Create extends Component {
               value={title}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <label>Source</label>
             <input
               className="form-control"
@@ -93,7 +108,7 @@ export class Create extends Component {
               value={source}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <label>Origin</label>
             <input
               className="form-control"
@@ -103,7 +118,7 @@ export class Create extends Component {
               value={origin}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <label>Description</label>
             <input
               className="form-control"
@@ -113,7 +128,7 @@ export class Create extends Component {
               value={description}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <label>Content Type</label>
             <input
               className="form-control"
@@ -123,7 +138,7 @@ export class Create extends Component {
               value={contentType}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <label>Content</label>
             <input
               className="form-control"
@@ -133,7 +148,7 @@ export class Create extends Component {
               value={content}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <label>Visibility</label>
             <input
               className="form-control"
@@ -143,7 +158,7 @@ export class Create extends Component {
               value={visibility}
             />
           </div>
-          <div class="form-group">
+          <div className="form-group">
             <button type="submit" className="btn btn-primary">
               Submit
             </button>
