@@ -1,14 +1,14 @@
 from django.urls import include, path
 from .views import ListPosts
 from rest_framework import routers 
-from .api import PostViewSet
+from .api import PostViewSet, CommentViewSet
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 
 router = routers.DefaultRouter()
 router.register('posts', PostViewSet, 'posts')
-
+router.register('posts/<slug:postId>/comments', PostViewSet, 'posts')
 urlpatterns = router.urls
 
 # urlpatterns = [

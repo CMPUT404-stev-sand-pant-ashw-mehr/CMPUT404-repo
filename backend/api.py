@@ -1,6 +1,6 @@
-from backend.models import Post 
+from backend.models import Post, Comment
 from rest_framework import viewsets, permissions 
-from .serializers import PostSerializer 
+from .serializers import PostSerializer, CommentSerializer
 
 # Viewset for Post
 class PostViewSet(viewsets.ModelViewSet):
@@ -15,3 +15,17 @@ class PostViewSet(viewsets.ModelViewSet):
         
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+        
+
+class CommentViewSet(viewsets.ModelViewSet):
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]
+
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        return self.request.user.post.comments.all()
+        
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, post=self.request.user.post)
