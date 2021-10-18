@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone 
 from django.contrib.auth.models import User 
+import datetime
+import uuid
 
 class Post(models.Model):
     postType = models.CharField(max_length=255)
@@ -48,3 +50,24 @@ class Post(models.Model):
     # FRIENDS should've already been sent the post so they don't need this
     unlisted = models.BooleanField()
     # unlisted means it is public if you know the post name -- use this for images, it's so images don't show up in timelines
+
+
+class Comment(models.Model):
+    # ID of the Comment (UUID)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    commentType = models.CharField(max_length=255, default = "comment")
+    
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    
+    comment = models.TextField()
+    
+    contentType = models.CharField(max_length=255)
+    
+    # ISO 8601 TIMESTAMP
+    published = models.DateTimeField(default = datetime.datetime.now().astimezone().replace(microsecond=0).isoformat())
+    
+    def __str__(self):
+        return str(self.comment)
