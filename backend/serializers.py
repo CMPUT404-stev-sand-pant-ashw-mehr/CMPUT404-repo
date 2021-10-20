@@ -12,4 +12,4 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer): 
     class Meta: 
         model = Comment
-        fields = '__all__'
+        fields = ['uuid', 'commentType', 'author', 'post', 'comment', 'contentType', 'published']

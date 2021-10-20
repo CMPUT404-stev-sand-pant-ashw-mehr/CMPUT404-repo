@@ -1,5 +1,5 @@
 from django.urls import include, path
-from .views import ListPosts
+from .views import ListPosts, ListComments
 from rest_framework import routers 
 from .api import PostViewSet, CommentViewSet
 
@@ -8,7 +8,8 @@ from .api import PostViewSet, CommentViewSet
 
 router = routers.DefaultRouter()
 router.register('posts', PostViewSet, 'posts')
-router.register('posts/<slug:postId>/comments', PostViewSet, 'posts')
+router.register('posts', CommentViewSet, 'comments')
+
 urlpatterns = router.urls
 
 # urlpatterns = [

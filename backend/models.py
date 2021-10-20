@@ -58,16 +58,16 @@ class Comment(models.Model):
     
     commentType = models.CharField(max_length=255, default = "comment")
     
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
     
-    comment = models.TextField()
+    comment = models.TextField(null=True)
     
-    contentType = models.CharField(max_length=255)
+    contentType = models.CharField(max_length=255, default = "text/markdown")
     
     # ISO 8601 TIMESTAMP
-    published = models.DateTimeField(default = datetime.datetime.now().astimezone().replace(microsecond=0).isoformat())
+    published = models.DateTimeField(default=timezone.now)
     
     def __str__(self):
         return str(self.comment)
