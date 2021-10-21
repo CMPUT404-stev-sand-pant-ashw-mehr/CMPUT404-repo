@@ -18,14 +18,6 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    
-#Viewset for Comments
-class CommentViewSet(viewsets.ModelViewSet):
-    permission_classes = [
-        permissions.IsAuthenticated
-    ]
-    
-    
     @action(detail=True, methods=['GET', 'POST'], name='comments')
     def comments(self, request, pk=None):
         if(request.method == 'GET'):
@@ -38,4 +30,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({
                 "message": "Comment Added"
             })
+    
+    
+    
         
