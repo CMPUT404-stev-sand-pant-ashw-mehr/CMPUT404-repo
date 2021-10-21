@@ -71,11 +71,3 @@ class ListPosts(APIView):
         }
         
         return Response(response, status=status.HTTP_200_OK)
-
-
-
-class ListComments(APIView):
-    
-    def get(self, request):
-        response = {}
-        return Response(response, status=status.HTTP_200_OK)

@@ -58,11 +58,11 @@ class Comment(models.Model):
     
     commentType = models.CharField(max_length=255, default = "comment")
     
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
     
-    comment = models.TextField(null=True)
+    comment = models.TextField()
     
     contentType = models.CharField(max_length=255, default = "text/markdown")
     
