@@ -12,4 +12,5 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer): 
     class Meta: 
         model = Comment
-        fields = ['uuid', 'commentType', 'author', 'post', 'comment', 'contentType', 'published']
+        fields = '__all__'
+        read_only_fields = ('uuid', 'published')
