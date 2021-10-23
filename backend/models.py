@@ -59,12 +59,12 @@ class Inbox(models.Model):
     '''
     # Suppose to be Author or User?
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-
     inbox_id = models.ForeignKey(Inbox, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     reciever = models.ForeignKey(User, on_delete=models.CASCADE)
     item_type = models.CharField(max_length=255)
-    item_id = models.ForeignKey(item_type, on_delete=models.CASCADE, related_name='item_id')
+    item_id = models.ForeignKey(
+        item_type, on_delete=models.CASCADE, related_name='item_id')
     
     # I'm retrieving these items? Could group items into a JSONField
     # post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_id')
