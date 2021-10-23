@@ -4,9 +4,8 @@ from .serializers import PostSerializer, InboxSerializer
 
 # Viewset for Post
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
     permission_classes = [
-        permissions.AllowAny
+        permissions.IsAuthenticated
     ]
     serializer_class = PostSerializer
 

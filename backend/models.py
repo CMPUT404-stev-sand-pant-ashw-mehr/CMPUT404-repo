@@ -25,7 +25,7 @@ class Post(models.Model):
     contentType = models.CharField(max_length=255)
     content = models.TextField()
     # the author has an ID where by authors can be disambiguated
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, related_name="posts", on_delete=models.CASCADE)
     # categories this post fits into (a list of strings
     # categories = many to many relationship
     # comments about the post
