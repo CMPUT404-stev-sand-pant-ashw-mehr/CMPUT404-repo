@@ -1,5 +1,5 @@
 from backend.models import Post 
-from rest_framework import viewsets, permissions 
+from rest_framework import viewsets, permissions, pagination
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response 
@@ -11,6 +11,8 @@ class PostViewSet(viewsets.ModelViewSet):
     ]
 
     serializer_class = PostSerializer
+    
+    pagination_class = pagination.PageNumberPagination
 
     def get_queryset(self):
         return self.request.user.posts.all()
@@ -22,8 +24,9 @@ class PostViewSet(viewsets.ModelViewSet):
     def comments(self, request, pk=None):
         if(request.method == 'GET'):
             query_set = Post.objects.get(id=pk).comment_set.all()
-            response = CommentSerializer(query_set, many=True)
-            return Response(response.data)
+            page = self.paginate_queryset(query_set)
+            response = CommentSerializer(page, many=True)
+            return self.get_paginated_response(response.data)
             
         elif(request.method =='POST'):
             Post.objects.get(id=pk).comment_set.create(author=request.user, comment=request.data["comment"])
