@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from author.serializer import AuthorSerializer
+from accounts.serializers import UserSerializer
 from .models import Followers, FriendRequest
+from django.contrib.auth.models import User
 
 class FollowerSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField(default="followers") # This indicates the type of the JSON
-    items = AuthorSerializer(many=True, read_only=True) # This gets the list of followers
+    items = UserSerializer(many=True, read_only=True) # This gets the list of followers
 
     class Meta:
         model = Followers
@@ -13,8 +14,8 @@ class FollowerSerializer(serializers.ModelSerializer):
 
 class FriendRequestSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField(default="Follow") # This indicates that it is a follow request
-    actor = AuthorSerializer(read_only=True)
-    object_ = AuthorSerializer(read_only=True)
+    actor = UserSerializer(read_only=True)
+    object_ = UserSerializer(read_only=True)
 
     class Meta:
         model = FriendRequest
