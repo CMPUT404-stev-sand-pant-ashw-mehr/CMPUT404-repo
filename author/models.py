@@ -1,10 +1,14 @@
 from django.db import models
+from django.db.models.deletion import CASCADE
+from django.contrib.auth.models import User 
 
 class Author(models.Model):
     type =  models.CharField(max_length=255)
 
     # ID of the Author
-    id=	models.CharField(max_length=255, primary_key=True)
+    id=	models.URLField(primary_key=True)
+
+    local_user_id = models.ForeignKey(User, on_delete=CASCADE, null=True)
 
     # the home host of the author
     host = models.CharField(max_length=255)
@@ -20,3 +24,6 @@ class Author(models.Model):
 
     # Image from a public domain
     profileImage = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = (("id", "local_user_id"),)
