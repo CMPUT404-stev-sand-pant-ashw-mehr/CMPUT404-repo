@@ -3,13 +3,17 @@ from author.models import Author
 from author.serializer import AuthorSerializer
 from .models import Followers, FriendRequest
 
-class FollowerSerializer(serializers.ModelSerializer):
+class FollowerModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Followers
+        fields = ("author_id", "follower_url")
+
+class FollowerAPISerializer(serializers.Serializer):
     type = serializers.ReadOnlyField(default="followers") # This indicates the type of the JSON
     items = AuthorSerializer(many=True, read_only=True) # This is the nested list of followers
 
-    class Meta:
-        model = Followers
-        fields = ("type", "items")
+    def create(self, validated_data):
+        return super().create(validated_data)
 
     # Create an entry from a friend request
     def create_from_friend_request(self, validated_data):
@@ -24,24 +28,15 @@ class FollowerSerializer(serializers.ModelSerializer):
 
         return Followers.objects.create(author_id=author_id, follower_url=follower_url)
 
-
-class FriendRequestSerializer(serializers.ModelSerializer):
-    type = serializers.ReadOnlyField(default="Follow") # This indicates that it is a follow request
-    actor = AuthorSerializer(read_only=True)
-    object_ = AuthorSerializer(read_only=True)
-
+class FriendRequestModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
-        fields = ("type", "summary", "actor", "receiver")
+        fields = ("summary", "actor", "receiver")
 
-    # Override
-    # Rename "receiver" field to "object"
-    def get_fields(self) -> dict():
-        #Rename the field receiver to object, since object is a python keyword it cannot be used in model
-        result = super().get_fields()
-        object_ = result.pop("receiver")
-        result["object"] = object_
-        return result
+class FriendRequestAPISerializer(serializers.Serializer):
+    type = serializers.ReadOnlyField(default="Follow") # This indicates that it is a follow request
+    actor = AuthorSerializer(read_only=True)
+    receiver = AuthorSerializer(read_only=True)
     
     # Override
     # receive author, summary and follower.

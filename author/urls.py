@@ -1,8 +1,8 @@
 # from .views import ListAuthors
-from rest_framework import routers 
+from django.urls.conf import path
 from .api import AuthorViewSet
 
-router = routers.DefaultRouter()
-router.register(r'authors', AuthorViewSet, basename='authors')
-
-urlpatterns = router.urls
+urlpatterns = [
+    path("authors/", AuthorViewSet.as_view({"get": "list"})),
+    path("author/<str:pk>", AuthorViewSet.as_view({"get": "retrieve", "post": "create"}))
+]
