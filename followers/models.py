@@ -10,7 +10,7 @@ class Followers(models.Model):
     #author id is the person being followed
     author_id = models.ForeignKey(Author, related_name="author_id", on_delete=CASCADE)
     #follower url is the url of the follower
-    follower_url = models.URLField()
+    follower_url = models.JSONField()
     # date which the author is followed
     follow_date = models.DateTimeField(default=now, editable=False)
 
@@ -24,9 +24,9 @@ class FriendRequest(models.Model):
     # Summary of the action
     summary = models.TextField()
     # The person sending the request
-    actor = models.URLField()
+    actor = models.JSONField()
     # The url of the receiver. Named "object" in the spec. 
-    receiver = models.URLField()
+    receiver = models.JSONField()
 
     request_date = models.DateTimeField(default=now, editable=False)
     
