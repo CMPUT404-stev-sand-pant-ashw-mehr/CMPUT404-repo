@@ -13,8 +13,6 @@ class PostViewSet(viewsets.ModelViewSet):
     
     pagination_class = pagination.PageNumberPagination
 
-    pagination_class = pagination.PageNumberPagination
-
     def get_queryset(self):
         return self.request.user.posts.all()
         
