@@ -3,6 +3,7 @@ from rest_framework import viewsets, permissions
 from .serializer import AuthorSerializer 
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.paginator import Paginator
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -15,8 +16,17 @@ class AuthorViewSet(viewsets.ModelViewSet):
     # GET all authors
     def list(self, request, *args, **kwargs):
         try:
+            page = request.GET.get('page', 'None')
+            size = request.GET.get('size', 'None')
             author_list = self.get_queryset()
-            serializer = AuthorSerializer(author_list, many=True)
+
+            if(page == "None" or size == "None"):
+                serializer = AuthorSerializer(author_list, many=True)
+            else:
+                paginator = Paginator(author_list, size)
+                result_page = paginator.get_page(page)
+                serializer = AuthorSerializer(result_page, many=True)
+           
             response = {
                 "type": "authors",
                 "items": serializer.data
@@ -53,7 +63,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     # PUT
     def update(self, request, pk=None):
-        print(request.data)
         try:
             for key in request.data.keys():
                 author = Author.objects.get(id=pk)
