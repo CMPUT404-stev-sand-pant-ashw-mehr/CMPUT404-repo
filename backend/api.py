@@ -4,7 +4,6 @@ from .serializers import PostSerializer, CommentSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response 
 
-# Viewset for Post
 class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [
         permissions.IsAuthenticated
