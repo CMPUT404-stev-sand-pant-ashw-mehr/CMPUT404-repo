@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone 
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
+import uuid
 
 class Post(models.Model):
     postType = models.CharField(max_length=255)
@@ -57,14 +58,18 @@ class Inbox(models.Model):
     Inbox model:
         author/sender      Who's Inbox this is
     '''
-    # Suppose to be Author or User?
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    inbox_id = models.ForeignKey(Inbox, on_delete=models.CASCADE)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    reciever = models.ForeignKey(User, on_delete=models.CASCADE)
-    item_type = models.CharField(max_length=255)
+    inbox_id = models.UUIDField(primary_key=True)
+    # does not like string types
+    item_type = models.CharField(max_length=255, default="None")
     item_id = models.ForeignKey(
         item_type, on_delete=models.CASCADE, related_name='item_id')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    
+    
+    # items = ArrayField(models.JSONField(), default=list)
+    # sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    # reciever = models.ForeignKey(User, on_delete=models.CASCADE)
     
     # I'm retrieving these items? Could group items into a JSONField
     # post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_id')
