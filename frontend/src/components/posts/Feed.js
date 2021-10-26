@@ -11,11 +11,12 @@ export class Feed extends Component {
   }
 
   render() {
+    const { posts, deletePost, getPosts } = this.props;
+
     return (
       <Fragment>
         <h1>Feed</h1>
-
-        {this.props.posts.map((post) => (
+        {posts.posts.map((post) => (
           <div className="card" key={post.id}>
             <div className="card-body">
               <h5 className="card-title">{post.title}</h5>
@@ -25,13 +26,46 @@ export class Feed extends Component {
               </a>
               <button
                 className="btn btn-danger"
-                onClick={this.props.deletePost.bind(this, post.id)}
+                onClick={deletePost.bind(this, post.id)}
               >
                 Delete Post
               </button>
             </div>
           </div>
         ))}
+        <nav aria-label="Page navigation example">
+          <ul className="pagination">
+            <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
+              <a
+                className="page-link"
+                href="#"
+                aria-label="Previous"
+                onClick={() => {
+                  getPosts(posts.previous);
+                }}
+              >
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li className="page-item active">
+              <a className="page-link" href="#">
+                {posts.page}
+              </a>
+            </li>
+            <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
+              <a
+                className="page-link"
+                href="#"
+                aria-label="Next"
+                onClick={() => {
+                  getPosts(posts.next);
+                }}
+              >
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
 
         <Create />
       </Fragment>
@@ -39,14 +73,14 @@ export class Feed extends Component {
   }
 
   static propTypes = {
-    posts: PropTypes.array.isRequired,
+    posts: PropTypes.object.isRequired,
     getPosts: PropTypes.func.isRequired,
     deletePost: PropTypes.func.isRequired,
   };
 }
 
 const mapStateToProps = (state) => ({
-  posts: state.posts.posts,
+  posts: state.posts,
 });
 
 export default connect(mapStateToProps, { getPosts, deletePost })(Feed);

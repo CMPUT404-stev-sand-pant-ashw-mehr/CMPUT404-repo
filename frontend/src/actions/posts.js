@@ -10,26 +10,36 @@ import {
 
 import { tokenConfig } from "./auth";
 
-export const getPosts = () => (dispatch, getState) => {
-  axios
-    .get(`/backend/posts`, tokenConfig(getState))
-    .then((res) => {
-      dispatch({
-        type: GET_POSTS,
-        payload: res.data,
+export const getPosts =
+  (pageUrl = "") =>
+  (dispatch, getState) => {
+    let page = 1;
+    if (pageUrl) {
+      const url = new URL(pageUrl);
+      const urlparams = new URLSearchParams(url.search);
+      page = urlparams.has("page") ? urlparams.get("page") : 1;
+    }
+
+    axios
+      .get(`/backend/posts?page=${page}`, tokenConfig(getState))
+      .then((res) => {
+        dispatch({
+          type: GET_POSTS,
+          payload: res.data,
+          page: page,
+        });
+      })
+      .catch((err) => {
+        const alert = {
+          msg: err.response.data,
+          status: err.response.status,
+        };
+        dispatch({
+          type: GET_ALERTS,
+          payload: alert,
+        });
       });
-    })
-    .catch((err) => {
-      const alert = {
-        msg: err.response.data,
-        status: err.response.status,
-      };
-      dispatch({
-        type: GET_ALERTS,
-        payload: alert,
-      });
-    });
-};
+  };
 
 export const deletePost = (id) => (dispatch, getState) => {
   axios
