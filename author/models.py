@@ -5,9 +5,6 @@ from django.contrib.auth.models import User
 class Author(models.Model):
     type =  models.CharField(max_length=255)
 
-    # ID of the Author
-    id=	models.URLField(primary_key=True)
-
     local_user_id = models.ForeignKey(User, on_delete=CASCADE, null=True)
 
     # the home host of the author

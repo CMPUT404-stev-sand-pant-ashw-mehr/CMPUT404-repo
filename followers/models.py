@@ -5,11 +5,11 @@ from author.models import Author
 
 # Followers
 class Followers(models.Model):
-    #Followers is a weak entity
-    #Its primary key will be author id and follower id
-    #author id is the person being followed
+    # Followers is a weak entity
+    # Its primary key will be author id and follower id
+    # author id is the person being followed
     author_id = models.ForeignKey(Author, on_delete=CASCADE)
-    #follower url is the url of the follower
+    # follower url is the url of the follower
     follower_url = models.URLField()
     # date which the author is followed
     follow_date = models.DateTimeField(default=now, editable=False)
