@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone 
 from django.contrib.auth.models import User
 import uuid
+from django.contrib.postgres.fields import ArrayField
 
 class Post(models.Model):
     postType = models.CharField(max_length=255)
@@ -58,24 +59,9 @@ class Inbox(models.Model):
     Inbox model:
         author/sender      Who's Inbox this is
     '''
-    inbox_id = models.UUIDField(primary_key=True)
-    # does not like string types
-    item_type = models.CharField(max_length=255, default="None")
-    item_id = models.ForeignKey(
-        item_type, on_delete=models.CASCADE, related_name='item_id')
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-    
-    
-    # items = ArrayField(models.JSONField(), default=list)
-    # sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    # reciever = models.ForeignKey(User, on_delete=models.CASCADE)
-    
-    # I'm retrieving these items? Could group items into a JSONField
-    # post_id = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_id')
-
-    # follow = models.ForeignKey(Follow, on_delete=models.CASCADE, related_name='follow')
-    # like = models.ForeignKey(Like, on_delete=models.CASCADE, related_name='like')
-    # comments = models.ForeignKey(Comments, on_delete=models.CASCADE, related_name='comments')
-    # # automatically sets the timestamp of when the object was first created. 
-    # published = models.DateTimeField(auto_now_add=True)
+    # GET
+    id = models.UUIDField(unique=True, default=uuid.uuid4,editable=False, primary_key=True)
+    #for POST
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    # List of JSONFields
+    items = ArrayField(models.JSONField(), default=list)
