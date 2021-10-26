@@ -7,12 +7,14 @@ from followers.models import Followers
 from django.contrib.auth.models import User
 
 import io
+import re
 from rest_framework.parsers import JSONParser
 
 import requests
 
 class FollowerViewSet(viewsets.ModelViewSet):
-
+    serializer_class = FollowerModelSerializer
+    
     # GET list of followers
     def list(self, request, author_id=None):
         get_object_or_404(User, pk=author_id) # Check if user exists
@@ -47,6 +49,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
                 "items": str(follower_items)
             }, status=status.HTTP_200_OK)
 
+    # PUT a follower to the specified author
     def put_follower(self, request, author_id=None, foreign_author_id=None):
         # check if user is authorized:
         if not request.user.is_authenticated:
@@ -89,10 +92,35 @@ class FollowerViewSet(viewsets.ModelViewSet):
         else:
             return Response({"detail": "error when storing to database", "error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-
+    # DELETE a follower of a given author
     def delete_follower(self, request, author_id=None, foreign_author_id=None):
+        # check if user is authorized:
+        if not request.user.is_authenticated:
+            return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
+
         get_object_or_404(User, pk=author_id) # Check if user exists
 
+
+    # GET if the author has the follower with the given id on the server
     def check_follower(self, request, author_id=None, foreign_author_id=None):
         get_object_or_404(User, pk=author_id) # Check if user exists
+
+        try:
+            host_url = str(request.META["HTTP_HOST"]).strip()
+            if host_url == "":
+                return Response({"detail": "host header cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
+        except KeyError:
+            return Response({"detail": "host header missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # append slashes if missing
+        if host_url[-1] != '/':
+            host_url += '/'
+
+        foreign_author_url = host_url + "author/" + foreign_author_id
+
+        print(foreign_author_url)
+        if Followers.objects.filter(follower_url__contains=foreign_author_url).exists():
+            return Response({"detail": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": False}, status=status.HTTP_200_OK)
+
