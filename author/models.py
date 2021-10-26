@@ -25,6 +25,3 @@ class Author(models.Model):
 
     # Image from a public domain
     profileImage = models.CharField(max_length=255)
-
-    class Meta:
-        unique_together = (("id", "local_user_id"),)
