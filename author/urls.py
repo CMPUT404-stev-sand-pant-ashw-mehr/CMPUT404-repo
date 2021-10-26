@@ -4,5 +4,5 @@ from .api import AuthorViewSet
 
 urlpatterns = [
     path("authors/", AuthorViewSet.as_view({"get": "list"})),
-    path("author/<str:pk>", AuthorViewSet.as_view({"get": "retrieve", "post": "create"}))
+    path("author/<str:pk>/", AuthorViewSet.as_view({"get": "retrieve", "post": "create"}))
 ]

@@ -7,7 +7,6 @@ from followers.models import Followers
 from django.contrib.auth.models import User
 
 import io
-import re
 from rest_framework.parsers import JSONParser
 
 import requests
@@ -88,7 +87,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         serializer = FollowerModelSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response({"detail": "error when storing to database", "error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -100,6 +99,26 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
         get_object_or_404(User, pk=author_id) # Check if user exists
 
+        # Try and get the host header to construct our URL
+        try:
+            host_url = str(request.META["HTTP_HOST"]).strip()
+            if host_url == "":
+                return Response({"detail": "host header cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
+        except KeyError:
+            return Response({"detail": "host header missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # append slashes if missing
+        if host_url[-1] != '/':
+            host_url += '/'
+
+        foreign_author_url = host_url + "author/" + foreign_author_id
+
+        if not Followers.objects.filter(follower_url__contains=foreign_author_url).exists():
+            return Response({"detail": "follower not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        Followers.objects.filter(follower_url__contains=foreign_author_url).delete()
+
+        return Response(status=status.HTTP_200_OK)
 
     # GET if the author has the follower with the given id on the server
     def check_follower(self, request, author_id=None, foreign_author_id=None):
