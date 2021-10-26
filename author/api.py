@@ -1,21 +1,28 @@
-from author.models import Author 
-from rest_framework import viewsets, permissions 
+from author.models import Author
 from .serializer import AuthorSerializer 
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework import status
+# from rest_framework.decorators import action
 from django.core.paginator import Paginator
+from knox.auth import TokenAuthentication
+
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
-    permission_classes = [
-        permissions.AllowAny
-    ]
+    # permission_classes = IsAuthenticated
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     serializer_class = AuthorSerializer
 
     # GET all authors
     def list(self, request, *args, **kwargs):
         try:
+            print("AUTH TOKEN - ", str(request.auth))
+
             page = request.GET.get('page', 'None')
             size = request.GET.get('size', 'None')
             author_list = self.get_queryset()
@@ -53,8 +60,27 @@ class AuthorViewSet(viewsets.ModelViewSet):
     # POST
     def create(self, request, *args, **kwargs):
         try:
-            return super().create(request, *args, **kwargs)
-        except:
+            print("DATA - ", request.data)
+            print("Meta - ", request.headers)
+            print("USER - ", type(request.user))
+
+            new_author = Author(
+                type=request.data["type"],
+                id=request.data["id"],
+                uid=request.user,
+                host=request.data["host"],
+                displayName=request.data["displayName"],
+                url=request.data["url"],
+                github=request.data["github"],
+                profileImage=request.data["profileImage"]
+            )
+
+            new_author.save()
+
+            return Response(status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print("ERROR: ", e)
             response = {
                 "message": "Record not created"
             }

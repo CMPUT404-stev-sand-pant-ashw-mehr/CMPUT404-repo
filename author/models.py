@@ -1,10 +1,14 @@
 from django.db import models
+from django.contrib.auth.models import User 
 
 class Author(models.Model):
     type =  models.CharField(max_length=255)
 
     # ID of the Author
-    id=	models.CharField(max_length=255, primary_key=True)
+    id = models.CharField(max_length=255, primary_key=True)
+
+    # foreign key to connect with the user auth table in django
+    uid = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
     # the home host of the author
     host = models.CharField(max_length=255)
