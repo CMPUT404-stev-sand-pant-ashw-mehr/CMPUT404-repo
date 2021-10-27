@@ -33,7 +33,11 @@ class FollowerViewSet(viewsets.ModelViewSet):
         # Get the updated information for each followers
         for follower in follower_rows:
             follower_id = follower["follower_id_id"] # Django will add "_id" suffix for all Foreign key field and there is no trivial way of overriding that
-            follower_id = follower_id.split("/author/")[-1] # We only want the UUID portion of the id. 
+
+            # Remove potential trailing slash of the follower id. 
+            if follower_id[-1] == '/':
+                follower_id = follower_id[:-1]
+
             follower_details = Author.objects.filter(id=follower_id).values()[0]
             follower_items.append(follower_details)
 
@@ -46,6 +50,10 @@ class FollowerViewSet(viewsets.ModelViewSet):
     def put_follower(self, request, author_id=None, foreign_author_id=None):
         get_object_or_404(User, pk=author_id) # Check if user exists
 
+        # Remove trailing slash
+        if foreign_author_id[-1] == '/':
+            foreign_author_id = foreign_author_id[:-1]
+
         try:
             content_type = request.META["CONTENT_TYPE"]
 
@@ -55,13 +63,12 @@ class FollowerViewSet(viewsets.ModelViewSet):
             stream = io.BytesIO(request.body)
             data = JSONParser().parse(stream)
 
-            # Extract the UUID portion of the url
+            # Remove trailing slashes of the url
             try:
                 id_url = data["id"]
                 # Remove trailing slash
                 if id_url[-1] == '/':
-                    id_url = id_url[:-1]
-                data["id"] = id_url.split("/author/")[-1]
+                    data["id"] = id_url[:-1]
             except KeyError:
                 return Response({"detail": "id Field of PUT data missing"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -75,11 +82,8 @@ class FollowerViewSet(viewsets.ModelViewSet):
                 # Remove trailing slash
                 if follower_url[-1] == '/':
                     follower_url = follower_url[:-1]
-
-                # Validate the follower id matches the id supplied in url
-                follower_id = follower_url.split("author/")[-1].strip()
             
-                if follower_id != foreign_author_id.strip():
+                if follower_url != foreign_author_id.strip():
                     return Response({"detail": "author id in URL does not match id in PUT body"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     # Save author to database via serializer
@@ -104,6 +108,10 @@ class FollowerViewSet(viewsets.ModelViewSet):
     def delete_follower(self, request, author_id=None, foreign_author_id=None):
         get_object_or_404(User, pk=author_id) # Check if user exists
 
+        # remove trailing slash
+        if foreign_author_id[-1] == '/':
+            foreign_author_id = foreign_author_id[:-1]
+
         if not Followers.objects.filter(follower_id=foreign_author_id).exists():
             return Response({"detail": "follower not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -113,8 +121,14 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # GET if the author has the follower with the given id on the server
     def check_follower(self, request, author_id=None, foreign_author_id=None):
+        #return Response({"foreign_author_id": foreign_author_id, "author_id": author_id})
+
         get_object_or_404(User, pk=author_id) # Check if user exists
 
+        # remove trailing slash
+        if foreign_author_id[-1] == '/':
+            foreign_author_id = foreign_author_id[:-1]
+            
         if Followers.objects.filter(follower_id=foreign_author_id).exists():
             return Response({"detail": True}, status=status.HTTP_200_OK)
         else:
