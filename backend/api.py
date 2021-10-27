@@ -16,6 +16,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return self.request.user.posts.all()
         
+    #Override
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
         
