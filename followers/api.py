@@ -21,7 +21,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
     def list(self, request, author_id=None):
         get_object_or_404(User, pk=author_id) # Check if user exists
 
-        follower_rows = Followers.objects.filter(author_id=author_id).values()
+        follower_rows = Followers.objects.filter(author=author_id).values()
         # check if follower_rows is empty
         if not len(follower_rows):
             return Response({
@@ -32,7 +32,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
         # Get the updated information for each followers
         for follower in follower_rows:
-            follower_id = follower["follower_id_id"] # Django will add "_id" suffix for all Foreign key field and there is no trivial way of overriding that
+            follower_id = follower["follower_id"] # Django will add "_id" suffix for all Foreign key field and there is no trivial way of overriding that
 
             # Remove potential trailing slash of the follower id. 
             if follower_id[-1] == '/':
@@ -95,8 +95,8 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
         # Store to Follower Database
         data = dict()
-        data["author_id"] = author_id
-        data["follower_id"] = foreign_author_id.strip()
+        data["author"] = author_id
+        data["follower"] = foreign_author_id.strip()
         serializer = FollowerModelSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -112,10 +112,10 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
 
-        if not Followers.objects.filter(follower_id=foreign_author_id).exists():
+        if not Followers.objects.filter(follower=foreign_author_id).exists():
             return Response({"detail": "follower not found"}, status=status.HTTP_404_NOT_FOUND)
         
-        Followers.objects.filter(follower_id=foreign_author_id).delete()
+        Followers.objects.filter(follower=foreign_author_id).delete()
 
         return Response(status=status.HTTP_200_OK)
 
@@ -129,7 +129,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
             
-        if Followers.objects.filter(follower_id=foreign_author_id).exists():
+        if Followers.objects.filter(follower=foreign_author_id).exists():
             return Response({"detail": True}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": False}, status=status.HTTP_404_NOT_FOUND)

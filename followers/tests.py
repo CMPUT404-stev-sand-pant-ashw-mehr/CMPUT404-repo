@@ -20,7 +20,7 @@ class FollowerTest(LiveServerTestCase):
         self.testUser1 = {
             "type" : "author",
             "id": "1",
-            "uid": self.testUserAuthed,
+            "user": self.testUserAuthed,
             "host": "http://127.0.0.1:8000/",
             "displayName": "TestUser1",
             "url": "http://127.0.0.1:8000/author/1",
@@ -52,15 +52,15 @@ class FollowerTest(LiveServerTestCase):
         self.testUser2Obj = Author.objects.create(**self.testUser2)
         self.testUser3Obj = Author.objects.create(**self.testUser3)
 
-        Followers.objects.create(author_id=self.testUser1Obj, follower_id=self.testUser2Obj)
-        Followers.objects.create(author_id=self.testUser1Obj, follower_id=self.testUser3Obj)
+        Followers.objects.create(author=self.testUser1Obj, follower=self.testUser2Obj)
+        Followers.objects.create(author=self.testUser1Obj, follower=self.testUser3Obj)
 
     def test_followers_field(self):
-        followers = Followers.objects.filter(author_id=self.testUser1["id"]).values()
+        followers = Followers.objects.filter(author=self.testUser1["id"]).values()
         self.assertEquals(2, len(followers))
         
         for follower in followers:
-            follower_id = follower["follower_id_id"]
+            follower_id = follower["follower_id"]
             self.assertTrue(Author.objects.filter(id=follower_id).exists())
         
     
@@ -91,9 +91,9 @@ class FollowerTest(LiveServerTestCase):
         }
 
         r = self.client.put('/author/1/followers/http://127.0.0.1:8000/author/4/', testUser4, content_type='application/json')
-        follower_id = r.json()["follower_id"]
+        follower_id = r.json()["follower"]
 
-        self.assertTrue(Followers.objects.filter(follower_id=follower_id).exists())
+        self.assertTrue(Followers.objects.filter(follower=follower_id).exists())
 
         # GET the list of followers again for author 1 and check if followers is stored
         r = self.client.get('/author/1/followers/')
@@ -120,7 +120,7 @@ class FollowerTest(LiveServerTestCase):
         r = self.client.delete('/author/1/followers/http://127.0.0.1:8000/author/4/')
         self.assertTrue(200 <= r.status_code < 300)
 
-        self.assertFalse(Followers.objects.filter(follower_id=testUser4["id"]).exists())
+        self.assertFalse(Followers.objects.filter(follower=testUser4["id"]).exists())
 
     def test_check_follower(self):
         # Test user 1 and 2 should exists

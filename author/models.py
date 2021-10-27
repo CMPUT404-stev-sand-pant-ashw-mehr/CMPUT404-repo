@@ -11,7 +11,7 @@ class Author(models.Model):
 
     # foreign key to connect with the user auth table in django
     # If this field is null it indicates that the author is not a local user
-    uid = models.ForeignKey(User, on_delete=CASCADE, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=CASCADE, blank=True, null=True)
 
     # the home host of the author
     host = models.CharField(max_length=255)
