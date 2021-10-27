@@ -8,6 +8,9 @@ class FollowerModelSerializer(serializers.ModelSerializer):
         model = Followers
         fields = ("author_id", "follower_id")
 
+# These commented out serialzer classes are not used by me but I'm not sure if Sandy/Inbox is using them
+# They are kinda deprecated though
+'''
 class FollowerAPISerializer(serializers.Serializer):
     type = serializers.ReadOnlyField(default="followers") # This indicates the type of the JSON
     items = AuthorSerializer(many=True, read_only=True) # This is the nested list of followers
@@ -27,12 +30,14 @@ class FollowerAPISerializer(serializers.Serializer):
             Author.objects.create(**followee)
 
         return Followers.objects.create(author_id=author_id, follower_url=follower_url)
+'''
 
 class FriendRequestModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
         fields = ("summary", "actor", "receiver")
 
+'''
 class FriendRequestAPISerializer(serializers.Serializer):
     type = serializers.ReadOnlyField(default="Follow") # This indicates that it is a follow request
     actor = AuthorSerializer(read_only=True)
@@ -48,3 +53,4 @@ class FriendRequestAPISerializer(serializers.Serializer):
         receiver = followee.pop("url")
 
         return FriendRequest.objects.create(summary=summary, actor=actor, receiver=receiver)
+'''
