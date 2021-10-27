@@ -11,7 +11,7 @@ from knox.auth import TokenAuthentication
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
-    queryset = Author.objects.all()
+    queryset = Author.objects.exclude(uid__isnull=True)
     # permission_classes = IsAuthenticated
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)

@@ -8,14 +8,14 @@ class Followers(models.Model):
     # Followers is a weak entity
     # Its primary key will be author id and follower id
     # author id is the person being followed
-    author_id = models.ForeignKey(Author, on_delete=CASCADE)
+    author_id = models.ForeignKey(Author, related_name="author_id", db_column="author_id", on_delete=CASCADE)
     # follower url is the url of the follower
-    follower_url = models.URLField()
+    follower_id = models.ForeignKey(Author, related_name="follower_id", db_column="follower_id", on_delete=CASCADE)
     # date which the author is followed
     follow_date = models.DateTimeField(default=now, editable=False)
 
     class Meta:
-        unique_together = (("author_id", "follower_url"),("author_id", "id"))
+        unique_together = (("author_id", "follower_id"),)
 
 
 # Friend request

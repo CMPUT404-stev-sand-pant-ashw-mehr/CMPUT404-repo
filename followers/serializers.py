@@ -6,7 +6,7 @@ from .models import Followers, FriendRequest
 class FollowerModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Followers
-        fields = ("author_id", "follower_url")
+        fields = ("author_id", "follower_id")
 
 class FollowerAPISerializer(serializers.Serializer):
     type = serializers.ReadOnlyField(default="followers") # This indicates the type of the JSON

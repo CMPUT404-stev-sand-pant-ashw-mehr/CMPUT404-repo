@@ -3,20 +3,24 @@ from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
 from followers.serializers import FollowerModelSerializer
 from author.serializer import AuthorSerializer
+from author.models import Author
 from followers.models import Followers
 from django.contrib.auth.models import User
+from knox.auth import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 import io
 from rest_framework.parsers import JSONParser
 
-import requests
-
 class FollowerViewSet(viewsets.ModelViewSet):
     serializer_class = FollowerModelSerializer
-    
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     # GET list of followers
     def list(self, request, author_id=None):
         get_object_or_404(User, pk=author_id) # Check if user exists
+
         follower_rows = Followers.objects.filter(author_id=author_id).values()
         # check if follower_rows is empty
         if not len(follower_rows):
@@ -28,32 +32,18 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
         # Get the updated information for each followers
         for follower in follower_rows:
-            f_url = str(follower["follower_url"])
-
-            # Get follower details via url
-            try:
-                follower_details = requests.get(f_url)
-            except:
-                continue
-
-            if follower_details.status_code == 200:
-                serializer = AuthorSerializer(data=follower_details.json())
-                if serializer.is_valid():
-                    follower_items.append(serializer.data)
-                else:
-                    print(serializer.errors)
+            follower_id = follower["follower_id_id"] # Django will add "_id" suffix for all Foreign key field and there is no trivial way of overriding that
+            follower_id = follower_id.split("/author/")[-1] # We only want the UUID portion of the id. 
+            follower_details = Author.objects.filter(id=follower_id).values()[0]
+            follower_items.append(follower_details)
 
         return Response({
                 "type": "followers",
-                "items": str(follower_items)
+                "items": follower_items
             }, status=status.HTTP_200_OK)
 
     # PUT a follower to the specified author
     def put_follower(self, request, author_id=None, foreign_author_id=None):
-        # check if user is authorized:
-        if not request.user.is_authenticated:
-            return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
-
         get_object_or_404(User, pk=author_id) # Check if user exists
 
         try:
@@ -64,26 +54,45 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
             stream = io.BytesIO(request.body)
             data = JSONParser().parse(stream)
+
+            # Extract the UUID portion of the url
+            try:
+                id_url = data["id"]
+                # Remove trailing slash
+                if id_url[-1] == '/':
+                    id_url = id_url[:-1]
+                data["id"] = id_url.split("/author/")[-1]
+            except KeyError:
+                return Response({"detail": "id Field of PUT data missing"}, status=status.HTTP_400_BAD_REQUEST)
+
             serializer = AuthorSerializer(data=data)
 
-            if not serializer.is_valid():
-                return Response({"detail": "Invalid json format for author", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            if serializer.is_valid():
+                # validate if the id in request body matches the foreign_author_id
+                request_body = serializer.validated_data
+                follower_url = str(request_body["url"])
 
+                # Remove trailing slash
+                if follower_url[-1] == '/':
+                    follower_url = follower_url[:-1]
+
+                # Validate the follower id matches the id supplied in url
+                follower_id = follower_url.split("author/")[-1].strip()
+            
+                if follower_id != foreign_author_id.strip():
+                    return Response({"detail": "author id in URL does not match id in PUT body"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    # Save author to database via serializer
+                    serializer.save()
+            else:
+                return Response({"detail": "Invalid json for author", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"detail": "PUT missing body with content_type: application/json"}, status=status.HTTP_400_BAD_REQUEST)
 
-        request_body = serializer.validated_data
-        follower_url = str(request_body["url"])
-
-        # Validate the follower id matches the id supplied in url
-        follower_id = follower_url.split("followers/")[-1].strip()
-        
-        if follower_id != foreign_author_id.strip():
-            return Response({"detail": "author id in URL does not match id in PUT body"}, status=status.HTTP_400_BAD_REQUEST)
-
+        # Store to Follower Database
         data = dict()
         data["author_id"] = author_id
-        data["follower_url"] = follower_url
+        data["follower_id"] = foreign_author_id.strip()
         serializer = FollowerModelSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -93,30 +102,12 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # DELETE a follower of a given author
     def delete_follower(self, request, author_id=None, foreign_author_id=None):
-        # check if user is authorized:
-        if not request.user.is_authenticated:
-            return Response('Unauthorized', status=status.HTTP_401_UNAUTHORIZED)
-
         get_object_or_404(User, pk=author_id) # Check if user exists
 
-        # Try and get the host header to construct our URL
-        try:
-            host_url = str(request.META["HTTP_HOST"]).strip()
-            if host_url == "":
-                return Response({"detail": "host header cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
-        except KeyError:
-            return Response({"detail": "host header missing"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # append slashes if missing
-        if host_url[-1] != '/':
-            host_url += '/'
-
-        foreign_author_url = host_url + "author/" + foreign_author_id
-
-        if not Followers.objects.filter(follower_url__contains=foreign_author_url).exists():
+        if not Followers.objects.filter(follower_id=foreign_author_id).exists():
             return Response({"detail": "follower not found"}, status=status.HTTP_404_NOT_FOUND)
         
-        Followers.objects.filter(follower_url__contains=foreign_author_url).delete()
+        Followers.objects.filter(follower_id=foreign_author_id).delete()
 
         return Response(status=status.HTTP_200_OK)
 
@@ -124,22 +115,8 @@ class FollowerViewSet(viewsets.ModelViewSet):
     def check_follower(self, request, author_id=None, foreign_author_id=None):
         get_object_or_404(User, pk=author_id) # Check if user exists
 
-        try:
-            host_url = str(request.META["HTTP_HOST"]).strip()
-            if host_url == "":
-                return Response({"detail": "host header cannot be empty"}, status=status.HTTP_400_BAD_REQUEST)
-        except KeyError:
-            return Response({"detail": "host header missing"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # append slashes if missing
-        if host_url[-1] != '/':
-            host_url += '/'
-
-        foreign_author_url = host_url + "author/" + foreign_author_id
-
-        print(foreign_author_url)
-        if Followers.objects.filter(follower_url__contains=foreign_author_url).exists():
+        if Followers.objects.filter(follower_id=foreign_author_id).exists():
             return Response({"detail": True}, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": False}, status=status.HTTP_200_OK)
+            return Response({"detail": False}, status=status.HTTP_404_NOT_FOUND)
 
