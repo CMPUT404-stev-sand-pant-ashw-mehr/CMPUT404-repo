@@ -121,8 +121,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # GET if the author has the follower with the given id on the server
     def check_follower(self, request, author_id=None, foreign_author_id=None):
-        #return Response({"foreign_author_id": foreign_author_id, "author_id": author_id})
-
+        
         get_object_or_404(User, pk=author_id) # Check if user exists
 
         # remove trailing slash
