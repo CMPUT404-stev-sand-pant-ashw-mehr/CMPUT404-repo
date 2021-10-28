@@ -108,7 +108,8 @@ class AuthorTest(TestCase):
         r = self.client.post('/author/2')
 
         self.assertEquals(r.status_code, 400)
+    
+    def test_notallowed_methods(self):
+        r = self.client.put('/author/2')
 
-
-
-        
+        self.assertEquals(r.status_code, 405)
