@@ -51,7 +51,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
     # GET using author id
-
     def get_author(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
         try:

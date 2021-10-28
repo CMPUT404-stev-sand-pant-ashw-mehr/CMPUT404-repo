@@ -60,7 +60,6 @@ class AuthorTest(TestCase):
 
     def test_get_all_authors(self):
         r = self.client.get('/authors/')
-
         try:
             result = r.json()
         except:
@@ -85,7 +84,6 @@ class AuthorTest(TestCase):
 
     def test_get_author_info(self):
         r = self.client.get('/author/2')
-
         self.assertEquals(r.status_code, 200)
 
         result = r.json()
@@ -114,7 +112,6 @@ class AuthorTest(TestCase):
         r = self.client.post('/author/2')
 
         self.assertEquals(r.status_code, 400)
-
     def test_notallowed_methods(self):
         r = self.client.put('/author/2')
 
