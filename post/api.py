@@ -10,6 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response 
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.core.paginator import Paginator
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
@@ -35,12 +36,20 @@ class PostViewSet(viewsets.ModelViewSet):
         post_data['author'] = author_detail
         post_data['comments'] = post_data['id'] + '/comments'
 
-        try:
-            comment_query = Comment.objects.get(post=post_id, author=author_id)
-            comment_details = model_to_dict(comment_query)
-        except:
-            post_data["count"] = 0
-            post_data["CommentsSrc"] = {}
+        comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('id')
+        comment_details = Paginator(comment_query, 5) # get first 5 comments
+        comment_serilaizer = CommentSerializer(comment_details.get_page(1), many=True)
+
+        post_data["count"] = comment_query.distinct().count()
+        
+        post_data["CommentsSrc"] = {
+            "type": "comments",
+            "page": 1,
+            "size": 5,
+            "post": post_data["id"],
+            "id": post_data["comments"],
+            "comments": comment_serilaizer.data
+        }
 
         return Response(post_data, status=status.HTTP_200_OK)
 
