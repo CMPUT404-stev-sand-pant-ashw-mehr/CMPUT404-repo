@@ -50,6 +50,8 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     # GET using author id
     def get_author(self, request: HttpRequest, author_id=None):
+        author_id = self.remove_backslash(author_id)
+
         query = self.get_queryset().filter(id=author_id)
 
         if not query.exists():
@@ -62,6 +64,8 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     # POST and update author's profile
     def update(self, request: HttpRequest, author_id=None):
+        author_id = self.remove_backslash(author_id)
+
         try:
             author = Author.objects.get(id=author_id)
             if not author.exists():
@@ -71,12 +75,12 @@ class AuthorViewSet(viewsets.ModelViewSet):
                 if(key=="url"):
                     if not self.validate_url(request.data[key]):
                         return Response({"detail": "url format is invalid"}, status=status.HTTP_400_BAD_REQUEST)
-                    author.url=request.data[key]
+                    author.url=self.remove_backslash(request.data[key])
 
                 elif(key=="host"):
                     if not self.validate_url(request.data[key]):
                         return Response({"detail": "host format is invalid"}, status=status.HTTP_400_BAD_REQUEST)
-                    author.host=request.data[key]
+                    author.host=self.remove_backslash(request.data[key])
 
                 elif(key=="displayName"):
                     author.displayName=request.data[key]
@@ -107,3 +111,12 @@ class AuthorViewSet(viewsets.ModelViewSet):
             return all([result.scheme, result.netloc])
         except:
             return False
+
+    def remove_backslash(self, string: str) -> str:
+        try:
+            if string[-1] == '/':
+                return string[:-1]
+            else:
+                return string
+        except:
+            return string
