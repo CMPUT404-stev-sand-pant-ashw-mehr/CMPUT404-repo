@@ -57,6 +57,8 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
         query.update(id=F('url'))
 
+        return Response(query.values(), status=status.HTTP_200_OK)
+
 
     # POST and update author's profile
     def update(self, request: HttpRequest, author_id=None):
