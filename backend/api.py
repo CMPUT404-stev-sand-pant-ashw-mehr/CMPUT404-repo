@@ -40,9 +40,9 @@ class InboxViewSet(viewsets.ModelViewSet):
     '''
 
     # Check permissions to require access to data
-    permission_classes = [
-        permissions.IsAuthenticated
-    ]
+    # permission_classes = [
+    #     permissions.IsAuthenticated
+    # ]
     # Serializer used to return a JSON response
     serializer_class = InboxSerializer
 
@@ -59,5 +59,12 @@ class InboxViewSet(viewsets.ModelViewSet):
                 "items": {}
             }
             return Response(response, status=status.HTTP_404_NOT_FOUND)
+    
+        # Check if user is autheticated 
+        if (request.user.is_autheticated and check_author == request.user):
+            return Response("USER AUTHETICATED!", status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response("USER NOT AUTHETICATED", status=status.HTTP_404_NOT_FOUND)
+        
     
             

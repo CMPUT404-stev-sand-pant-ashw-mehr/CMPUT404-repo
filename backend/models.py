@@ -1,8 +1,35 @@
 from django.db import models
+from django.db.models.deletion import CASCADE
 from django.utils import timezone 
 from django.contrib.auth.models import User
 import uuid
 from django.contrib.postgres.fields import ArrayField
+
+
+class Author(models.Model):
+    type = models.CharField(max_length=255)
+
+    # ID of the Author
+    id = models.CharField(max_length=255, primary_key=True)
+
+    user = models.ForeignKey(User, on_delete=CASCADE, null=True)
+
+    # the home host of the author
+    host = models.CharField(max_length=255)
+
+    # the display name of the author
+    displayName = models.CharField(max_length=255)
+
+    # url to the authors profile
+    url = models.CharField(max_length=255)
+
+    # HATEOS url for Github API
+    github = models.CharField(max_length=255)
+
+    # Image from a public domain
+    profileImage = models.CharField(max_length=255)
+
+
 
 class Post(models.Model):
     postType = models.CharField(max_length=255)
@@ -51,6 +78,29 @@ class Post(models.Model):
     unlisted = models.BooleanField()
     # unlisted means it is public if you know the post name -- use this for images, it's so images don't show up in timelines
 
+
+class Comment(models.Model):
+    # ID of the Comment (UUID)
+    uuid = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
+
+    commentType = models.CharField(max_length=255, default="comment")
+
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    comment = models.TextField()
+
+    contentType = models.CharField(max_length=255, default="text/markdown")
+
+    # ISO 8601 TIMESTAMP
+    published = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return str(self.comment)
+
+
 # GET List of Posts
 class Inbox(models.Model):
     '''
@@ -65,3 +115,4 @@ class Inbox(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     # List of JSONFields
     items = ArrayField(models.JSONField(), default=list)
+

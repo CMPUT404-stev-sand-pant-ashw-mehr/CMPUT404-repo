@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from backend.models import Post, Comment, Inbox
+from backend.models import Post, Comment, Inbox, Author
 
 # Post Serializer 
 class PostSerializer(serializers.ModelSerializer): 
@@ -22,3 +22,10 @@ class InboxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Inbox
         fields = ('id', 'author', 'items')
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Author
+        fields = ['type', 'id', 'user','host', 'displayName', 'url', 'github', 'profileImage']
