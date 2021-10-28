@@ -8,6 +8,7 @@ from rest_framework.response import Response
 # from rest_framework.decorators import action
 from django.core.paginator import Paginator
 from django.db.models import F
+from django.forms.models import model_to_dict
 from knox.auth import TokenAuthentication
 from urllib.parse import urlparse
 
@@ -51,15 +52,13 @@ class AuthorViewSet(viewsets.ModelViewSet):
     # GET using author id
     def get_author(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
-
-        query = self.get_queryset().filter(id=author_id)
-
-        if not query.exists():
+        try:
+            query = self.get_queryset().get(id=author_id)
+        except:
             return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        query.update(id=F('url'))
-
-        return Response(query.values(), status=status.HTTP_200_OK)
+        result = model_to_dict(query)
+        return Response(result, status=status.HTTP_200_OK)
 
 
     # POST and update author's profile
