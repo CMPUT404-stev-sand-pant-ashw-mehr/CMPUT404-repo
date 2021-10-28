@@ -1,14 +1,14 @@
 from django.db import models
 from django.utils import timezone 
-from django.contrib.auth.models import User
 import uuid
+from author.models import Author
 
 class Post(models.Model):
     postType = models.CharField(max_length=255)
     # title of a post
     title = models.TextField()
     # id of the post
-    # id = done by default
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # where did you get this post from?
     source = models.TextField()
     # where is it actually from
@@ -26,7 +26,7 @@ class Post(models.Model):
     contentType = models.CharField(max_length=255)
     content = models.TextField()
     # the author has an ID where by authors can be disambiguated
-    author = models.ForeignKey(User, related_name="posts", on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, related_name="posts", on_delete=models.CASCADE)
     # categories this post fits into (a list of strings
     # categories = many to many relationship
     # comments about the post
@@ -57,7 +57,7 @@ class Comment(models.Model):
     
     commentType = models.CharField(max_length=255, default = "comment")
     
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
     
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     

@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
-from django.test import LiveServerTestCase
+from django.test import TestCase
 from django.test.client import Client
 from followers.models import Followers
 from author.models import Author
 from knox.models import AuthToken
 
 # Test for Follower Model and its API
-class FollowerTest(LiveServerTestCase):
+class FollowerTest(TestCase):
     def setUp(self) -> None:
         # create test user for login
         self.testUserAuthed = User.objects.create(id=1, username="testUser1", password="1234")
@@ -75,6 +75,8 @@ class FollowerTest(LiveServerTestCase):
         self.assertTrue("type" in response.keys())
         self.assertTrue("items" in response.keys())
 
+        self.assertTrue(response["type"].strip()=="followers")
+        
         followers_item = response["items"]
         self.assertTrue(type(followers_item)==list)
         self.assertEquals(len(followers_item), 2)

@@ -8,6 +8,7 @@ from followers.models import Followers
 from django.contrib.auth.models import User
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from urllib.parse import urlparse
 
 import io
 from rest_framework.parsers import JSONParser
@@ -58,7 +59,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
             content_type = request.META["CONTENT_TYPE"]
 
             if content_type != "application/json":
-                raise Response({"detail": "invalid content type. Required: application/json"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "invalid content type. Required: application/json"}, status=status.HTTP_400_BAD_REQUEST)
 
             stream = io.BytesIO(request.body)
             data = JSONParser().parse(stream)
@@ -66,6 +67,10 @@ class FollowerViewSet(viewsets.ModelViewSet):
             # Remove trailing slashes of the url
             try:
                 id_url = data["id"]
+                
+                if not self.validate_url(id_url):
+                    return Response({"detail": "follower id format invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
                 # Remove trailing slash
                 if id_url[-1] == '/':
                     data["id"] = id_url[:-1]
@@ -78,6 +83,9 @@ class FollowerViewSet(viewsets.ModelViewSet):
                 # validate if the id in request body matches the foreign_author_id
                 request_body = serializer.validated_data
                 follower_url = str(request_body["url"])
+
+                if not self.validate_url(follower_url):
+                    return Response({"detail": "follower url format invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Remove trailing slash
                 if follower_url[-1] == '/':
@@ -128,8 +136,16 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
             
-        if Followers.objects.filter(follower=foreign_author_id).exists():
+        if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
             return Response({"detail": True}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": False}, status=status.HTTP_404_NOT_FOUND)
+
+    # validate if the url format is correct
+    def validate_url(self, url: str) -> bool:
+        try:
+            result = urlparse(url)
+            return all([result.scheme, result.netloc])
+        except:
+            return False
 

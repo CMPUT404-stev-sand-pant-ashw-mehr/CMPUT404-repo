@@ -1,12 +1,16 @@
+from rest_framework.generics import get_object_or_404
 from author.models import Author
 from .serializer import AuthorSerializer 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
+from django.http import HttpRequest
 from rest_framework.response import Response
 # from rest_framework.decorators import action
 from django.core.paginator import Paginator
+from django.db.models import F
+from django.forms.models import model_to_dict
 from knox.auth import TokenAuthentication
-
+from urllib.parse import urlparse
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -17,11 +21,14 @@ class AuthorViewSet(viewsets.ModelViewSet):
     serializer_class = AuthorSerializer
 
     # GET all authors
-    def list(self, request, *args, **kwargs):
+    def list(self, request: HttpRequest):
         try:
             page = request.GET.get('page', 'None')
             size = request.GET.get('size', 'None')
             author_list = self.get_queryset()
+
+            # Swap the id fields to url
+            author_list.update(id=F('url'))
 
             if(page == "None" or size == "None"):
                 serializer = AuthorSerializer(author_list, many=True)
@@ -29,7 +36,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
                 paginator = Paginator(author_list, size)
                 result_page = paginator.get_page(page)
                 serializer = AuthorSerializer(result_page, many=True)
-           
+
             response = {
                 "type": "authors",
                 "items": serializer.data
@@ -43,54 +50,36 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
 
     # GET using author id
-    def retrieve(self, request, *args, **kwargs):
+    def get_author(self, request: HttpRequest, author_id=None):
+        author_id = self.remove_backslash(author_id)
         try:
-            return super().retrieve(request, *args, **kwargs)
+            query = self.get_queryset().get(id=author_id)
         except:
-            response = {
-                "message": "Record not found"
-            }
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        result = model_to_dict(query)
+        result['id'] = result['url']
+        return Response(result, status=status.HTTP_200_OK)
 
 
-    # POST
-    def create(self, request, *args, **kwargs):
+    # POST and update author's profile
+    def update(self, request: HttpRequest, author_id=None):
+        author_id = self.remove_backslash(author_id)
+
         try:
-            new_author = Author(
-                type=request.data["type"],
-                id=request.data["id"],
-                user=request.user,
-                host=request.data["host"],
-                displayName=request.data["displayName"],
-                url=request.data["url"],
-                github=request.data["github"],
-                profileImage=request.data["profileImage"]
-            )
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            new_author.save()
+        try:            
+            ignored_keys = list()
+            request_data = request.data.keys()
+            
+            if len(request_data) == 0:
+                return Response({"detail": "No POST data is sent"}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(status.HTTP_201_CREATED)
-
-        except Exception as e:
-            response = {
-                "message": "Record not created",
-                "detail": e.args
-            }
-            return Response(response,status.HTTP_400_BAD_REQUEST)
-
-
-    # PUT
-    def update(self, request, pk=None):
-        try:
             for key in request.data.keys():
-                author = Author.objects.get(id=pk)
-                if(key=="url"):
-                    author.url=request.data[key]
-
-                elif(key=="host"):
-                    author.host=request.data[key]
-
-                elif(key=="displayName"):
+                if(key=="displayName"):
                     author.displayName=request.data[key]
 
                 elif(key=="github"):
@@ -98,16 +87,39 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
                 elif(key=="profileImage"):
                     author.profileImage=request.data[key]
+                else:
+                    ignored_keys.append(key)
 
                 author.save()
-
-            response={
-                "message": "Record updated"
-            }
+            if len(ignored_keys) == 0:
+                response={
+                    "message": "Record updated"
+                }
+            else:
+                response={
+                    "detail": "The following keys supplied are ignored: " + str(ignored_keys)
+                }
             return Response(response,status.HTTP_200_OK)
-        except:
+        except Exception as e:
             response={
                 "message": "Record not updated",
-                "detail": "Incorrect data keys"
+                "detail": e.args
             }
             return Response(response,status.HTTP_400_BAD_REQUEST)
+
+    # validate if the url is the correct format
+    def validate_url(self, url: str) -> bool:
+        try:
+            result = urlparse(url)
+            return all([result.scheme, result.netloc])
+        except:
+            return False
+
+    def remove_backslash(self, string: str) -> str:
+        try:
+            if string[-1] == '/':
+                return string[:-1]
+            else:
+                return string
+        except:
+            return string
