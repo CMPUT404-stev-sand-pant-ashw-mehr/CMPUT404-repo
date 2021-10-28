@@ -70,19 +70,10 @@ class AuthorViewSet(viewsets.ModelViewSet):
             author = Author.objects.get(id=author_id)
             if not author.exists():
                 return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
-                
+            
+            ignored_keys = list()
             for key in request.data.keys():
-                if(key=="url"):
-                    if not self.validate_url(request.data[key]):
-                        return Response({"detail": "url format is invalid"}, status=status.HTTP_400_BAD_REQUEST)
-                    author.url=self.remove_backslash(request.data[key])
-
-                elif(key=="host"):
-                    if not self.validate_url(request.data[key]):
-                        return Response({"detail": "host format is invalid"}, status=status.HTTP_400_BAD_REQUEST)
-                    author.host=self.remove_backslash(request.data[key])
-
-                elif(key=="displayName"):
+                if(key=="displayName"):
                     author.displayName=request.data[key]
 
                 elif(key=="github"):
@@ -90,12 +81,18 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
                 elif(key=="profileImage"):
                     author.profileImage=request.data[key]
+                else:
+                    ignored_keys.append(key)
 
                 author.save()
-
-            response={
-                "message": "Record updated"
-            }
+            if len(ignored_keys) == 0:
+                response={
+                    "message": "Record updated"
+                }
+            else:
+                response={
+                    "detail": "The following keys supplied are ignored: " + str(ignored_keys)
+                }
             return Response(response,status.HTTP_200_OK)
         except:
             response={
