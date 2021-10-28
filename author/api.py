@@ -58,6 +58,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
         result = model_to_dict(query)
+        result['id'] = result['url']
         return Response(result, status=status.HTTP_200_OK)
 
 
