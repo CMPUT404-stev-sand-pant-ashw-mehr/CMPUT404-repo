@@ -9,7 +9,7 @@ class Comment(models.Model):
     # ID of the Comment (UUID)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
-    commentType = models.CharField(max_length=255, default = "comment")
+    type = models.CharField(max_length=255, default = "comment")
     
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     
