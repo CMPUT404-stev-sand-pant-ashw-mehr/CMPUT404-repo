@@ -8,7 +8,7 @@ class Post(models.Model):
     # title of a post
     title = models.TextField()
     # id of the post
-    # id = done by default
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # where did you get this post from?
     source = models.TextField()
     # where is it actually from
