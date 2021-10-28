@@ -136,7 +136,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
             
-        if Followers.objects.filter(follower=foreign_author_id).exists():
+        if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
             return Response({"detail": True}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": False}, status=status.HTTP_404_NOT_FOUND)
