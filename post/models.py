@@ -5,11 +5,11 @@ import uuid
 from author.models import Author
 
 class Post(models.Model):
-    type = models.CharField(max_length=255)
+    type = models.CharField(max_length=255, default='post')
     # title of a post
     title = models.TextField()
     # id of the post
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     # where did you get this post from?
     source = models.URLField()
     # where is it actually from
