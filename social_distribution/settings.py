@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'post',
+    'comment',
     'frontend',
     'author',
     'accounts',

@@ -1,35 +1,28 @@
 from post.models import Post 
 from rest_framework import viewsets, permissions, pagination
-from .serializers import PostSerializer, CommentSerializer
+from .serializers import PostSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response 
+from knox.auth import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 class PostViewSet(viewsets.ModelViewSet):
-    permission_classes = [
-        permissions.IsAuthenticated
-    ]
-
     serializer_class = PostSerializer
-    
-    pagination_class = pagination.PageNumberPagination
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        return self.request.user.posts.all()
-        
-    #Override
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-        
-    @action(detail=True, methods=['GET', 'POST'], name='comments')
-    def comments(self, request, pk=None):
-        if(request.method == 'GET'):
-            query_set = Post.objects.get(id=pk).comment_set.all()
-            page = self.paginate_queryset(query_set)
-            response = CommentSerializer(page, many=True)
-            return self.get_paginated_response(response.data)
-            
-        elif(request.method =='POST'):
-            Post.objects.get(id=pk).comment_set.create(author=request.user, comment=request.data["comment"])
-            return Response({
-                "message": "Comment Added"
-            })
+    def get_post(self, request, author_id=None, post_id=None):
+        pass
+
+    def get_recent_post(self, request, author_id=None):
+        pass
+
+    def update_post(self, request, author_id=None, post_id=None):
+        pass
+
+    def create_post(self, request, author_id=None, post_id=None):
+        pass
+
+    def delete_post(self, request, author_id=None, post_id=None):
+        pass
+    
