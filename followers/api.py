@@ -40,6 +40,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
                 follower_id = follower_id[:-1]
 
             follower_details = Author.objects.filter(id=follower_id).values()[0]
+            follower_details['id'] = follower_details['url']
             follower_items.append(follower_details)
 
         return Response({

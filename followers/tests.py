@@ -84,11 +84,11 @@ class FollowerTest(TestCase):
     def test_put_follower(self):
         testUser4 = {
             "type" : "author",
-            "id": "http://127.0.0.1:8000/author/4/",
+            "id": "http://127.0.0.1:8000/author/4",
             "host": "http://127.0.0.1:8000/",
             "displayName": "TestUser3",
-            "url": "http://127.0.0.1:8000/author/4/",
-            "github": "https://github.com/testUser4/",
+            "url": "http://127.0.0.1:8000/author/4",
+            "github": "https://github.com/testUser4",
             "profileImage":"None"
         }
 
@@ -101,7 +101,6 @@ class FollowerTest(TestCase):
         r = self.client.get('/author/1/followers/')
 
         followers_item = r.json()["items"]
-
         self.assertTrue(any(follower["id"] == follower_id for follower in followers_item))
 
 
