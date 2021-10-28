@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 import uuid
 
 class Author(models.Model):
-    type =  models.CharField(max_length=255)
+    type =  models.CharField(max_length=255, default='author')
 
     # ID of the Author
     id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4)
