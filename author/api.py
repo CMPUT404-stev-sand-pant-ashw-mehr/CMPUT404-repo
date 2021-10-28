@@ -53,7 +53,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         query = self.get_queryset().filter(id=author_id)
 
         if not query.exists():
-            return Response({"detail": "Author not found or is not local."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
         query.update(id=F('url'))
 
@@ -61,8 +61,11 @@ class AuthorViewSet(viewsets.ModelViewSet):
     # POST and update author's profile
     def update(self, request: HttpRequest, author_id=None):
         try:
+            author = Author.objects.get(id=author_id)
+            if not author.exists():
+                return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
+                
             for key in request.data.keys():
-                author = Author.objects.get(id=author_id)
                 if(key=="url"):
                     if not self.validate_url(request.data[key]):
                         return Response({"detail": "url format is invalid"}, status=status.HTTP_400_BAD_REQUEST)
