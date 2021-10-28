@@ -24,3 +24,4 @@ class PostSerializer(serializers.ModelSerializer):
             'visibility',
             'unlisted'    
         )
+    
