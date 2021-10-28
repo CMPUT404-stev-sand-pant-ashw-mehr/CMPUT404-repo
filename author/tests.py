@@ -7,47 +7,51 @@ from knox.models import AuthToken
 from django.forms.models import model_to_dict
 
 # Create your tests here.
+
+
 class AuthorTest(TestCase):
     def setUp(self) -> None:
         # create test user for login
-        self.testUserAuthed = User.objects.create(id=1, username="testUser1", password="1234")
+        self.testUserAuthed = User.objects.create(
+            id=1, username="testUser1", password="1234")
         token = AuthToken.objects.create(user=self.testUserAuthed)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + token[1])
         self.client.login(username="testUser1", password="1234")
 
-        self.testUser2Authed = User.objects.create(id=2, username="testUser2", password="1234")
+        self.testUser2Authed = User.objects.create(
+            id=2, username="testUser2", password="1234")
 
         # Test user 1, 2 are local user, while test user 3 is a foreign author
         self.testUser1 = {
-            "type" : "author",
+            "type": "author",
             "id": "1",
             "user": self.testUserAuthed,
             "host": "http://127.0.0.1:8000/",
             "displayName": "TestUser1",
             "url": "http://127.0.0.1:8000/author/1",
             "github": "https://github.com/testUser1",
-            "profileImage":"None"
+            "profileImage": "None"
         }
 
         self.testUser2 = {
-            "type" : "author",
+            "type": "author",
             "id": "2",
             "user": self.testUser2Authed,
             "host": "http://127.0.0.1:8000/",
             "displayName": "TestUser2",
             "url": "http://127.0.0.1:8000/author/2",
             "github": "https://github.com/testUser2",
-            "profileImage":"None"
+            "profileImage": "None"
         }
 
         self.testUser3 = {
-            "type" : "author",
+            "type": "author",
             "id": "http://127.0.0.1:8000/author/3",
             "host": "http://127.0.0.1:8000/",
             "displayName": "TestUser3",
             "url": "http://127.0.0.1:8000/author/3",
             "github": "https://github.com/testUser3",
-            "profileImage":"None"
+            "profileImage": "None"
         }
 
         self.testUser1Obj = Author.objects.create(**self.testUser1)
@@ -56,7 +60,6 @@ class AuthorTest(TestCase):
 
     def test_get_all_authors(self):
         r = self.client.get('/authors/')
-        
         try:
             result = r.json()
         except:
@@ -81,7 +84,6 @@ class AuthorTest(TestCase):
 
     def test_get_author_info(self):
         r = self.client.get('/author/2')
-        
         self.assertEquals(r.status_code, 200)
 
         result = r.json()
@@ -94,10 +96,12 @@ class AuthorTest(TestCase):
 
     def test_post_update_author_info(self):
         newGithubLink = "https://github.com/new/address"
-        r = self.client.post('/author/http://127.0.0.1:8000/author/3/', {"github": newGithubLink})
+        r = self.client.post(
+            '/author/http://127.0.0.1:8000/author/3/', {"github": newGithubLink})
         self.assertEquals(r.status_code, 200)
 
-        testUser3NewData = model_to_dict(Author.objects.get(id=self.testUser3['id']))
+        testUser3NewData = model_to_dict(
+            Author.objects.get(id=self.testUser3['id']))
 
         self.assertEquals(testUser3NewData["github"], newGithubLink)
 
@@ -108,7 +112,6 @@ class AuthorTest(TestCase):
         r = self.client.post('/author/2')
 
         self.assertEquals(r.status_code, 400)
-    
     def test_notallowed_methods(self):
         r = self.client.put('/author/2')
 
