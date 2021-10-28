@@ -49,41 +49,6 @@ class RegisterAPI(generics.GenericAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
-
-        # Create an author object
-
-        # if request.data.get('github', False):
-        #     author = Author(
-        #         user=user,
-        #         token=token,
-        #         host =request.data["host"],
-        #         displayName=request.data["displayName"],
-        #         github=request.data["github"],
-        #         profileImage=request.data["profileImage"],
-        #     )
-        #     # this might not work if github does not match display
-        # else:
-        #     author = Author(
-        #         user=user,
-        #         token=token,
-        #         host=request.data["host"],
-        #         displayName=request.data["displayName"],
-        #         github="https://github.com/" + request.data["displayName"],
-        #         profileImage=request.data["profileImage"],
-        #     )
-        # # URL of author is generated on creation
-        # author_serializer = AuthorSerializer(data=author)
-
-        # if not (author_serializer.is_valid()):
-        #     user.delete()
-        #     raise validators.ValidationError(author_serializer.errors)
-        
-
-        # response = "Successfully Registered!"
-
-        # return Response(response, status=status.HTTP_201_created)
-
-
 class LoginAPI(generics.GenericAPIView):
     '''
     Takes username & password to autheticate the user
@@ -104,25 +69,6 @@ class LoginAPI(generics.GenericAPIView):
             'token': 'Token ' + token[1]
         }, status=status.HTTP_200_OK)
 
-
-    # queryset = Author.objects.all()
-
-    # permission_classes = [
-    #     permissions.AllowAny
-    # ]
-
-    # serializer_class = Login
-    # def post(self, request):
-    #     serializer = self.get_serializer(data = request.data)
-    #     serializer.is_valid(raise_exception = True)
-    #     user = serializer.validated_data["username"]
-
-    #     token = AuthToken.objects.create(user)[1]
-
-    #     return Response({
-    #         "user": UserSerializer(user, context = self.get_serializer_context()).data,
-    #         "token": token
-    #     })
 
 
 

@@ -4,8 +4,6 @@ from django.contrib.auth.models import User
 import uuid
 
 class Author(models.Model):
-    type =  "author"
-
     # ID of the Author
     id = models.UUIDField(unique=True, editable=False, primary_key=True, default=uuid.uuid4)
 
@@ -20,7 +18,7 @@ class Author(models.Model):
     displayName = models.CharField(max_length=255)
 
     # url to the authors profile
-    url = models.CharField(max_length=255)
+    url = models.URLField(blank=True)
 
     # HATEOS url for Github API
     github = models.CharField(null= True, blank=True, max_length=255)
