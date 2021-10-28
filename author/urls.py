@@ -1,8 +1,9 @@
 # from .views import ListAuthors
-from django.urls.conf import path
+from django.urls.conf import path, re_path
 from .api import AuthorViewSet
 
 urlpatterns = [
-    path("authors/", AuthorViewSet.as_view({"get": "list"})),
-    path("author/<str:pk>/", AuthorViewSet.as_view({"get": "retrieve", "post": "create"}))
+    re_path(r"^authors/?$", AuthorViewSet.as_view({"get": "list"})),
+    re_path(r'^author/(?P<author_id>[a-z0-9/:\.]+)/?$',
+            AuthorViewSet.as_view({"get": "get_author", "post": "update"}))
 ]

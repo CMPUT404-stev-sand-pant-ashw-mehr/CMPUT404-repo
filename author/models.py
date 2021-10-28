@@ -4,17 +4,17 @@ from django.contrib.auth.models import User
 import uuid
 
 class Author(models.Model):
-    type =  models.CharField(max_length=255)
+    type =  "author"
 
     # ID of the Author
-    id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4)
+    id = models.UUIDField(unique=True, editable=False, primary_key=True, default=uuid.uuid4)
 
     # foreign key to connect with the user auth table in django
     # If this field is null it indicates that the author is not a local user
-    user = models.ForeignKey(User, on_delete=CASCADE, blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=CASCADE, blank=True, null=True)
 
     # the home host of the author
-    host = models.CharField(max_length=255)
+    host = models.URLField(blank=True)
 
     # the display name of the author
     displayName = models.CharField(max_length=255)
@@ -23,10 +23,11 @@ class Author(models.Model):
     url = models.CharField(max_length=255)
 
     # HATEOS url for Github API
-    github = models.CharField(max_length=255)
+    github = models.CharField(null= True, blank=True, max_length=255)
 
     # Image from a public domain
-    profileImage = models.CharField(max_length=255)
+    profileImage = models.CharField(max_length=255, blank=True)
 
-    class Meta:
-        unique_together = (("id", "url"),)
+    
+    def get_full_path(self):
+        return str(self.host) + f"/author/{self.id}"
