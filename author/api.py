@@ -68,10 +68,16 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
         try:
             author = Author.objects.get(id=author_id)
-            if not author.exists():
-                return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
-            
+        except:
+            return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:            
             ignored_keys = list()
+            request_data = request.data.keys()
+            
+            if len(request_data) == 0:
+                return Response({"detail": "No POST data is sent"}, status=status.HTTP_400_BAD_REQUEST)
+
             for key in request.data.keys():
                 if(key=="displayName"):
                     author.displayName=request.data[key]
@@ -94,10 +100,10 @@ class AuthorViewSet(viewsets.ModelViewSet):
                     "detail": "The following keys supplied are ignored: " + str(ignored_keys)
                 }
             return Response(response,status.HTTP_200_OK)
-        except:
+        except Exception as e:
             response={
                 "message": "Record not updated",
-                "detail": "Incorrect data keys"
+                "detail": e.args
             }
             return Response(response,status.HTTP_400_BAD_REQUEST)
 

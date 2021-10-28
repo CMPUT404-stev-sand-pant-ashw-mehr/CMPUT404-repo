@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.test.client import Client
 from author.models import Author
 from knox.models import AuthToken
+from django.forms.models import model_to_dict
 
 # Create your tests here.
 class AuthorTest(TestCase):
@@ -77,4 +78,37 @@ class AuthorTest(TestCase):
 
         self.assertEquals(authors[0]['url'], self.testUser1['url'])
         self.assertEquals(authors[1]['url'], self.testUser2['url'])
+
+    def test_get_author_info(self):
+        r = self.client.get('/author/2')
+        
+        self.assertEquals(r.status_code, 200)
+
+        result = r.json()
+        self.assertEquals(result['id'], result['url'])
+
+        self.assertEquals(result['url'], self.testUser2['url'])
+        self.assertEquals(result['displayName'], self.testUser2['displayName'])
+        self.assertEquals(result['host'], self.testUser2['host'])
+        self.assertEquals(result['github'], self.testUser2['github'])
+
+    def test_post_update_author_info(self):
+        newGithubLink = "https://github.com/new/address"
+        r = self.client.post('/author/http://127.0.0.1:8000/author/3/', {"github": newGithubLink})
+        self.assertEquals(r.status_code, 200)
+
+        testUser3NewData = model_to_dict(Author.objects.get(id=self.testUser3['id']))
+
+        self.assertEquals(testUser3NewData["github"], newGithubLink)
+
+        r = self.client.post('/author/doesnt/exists')
+
+        self.assertEquals(r.status_code, 404)
+
+        r = self.client.post('/author/2')
+
+        self.assertEquals(r.status_code, 400)
+
+
+
         
