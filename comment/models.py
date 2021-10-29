@@ -22,6 +22,9 @@ class Comment(models.Model):
     # ISO 8601 TIMESTAMP
     published = models.DateTimeField(default=timezone.now)
     
+    class Meta:
+        unique_together = (('id', 'post'),)
+        
     def __str__(self):
         return str(self.comment)
 
