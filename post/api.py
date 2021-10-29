@@ -183,7 +183,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # Order by recent
         posts_query = posts_query.order_by('-published')
 
-        page = request.GET.get('page', 'None')
+        page = request.GET.get('page', "1")
         size = request.GET.get('size', "5")
 
         if(page == "None" or size == "None"):
@@ -238,7 +238,8 @@ class PostViewSet(viewsets.ModelViewSet):
                 }
             else:
                 post_data["commentsSrc"] = dict()
-                return_list.append(post_data)        
+            return_list.append(post_data)   
+
         next = None
         previous = None
         if(page != "None"):
