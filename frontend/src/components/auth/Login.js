@@ -26,38 +26,44 @@ export class Login extends Component {
     }
     const { username, password } = this.state;
     return (
-      <div>
-        <form onSubmit={this.onSubmit}>
-          <div className="form-group">
-            <label>Username</label>
-            <input
-              className="form-control"
-              type="text"
-              name="username"
-              onChange={this.onChange}
-              value={username}
-            />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              className="form-control"
-              type="password"
-              name="password"
-              onChange={this.onChange}
-              value={password}
-            />
-          </div>
-          <div className="form-group">
-            <button type="submit" className="btn btn-primary">
-              Login!
-            </button>
-          </div>
-          <br />
-          <span>
-            Not registered? <Link to="/register">Register</Link>
-          </span>
-        </form>
+      <div className="row justify-content-center align-items-center">
+        <div className="col-6">
+          <form onSubmit={this.onSubmit}>
+            <div className="mb-3">
+              <label for="username" className="form-label">
+                Username
+              </label>
+              <input
+                className="form-control"
+                type="text"
+                name="username"
+                onChange={this.onChange}
+                value={username}
+              />
+            </div>
+            <div className="mb-3">
+              <label for="password" className="form-label">
+                Password
+              </label>
+              <input
+                className="form-control"
+                type="password"
+                name="password"
+                onChange={this.onChange}
+                value={password}
+              />
+            </div>
+            <div className="mb-3">
+              <button type="submit" className="btn btn-primary">
+                Login!
+              </button>
+            </div>
+            <br />
+            <span>
+              Not registered? <Link to="/register">Register</Link>
+            </span>
+          </form>
+        </div>
       </div>
     );
   }

@@ -158,6 +158,7 @@ export class Create extends Component {
               value={visibility}
             />
           </div>
+          <br></br>
           <div className="form-group">
             <button type="submit" className="btn btn-primary">
               Submit

@@ -45,78 +45,91 @@ export class Register extends Component {
     const { username, displayName, github, email, password, password_confirm } =
       this.state;
     return (
-      <div>
-        <form onSubmit={this.onSubmit}>
-          <div className="form-group">
-            <label>Username</label>
-            <input
-              className="form-control"
-              type="text"
-              name="username"
-              onChange={this.onChange}
-              value={username}
-            />
-          </div>
-          <div className="form-group">
-            <label>Display Name</label>
-            <input
-              className="form-control"
-              type="text"
-              name="displayName"
-              onChange={this.onChange}
-              value={displayName}
-            />
-          </div>
-          <div className="form-group">
-            <label>GitHub</label>
-            <input
-              className="form-control"
-              type="text"
-              name="github"
-              onChange={this.onChange}
-              value={github}
-            />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              className="form-control"
-              type="email"
-              name="email"
-              onChange={this.onChange}
-              value={email}
-            />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              className="form-control"
-              type="password"
-              name="password"
-              onChange={this.onChange}
-              value={password}
-            />
-          </div>
-          <div className="form-group">
-            <label>Confirm Password</label>
-            <input
-              className="form-control"
-              type="password"
-              name="password_confirm"
-              onChange={this.onChange}
-              value={password_confirm}
-            />
-          </div>
-          <div className="form-group">
-            <button type="submit" className="btn btn-primary">
-              Register!
-            </button>
-          </div>
-          <br />
-          <span>
-            Already registered? <Link to="/login">Login</Link>
-          </span>
-        </form>
+      <div className="row justify-content-center align-items-center">
+        <div className="col-6">
+          <form onSubmit={this.onSubmit}>
+            <div className="mb-3">
+              <label for="username" className="form-label">
+                Username
+              </label>
+              <input
+                className="form-control"
+                type="text"
+                name="username"
+                onChange={this.onChange}
+                value={username}
+              />
+            </div>
+            <div className="mb-3">
+              <label for="displayName" className="form-label">
+                Display Name
+              </label>
+              <input
+                className="form-control"
+                type="text"
+                name="displayName"
+                onChange={this.onChange}
+                value={displayName}
+              />
+            </div>
+            <div className="mb-3">
+              <label for="github" className="form-label">
+                GitHub
+              </label>
+              <input
+                className="form-control"
+                type="text"
+                name="github"
+                onChange={this.onChange}
+                value={github}
+              />
+            </div>
+            <div className="mb-3">
+              <label for="email" className="form-label">
+                Email
+              </label>
+              <input
+                className="form-control"
+                type="email"
+                name="email"
+                onChange={this.onChange}
+                value={email}
+              />
+            </div>
+            <div className="mb-3">
+              <label for="password" className="form-label">
+                Password
+              </label>
+              <input
+                className="form-control"
+                type="password"
+                name="password"
+                onChange={this.onChange}
+                value={password}
+              />
+            </div>
+            <div className="mb-3">
+              <label for="password_confirm" className="form-label">
+                Confirm Password
+              </label>
+              <input
+                className="form-control"
+                type="password"
+                name="password_confirm"
+                onChange={this.onChange}
+                value={password_confirm}
+              />
+            </div>
+            <div className="mb-3">
+              <button type="submit" className="btn btn-primary mx-auto">
+                Register!
+              </button>
+            </div>
+            <span>
+              Already registered? <Link to="/login">Login</Link>
+            </span>
+          </form>
+        </div>
       </div>
     );
   }

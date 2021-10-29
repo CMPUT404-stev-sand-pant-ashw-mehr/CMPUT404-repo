@@ -15,7 +15,8 @@ export class Feed extends Component {
 
     return (
       <Fragment>
-        <h1>Feed</h1>
+        <h1>My Feed</h1>
+        <br></br>
         {posts.posts.map((post) => (
           <div className="card" key={post.id}>
             <div className="card-body">
@@ -66,8 +67,6 @@ export class Feed extends Component {
             </li>
           </ul>
         </nav>
-
-        <Create />
       </Fragment>
     );
   }
