@@ -7,7 +7,7 @@ urlpatterns = [
          "get": "get_recent_post", 
          "post": "create_post"
          })),
-     re_path(r'author/(?P<author_id>\w+)/posts/(?P<post_id>\w+)/?$', PostViewSet.as_view({
+     re_path(r'^author/(?P<author_id>\w+)/posts/(?P<post_id>\w+)/?$', PostViewSet.as_view({
          "get": "get_post", 
          "post": "update_post", 
          "delete": "delete_post", 

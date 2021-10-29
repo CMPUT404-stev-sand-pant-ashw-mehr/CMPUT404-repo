@@ -118,7 +118,7 @@ class PostViewSet(viewsets.ModelViewSet):
     # POST to create a post with generated post_id, PUT to put a post with specified post id
     def create_post(self, request, author_id=None, post_id=None):
         if request.method == "POST":
-            post_id = str(uuid.uuid4())
+            post_id = str(uuid.uuid4().hex)
             try:
                 Author.objects.get(id=author_id)
             except:
@@ -175,9 +175,7 @@ class PostViewSet(viewsets.ModelViewSet):
         elif request.method == "PUT":
             if not post_id:
                 return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-
+            #TODO
         else:
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 

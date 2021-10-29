@@ -69,4 +69,27 @@ class PostTest(TestCase):
 
         r = self.client.post('/author/1/posts', test_post)
         self.assertTrue(200 <= r.status_code < 300)
-        
+
+        post_id = r.json()['id']
+        self.assertTrue(Post.objects.filter(id=post_id).exists())
+    
+    def test_delete_post(self):
+        test_post = {
+            "type":"post",
+            "title":"A post title about a post about web dev",
+            "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+            "origin":"http://whereitcamefrom.com/posts/zzzzz",
+            "description":"This post discusses stuff -- brief",
+            "categories": str(['test1', 'test2']),
+            "contentType":"text/plain",
+            "content":"Test content",
+            "count": 1023,
+            "visibility":"PUBLIC",
+            "unlisted": 'false'
+        }
+
+        r = self.client.post('/author/1/posts', test_post)
+
+        post_id = r.json()['id']
+        r = self.client.delete(f'/author/1/posts/{post_id}/')
+        self.assertTrue(200 <= r.status_code < 300)
