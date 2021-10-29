@@ -17,6 +17,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_post_comments(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+
         try:
             Author.objects.exclude(user__isnull=True).get(id=author_id)
             Post.objects.get(id=post_id, author=author_id)
@@ -56,6 +60,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     # POST to add new comment
     def add_comment_to_post(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+            
         try:
             Author.objects.exclude(user__isnull=True).get(id=author_id)
             Post.objects.get(id=post_id, author=author_id)
