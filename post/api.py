@@ -51,29 +51,31 @@ class PostViewSet(viewsets.ModelViewSet):
         comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
         comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
         comment_object_list = comment_details.get_page(1).object_list.values()
-        comment_serilaizer = CommentSerializer(data=[c for c in comment_object_list], many=True)
 
-        if comment_serilaizer.is_valid():
-            for entry in comment_serilaizer.data:
-                entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
+        comment_list = list()
+        for entry in comment_object_list:
+            comment_author_id = entry.pop('author_id', None)
+            author_details = model_to_dict(Author.objects.get(id=comment_author_id))
+            author_details['id'] = author_details['url']
+            entry['author'] = author_details
+            entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
+            comment_list.append(entry)
 
-            post_data["count"] = comment_query.distinct().count()
+        post_data["count"] = comment_query.distinct().count()
 
-            if post_data["count"] > 0:
-                post_data["CommentsSrc"] = {
-                    "type": "comments",
-                    "page": 1,
-                    "size": 5,
-                    "post": post_data["id"],
-                    "id": post_data["comments"],
-                    "comments": comment_serilaizer.data
-                }
-            else:
-                post_data["CommentsSrc"] = dict()
-
-            return Response(post_data, status=status.HTTP_200_OK)
+        if post_data["count"] > 0:
+            post_data["CommentsSrc"] = {
+                "type": "comments",
+                "page": 1,
+                "size": 5,
+                "post": post_data["id"],
+                "id": post_data["comments"],
+                "comments": comment_list
+            }
         else:
-            return Response(comment_serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
+            post_data["CommentsSrc"] = dict()
+
+        return Response(post_data, status=status.HTTP_200_OK)
 
     # GET recent post
     def get_recent_post(self, request, author_id=None):
@@ -116,31 +118,33 @@ class PostViewSet(viewsets.ModelViewSet):
             comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
             comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
             comment_object_list = comment_details.get_page(1).object_list.values()
-            comment_serilaizer = CommentSerializer(data=[c for c in comment_object_list], many=True)
 
-            if comment_serilaizer.is_valid():
-                for entry in comment_serilaizer.data:
-                    entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
+            comment_list = list()
+            for entry in comment_object_list:
+                comment_author_id = entry.pop('author_id', None)
+                author_details = model_to_dict(Author.objects.get(id=comment_author_id))
+                author_details['id'] = author_details['url']
+                entry['author'] = author_details
+                entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
+                comment_list.append(entry)
 
-                post_data["count"] = comment_query.distinct().count()
+            post_data["count"] = comment_query.distinct().count()
 
-                if post_data["count"] > 0:
-                    post_data["CommentsSrc"] = {
-                        "type": "comments",
-                        "page": 1,
-                        "size": 5,
-                        "post": post_data["id"],
-                        "id": post_data["comments"],
-                        "comments": comment_serilaizer.data
-                    }
-                else:
-                    post_data["CommentsSrc"] = dict()
+            if post_data["count"] > 0:
+                post_data["CommentsSrc"] = {
+                    "type": "comments",
+                    "page": 1,
+                    "size": 5,
+                    "post": post_data["id"],
+                    "id": post_data["comments"],
+                    "comments": comment_list
+                }
+            else:
+                post_data["CommentsSrc"] = dict()
 
                 return_list.append(post_data)
 
-            else:
-                return Response(comment_serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         return Response({
             "type": "posts",
             "page": page,

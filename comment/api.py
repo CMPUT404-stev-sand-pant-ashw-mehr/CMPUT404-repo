@@ -22,8 +22,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             post_id = post_id[:-1]
 
         try:
-            Author.objects.exclude(user__isnull=True).get(id=author_id)
-            Post.objects.get(id=post_id, author=author_id)
+            author = Author.objects.exclude(user__isnull=True).get(id=author_id)
+            Post.objects.get(id=post_id, author_id=author_id)
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -31,31 +31,30 @@ class CommentViewSet(viewsets.ModelViewSet):
         size = request.GET.get('size', 'None')
 
         query = Comment.objects.filter(author=author_id)
+
         if(page == "None" or size == "None"):
             comment_query = query.values()
         else:
             paginator = Paginator(query.values(), size)
             comment_query = paginator.get_page(page).object_list
 
-        serialzer = CommentSerializer(data=comment_query, many=True)
-
-        if serialzer.is_valid():
-            return_list = list()
-            for comment in serialzer.data:
-                author = comment["author"]
-                comment["id"] = author["url"] + '/posts/' + post_id + '/comments/' + comment['id']
-                return_list.append(comment)
-            
-            return Response({
-                "type": "comments",
-                "page": page,
-                "size": size,
-                "post": str(request.build_absolute_uri()).replace("/comments", ''),
-                "id": str(request.build_absolute_uri()),
-                "comments": return_list
-            }, status=status.HTTP_200_OK)
-        else:
-            return Response(serialzer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return_list = list()
+        for comment in comment_query:
+            comment_author_id = comment.pop('author_id', None)
+            author_details = model_to_dict(Author.objects.get(id=comment_author_id))
+            author_details['id'] = author_details['url']
+            comment['author'] = author_details
+            comment["id"] = author_details["url"] + '/posts/' + post_id + '/comments/' + comment['id']
+            return_list.append(comment)
+        
+        return Response({
+            "type": "comments",
+            "page": page,
+            "size": size,
+            "post": str(request.build_absolute_uri()).replace("/comments", ''),
+            "id": str(request.build_absolute_uri()),
+            "comments": return_list
+        }, status=status.HTTP_200_OK)
 
 
     # POST to add new comment
@@ -81,8 +80,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         try:
             keys = {
                 "type": request.data["type"],
-                "author": author_id,
-                "post": post_id,
+                "author_id": author_id,
+                "post_id": post_id,
                 "comment": request.data["comment"],
                 "contentType": request.data["contentType"]
             }
