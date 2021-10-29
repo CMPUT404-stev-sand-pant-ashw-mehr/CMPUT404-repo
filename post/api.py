@@ -87,7 +87,7 @@ class PostViewSet(viewsets.ModelViewSet):
         posts_query = posts_query.order_by('-published')
 
         page = request.GET.get('page', 'None')
-        size = request.GET.get('size', 'None')
+        size = request.GET.get('size', "5")
 
         if(page == "None" or size == "None"):
             post_data_list = posts_query.values()
@@ -141,9 +141,12 @@ class PostViewSet(viewsets.ModelViewSet):
                 }
             else:
                 post_data["commentsSrc"] = dict()
-
-                return_list.append(post_data)
-
+                return_list.append(post_data)        
+        next = None
+        previous = None
+        if(page != "None"):
+            next = ((int(page) + 1)) if Paginator(posts_query.values(), size).get_page(page).has_next() else None 
+            previous = ((int(page) - 1)) if Paginator(posts_query.values(), size).get_page(page).has_previous() else None
 
         return Response({
             "type": "posts",
@@ -151,6 +154,8 @@ class PostViewSet(viewsets.ModelViewSet):
             "size": size,
             "id": request.build_absolute_uri(),
             "items": return_list,
+            "next": next, 
+            "previous": previous
         }, status=status.HTTP_200_OK)
 
 

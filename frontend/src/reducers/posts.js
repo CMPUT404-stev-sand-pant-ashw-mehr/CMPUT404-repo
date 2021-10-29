@@ -1,4 +1,10 @@
-import { GET_POSTS, DELETE_POST, CREATE_POST } from "../actions/types.js";
+import {
+  GET_POSTS,
+  DELETE_POST,
+  CREATE_POST,
+  CREATE_POST_COMMENT,
+  UPDATE_POST,
+} from "../actions/types.js";
 
 const initialState = {
   posts: [],
@@ -13,12 +19,13 @@ export default function (state = initialState, action) {
     case GET_POSTS:
       return {
         ...state,
-        posts: action.payload.results,
+        posts: action.payload.items,
         count: action.payload.count,
         next: action.payload.next,
         previous: action.payload.previous,
         page: action.page,
       };
+    case CREATE_POST_COMMENT:
     case CREATE_POST:
       return {
         ...state,
