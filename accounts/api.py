@@ -5,8 +5,12 @@ from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.models import Author
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
+from django.utils.functional import SimpleLazyObject
+from django.contrib.sites.shortcuts import get_current_site
 
 from knox.models import AuthToken
+
+import uuid
 
 class RegisterAPI(generics.GenericAPIView):
     """
@@ -15,14 +19,19 @@ class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request):
-
+        host = 'http://' + str(request.get_host())
         user_serializer = self.get_serializer(data = request.data)
-        user_serializer.is_valid(raise_exception = True)
+        user_serializer.is_valid(raise_exception=True)
+        print(user_serializer.errors)
         # create user
         user = user_serializer.save()
 
+        author_uuid = uuid.uuid4()
+
         author_schema = {
-            "host" : "",
+            "host" : host,
+            "id": str(author_uuid),
+            "url": host + '/author/' + str(author_uuid),
             "displayName": request.data["displayName"],
             "github": request.data["github"],
             "user": user.id
