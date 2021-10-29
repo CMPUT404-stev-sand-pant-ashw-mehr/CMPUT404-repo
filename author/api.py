@@ -17,8 +17,8 @@ from urllib.parse import urlparse
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.exclude(user__isnull=True).order_by('id')
-    #authentication_classes = (TokenAuthentication,)
-    #permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = AuthorSerializer
 
