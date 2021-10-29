@@ -48,21 +48,24 @@ class PostViewSet(viewsets.ModelViewSet):
         comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
         comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
 
-        for entry in comment_serilaizer.data:
-            entry['id'] = author_detail['url'] + '/posts/' + entry['id']
+        if comment_serilaizer.is_valid():
+            for entry in comment_serilaizer.data:
+                entry['id'] = author_detail['url'] + '/posts/' + entry['id']
 
-        post_data["count"] = comment_query.distinct().count()
+            post_data["count"] = comment_query.distinct().count()
 
-        post_data["CommentsSrc"] = {
-            "type": "comments",
-            "page": 1,
-            "size": 5,
-            "post": post_data["id"],
-            "id": post_data["comments"],
-            "comments": comment_serilaizer.data
-        }
+            post_data["CommentsSrc"] = {
+                "type": "comments",
+                "page": 1,
+                "size": 5,
+                "post": post_data["id"],
+                "id": post_data["comments"],
+                "comments": comment_serilaizer.data
+            }
 
-        return Response(post_data, status=status.HTTP_200_OK)
+            return Response(post_data, status=status.HTTP_200_OK)
+        else:
+            return Response(comment_serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # GET recent post
     def get_recent_post(self, request, author_id=None):
@@ -106,28 +109,31 @@ class PostViewSet(viewsets.ModelViewSet):
             comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
             comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
 
-            for entry in comment_serilaizer.data:
-                entry['id'] = author_detail['url'] + '/posts/' + entry['id']
-                
-            post_data["count"] = comment_query.distinct().count()
+            if comment_serilaizer.is_valid():
+                for entry in comment_serilaizer.data:
+                    entry['id'] = author_detail['url'] + '/posts/' + entry['id']
 
-            post_data["CommentsSrc"] = {
-                "type": "comments",
-                "page": 1,
-                "size": 5,
-                "post": post_data["id"],
-                "id": post_data["comments"],
-                "comments": comment_serilaizer.data
-            }
+                post_data["count"] = comment_query.distinct().count()
 
-            return_list.append(post_data)
+                post_data["CommentsSrc"] = {
+                    "type": "comments",
+                    "page": 1,
+                    "size": 5,
+                    "post": post_data["id"],
+                    "id": post_data["comments"],
+                    "comments": comment_serilaizer.data
+                }
+
+                return_list.append(post_data)
+            else:
+                return Response({comment_serilaizer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
         
         return Response({
             "type": "posts",
             "page": page,
             "size": size,
-            "id": request.build_absolute_url(),
+            "id": request.build_absolute_uri(),
             "items": return_list,
         }, status=status.HTTP_200_OK)
 
