@@ -53,6 +53,9 @@ class Post(models.Model):
     unlisted = models.BooleanField()
     # unlisted means it is public if you know the post name -- use this for images, it's so images don't show up in timelines
 
+    class Meta:
+        unique_together = (('id', 'author'),)
+
 class Categories(models.Model):
     # category of a post (one to many relationship)
     post = models.ForeignKey(Post, on_delete=CASCADE)
