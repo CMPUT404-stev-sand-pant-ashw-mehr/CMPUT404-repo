@@ -70,7 +70,10 @@ class AuthorViewSet(viewsets.ModelViewSet):
         try:
             author = Author.objects.get(id=author_id)
         except:
-            return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:
             ignored_keys = list()
