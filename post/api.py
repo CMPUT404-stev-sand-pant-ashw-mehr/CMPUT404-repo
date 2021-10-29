@@ -23,7 +23,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_post(self, request, author_id=None, post_id=None):
         try:
             # get post with author.
-            post_query = Post.objects.get(id=post_id, author=author_id)
+            post_query = Post.objects.get(id=post_id, author=author_id, visibility="PUBLIC")
 
             # get author. Exclude foreign author
             author_query = Author.objects.exclude(user__isnull=True).get(id=author_id)
@@ -162,7 +162,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                    
+
             except KeyError as e:
                 return Response({"detail": "key(s) missing:", "message": e.args()}, status=status.HTTP_400_BAD_REQUEST)
 
