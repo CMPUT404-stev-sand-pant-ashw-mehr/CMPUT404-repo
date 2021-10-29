@@ -30,7 +30,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'backend',
+    'post',
+    'comment',
     'frontend',
     'author',
     'accounts',
