@@ -17,8 +17,8 @@ from urllib.parse import urlparse
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.exclude(user__isnull=True).order_by('id')
-    #authentication_classes = (TokenAuthentication,)
-    #permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = AuthorSerializer
 
@@ -29,19 +29,20 @@ class AuthorViewSet(viewsets.ModelViewSet):
             size = request.GET.get('size', 'None')
             author_list = self.get_queryset()
 
+            print(author_list.values())
+            
             # Swap the id fields to url
             author_list.update(id=F('url'))
 
             if(page == "None" or size == "None"):
-                serializer = AuthorSerializer(author_list, many=True)
+                author_data = author_list.values()
             else:
                 paginator = Paginator(author_list, size)
-                result_page = paginator.get_page(page)
-                serializer = AuthorSerializer(result_page, many=True)
+                author_data = paginator.get_page(page)
 
             response = {
                 "type": "authors",
-                "items": serializer.data
+                "items": author_data
             }
             return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
