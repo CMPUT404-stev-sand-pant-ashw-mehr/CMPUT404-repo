@@ -98,12 +98,14 @@ class AuthorTest(TestCase):
         newGithubLink = "https://github.com/new/address"
         r = self.client.post(
             '/author/http://127.0.0.1:8000/author/3/', {"github": newGithubLink})
+        self.assertEquals(r.status_code, 403)
+
+        r = self.client.post('/author/1', {"github": newGithubLink})
         self.assertEquals(r.status_code, 200)
+        testUser1NewData = model_to_dict(
+            Author.objects.get(id=self.testUser1['id']))
 
-        testUser3NewData = model_to_dict(
-            Author.objects.get(id=self.testUser3['id']))
-
-        self.assertEquals(testUser3NewData["github"], newGithubLink)
+        self.assertEquals(testUser1NewData["github"], newGithubLink)
 
         r = self.client.post('/author/doesnt/exists')
 
@@ -111,7 +113,8 @@ class AuthorTest(TestCase):
 
         r = self.client.post('/author/2')
 
-        self.assertEquals(r.status_code, 400)
+        self.assertEquals(r.status_code, 403)
+
     def test_notallowed_methods(self):
         r = self.client.put('/author/2')
 
