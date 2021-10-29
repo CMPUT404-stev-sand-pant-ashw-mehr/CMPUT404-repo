@@ -9,16 +9,42 @@ export class Header extends Component {
     const { isAuthenticated, user } = this.props.auth;
     const authLinks = (
       <Fragment>
-        <a className="me-3 py-2 text-dark text-decoration-none" href="#">
+        <Link to="/posts" className="me-3 py-2 text-dark text-decoration-none">
+          Feed
+        </Link>
+        <Link
+          to="/posts/create"
+          className="me-3 py-2 text-dark text-decoration-none"
+        >
+          Create Post
+        </Link>
+        <Link to="/inbox" className="me-3 py-2 text-dark text-decoration-none">
+          Inbox
+        </Link>
+        <a
+          className="nav-link me-3 py-2 dropdown-toggle text-dark text-decoration-none"
+          href="#"
+          id="navbarDarkDropdownMenuLink"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
           {user ? user.username : ""}
         </a>
-        <a
-          href="#"
-          className="btn btn-outline-primary me-2"
-          onClick={this.props.logout}
+        <ul
+          className="dropdown-menu dropdown-menu-dark"
+          aria-labelledby="navbarDarkDropdownMenuLink"
         >
-          Logout
-        </a>
+          <li>
+            <a
+              href="#"
+              className="dropdown-item btn btn-outline-primary me-2"
+              onClick={this.props.logout}
+            >
+              Logout
+            </a>
+          </li>
+        </ul>
       </Fragment>
     );
 
@@ -35,11 +61,11 @@ export class Header extends Component {
 
     return (
       <div>
-        <div className="col-lg-9 mx-auto pt-4">
+        <div className="col-lg-6 mx-auto pt-4">
           <header>
             <div className="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-              <a
-                href="/"
+              <Link
+                to={isAuthenticated ? "/posts" : "/"}
                 className="d-flex align-items-center text-dark text-decoration-none"
               >
                 <svg
@@ -50,7 +76,7 @@ export class Header extends Component {
                   viewBox="0 0 118 94"
                   role="img"
                 >
-                  <title>Bootstrap</title>
+                  <title>Social Distribution</title>
                   <path
                     fill-rule="evenodd"
                     clip-rule="evenodd"
@@ -59,15 +85,8 @@ export class Header extends Component {
                   ></path>
                 </svg>
                 <span className="fs-4">Social Distribution</span>
-              </a>
+              </Link>
               <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                <a
-                  className="me-3 py-2 text-dark text-decoration-none"
-                  href="#"
-                >
-                  About
-                </a>
-
                 {isAuthenticated ? authLinks : guestLinks}
               </nav>
             </div>
