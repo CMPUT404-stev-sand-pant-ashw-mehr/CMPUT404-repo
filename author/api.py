@@ -9,7 +9,6 @@ from django.http import HttpRequest
 from rest_framework.response import Response
 # from rest_framework.decorators import action
 from django.core.paginator import Paginator
-from django.db.models import F
 from django.forms.models import model_to_dict
 from knox.auth import TokenAuthentication
 from urllib.parse import urlparse
@@ -28,17 +27,16 @@ class AuthorViewSet(viewsets.ModelViewSet):
             page = request.GET.get('page', 'None')
             size = request.GET.get('size', 'None')
             author_list = self.get_queryset()
-
-            print(author_list.values())
             
-            # Swap the id fields to url
-            author_list.update(id=F('url'))
 
             if(page == "None" or size == "None"):
                 author_data = author_list.values()
             else:
                 paginator = Paginator(author_list, size)
                 author_data = paginator.get_page(page)
+
+            for author in author_data:
+                author["id"] = author["url"]
 
             response = {
                 "type": "authors",
@@ -55,6 +53,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
     def get_author(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
         try:
+            print(self.get_queryset().values())
             query = self.get_queryset().get(id=author_id)
         except:
             return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)

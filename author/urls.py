@@ -4,6 +4,7 @@ from .api import AuthorViewSet
 
 urlpatterns = [
     re_path(r"^authors/?$", AuthorViewSet.as_view({"get": "list"})),
-    re_path(r'^author/(?P<author_id>[a-z0-9/:\.]+)/?$',
-            AuthorViewSet.as_view({"get": "get_author", "post": "update"}))
+    re_path(r"^author/(?P<author_id>[a-z0-9/:\.-]+)/$",
+            AuthorViewSet.as_view({"get": "get_author", "post": "update"})),
+    path("author/<str:author_id>", AuthorViewSet.as_view({"get": "get_author", "post": "update"})),
 ]
