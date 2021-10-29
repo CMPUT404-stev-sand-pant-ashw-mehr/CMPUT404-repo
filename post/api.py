@@ -50,7 +50,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         if comment_serilaizer.is_valid():
             for entry in comment_serilaizer.data:
-                entry['id'] = author_detail['url'] + '/posts/' + entry['id']
+                entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
 
             post_data["count"] = comment_query.distinct().count()
 
@@ -111,7 +111,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
             if comment_serilaizer.is_valid():
                 for entry in comment_serilaizer.data:
-                    entry['id'] = author_detail['url'] + '/posts/' + entry['id']
+                    entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
 
                 post_data["count"] = comment_query.distinct().count()
 
