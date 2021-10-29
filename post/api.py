@@ -155,7 +155,14 @@ class PostViewSet(viewsets.ModelViewSet):
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
-
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+            
         try:
             post = Post.objects.get(author=author_id, id=post_id)
         except:
@@ -207,12 +214,16 @@ class PostViewSet(viewsets.ModelViewSet):
         
     # POST to create a post with generated post_id, PUT to put a post with specified post id
     def create_post(self, request, author_id=None, post_id=None):
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         if request.method == "POST":
             post_id = str(uuid.uuid4().hex)
-            try:
-                Author.objects.get(id=author_id)
-            except:
-                return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
             try:
                 request_keys = request.data
@@ -280,6 +291,14 @@ class PostViewSet(viewsets.ModelViewSet):
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
+
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:
             post = Post.objects.get(author=author_id, id=post_id)
