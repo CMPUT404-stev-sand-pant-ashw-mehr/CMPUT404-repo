@@ -10,11 +10,76 @@ from django.forms.models import model_to_dict
 
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/posts/< POST_ID >/comments",
+        manual_parameters=[
+            openapi.Parameter(
+                'page', 
+                openapi.IN_QUERY, 
+                description="optional", 
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'size', 
+                openapi.IN_QUERY, 
+                description="optional", 
+                type=openapi.TYPE_INTEGER
+            ),
+        ],
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "type":"comments",
+                        "page":1,
+                        "size":5,
+                        "post":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+                        "comments":[
+                            {
+                                "type":"comment",
+                                "author":{
+                                    "type":"author",
+                                    "id":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                    "url":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                    "host":"http://127.0.0.1:5454/",
+                                    "displayName":"Greg Johnson",
+                                    "github": "http://github.com/gjohnson",
+                                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                },
+                                "comment":"Sick Olde English",
+                                "contentType":"text/markdown",
+                                "published":"2015-03-09T13:07:04+00:00",
+                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments/f6255bb01c648fe967714d52a89e8e9c",
+                            }
+                        ]
+                    }
+                }
+                
+            ),
+            "400": openapi.Response(
+                description="Bad Request"
+            ),
+            "404": openapi.Response(
+                description="Post not found",
+                examples={
+                    "application/json":{"detail": "post not found"}
+                }
+            )
+        },
+        tags=['Get Comments on a Post'],
+    )
 
     def get_post_comments(self, request, author_id=None, post_id=None):
         # remove trailing slash
@@ -56,6 +121,50 @@ class CommentViewSet(viewsets.ModelViewSet):
             "comments": return_list
         }, status=status.HTTP_200_OK)
 
+
+    @swagger_auto_schema(
+        operation_description="POST /service/author/< AUTHOR_ID >/posts/< POST_ID >/comments",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["type", "author", "comment", "contentType", "published", "id"],
+            properties={
+                    "type": openapi.Schema(type=openapi.TYPE_STRING),
+                    "author": openapi.Schema(type=openapi.TYPE_OBJECT),
+                    "comment": openapi.Schema(type=openapi.TYPE_STRING),
+                    "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+                    "published": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "id": openapi.Schema(type=openapi.TYPE_STRING)
+                },
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments/f6255bb01c648fe967714d52a89e8e9c",
+                        "published":"2015-03-09T13:07:04+00:00",
+                        "type":"comments",
+                        "author": "http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                        "post": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                        "comment":"Sick Olde English",
+                        "contentType":"text/markdown"
+                    }
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden"
+            ),
+            "404": openapi.Response(
+                description="Author not found",
+                examples={
+                    "application/json":{"detail": "author not found"},
+                    "application/json":{"detail": "post not found"},
+                    "application/json":{"detail": "Missing fields", "message": "Error details..."}
+                }
+            ),
+        },
+        tags=['Add Comments to a Post'],
+    )
 
     # POST to add new comment
     def add_comment_to_post(self, request, author_id=None, post_id=None):

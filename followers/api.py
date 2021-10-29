@@ -1,3 +1,4 @@
+from rest_framework import response
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
@@ -9,6 +10,8 @@ from django.contrib.auth.models import User
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 import io
 from rest_framework.parsers import JSONParser
@@ -17,6 +20,57 @@ class FollowerViewSet(viewsets.ModelViewSet):
     serializer_class = FollowerModelSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/followers",
+        manual_parameters=[
+            openapi.Parameter(
+                'page', 
+                openapi.IN_QUERY, 
+                description="optional", 
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'size', 
+                openapi.IN_QUERY, 
+                description="optional", 
+                type=openapi.TYPE_INTEGER
+            ),
+        ],
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                        {
+                            
+                            "type": "followers",      
+                            "items":[
+                                {
+                                    "type":"author",
+                                    "id":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                    "url":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                    "host":"http://127.0.0.1:5454/",
+                                    "displayName":"Greg Johnson",
+                                    "github": "http://github.com/gjohnson",
+                                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                },
+                                {
+                                    "type":"author",
+                                    "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "host":"http://127.0.0.1:5454/",
+                                    "displayName":"Lara Croft",
+                                    "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "github": "http://github.com/laracroft",
+                                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                }
+                            ]
+                        }
+                }
+            )
+        },
+        tags=['Get all Followers'],
+    )
 
     # GET list of followers
     def list(self, request, author_id=None):
@@ -47,6 +101,31 @@ class FollowerViewSet(viewsets.ModelViewSet):
                 "type": "followers",
                 "items": follower_items
             }, status=status.HTTP_200_OK)
+
+
+    @swagger_auto_schema(
+        operation_description="PUT /service/author/< AUTHOR_ID >/followers/< FOREIGN_AUTHOR_ID >",
+        responses={
+            "201": openapi.Response(
+                description="Created",
+            ),
+            "400": openapi.Response(
+                description="Bad request",
+                examples={
+                    "application/json":{"detail": "invalid content type. Required: application/json"},
+                    "application/json":{"detail": "follower id format invalid"},
+                    "application/json":{"detail": "id Field of PUT data missing"},
+                    "application/json":{"detail": "follower url format invalid"},
+                    "application/json":{"detail": "author id in URL does not match id in PUT body"},
+                    "application/json":{"detail": "Invalid json for author", "errors": "Error details"},
+                    "application/json":{"detail": "error when storing to database", "error": "Error details"},
+                    "application/json":{"detail": "PUT missing body with content_type: application/json"}
+                }
+            ),
+
+        },
+        tags=['Add a Follower to an Author'],
+    )
 
     # PUT a follower to the specified author
     def put_follower(self, request, author_id=None, foreign_author_id=None):
@@ -120,6 +199,23 @@ class FollowerViewSet(viewsets.ModelViewSet):
         else:
             return Response({"detail": "error when storing to database", "error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+    @swagger_auto_schema(
+        operation_description="DELETE /service/author/< AUTHOR_ID >/followers/< FOREIGN_AUTHOR_ID >",
+        responses={
+            "200": openapi.Response(
+                description="OK"
+            ),
+            "404": openapi.Response(
+                description="Follower not found",
+                examples={
+                    "application/json":{"detail": "follower not found"}
+                }
+            ),
+        },
+        tags=['Delete a Follower'],
+    )
     # DELETE a follower of a given author
     def delete_follower(self, request, author_id=None, foreign_author_id=None):
         try:
@@ -141,6 +237,25 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
+
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/followers/< FOREIGN_AUTHOR_ID >",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"detail": True}
+                }
+            ),
+            "404": openapi.Response(
+                description="Follower not found",
+                examples={
+                    "application/json":{"detail": False}
+                }
+            ),
+        },
+        tags=['Check if Follower'],
+    )
     # GET if the author has the follower with the given id on the server
     def check_follower(self, request, author_id=None, foreign_author_id=None):
         
