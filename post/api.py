@@ -61,8 +61,17 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return Response(post_data, status=status.HTTP_200_OK)
 
+    # GET recent post
     def get_recent_post(self, request, author_id=None):
-        pass
+        posts_query = Post.objects.filter(author=author_id, visibility="PUBLIC", unlisted=False)
+        if not posts_query.exists():
+            return Response({"detail": "Author not found or does not have public posts"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Order by recent
+        posts_query = posts_query.order_by('-published')
+
+        page = request.GET.get('page', 'None')
+        size = request.GET.get('size', 'None')
 
     # POST and update a post with given author_id and post_id
     def update_post(self, request, author_id=None, post_id=None):
