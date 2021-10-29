@@ -13,7 +13,7 @@ class CommentSerializer(serializers.ModelSerializer):
         exclude = ('post',)
 
     def get_author(self, obj) -> dict():
-        author_query = Author.objects.get(id=obj.author)
+        author_query = Author.objects.get(id=obj.author_id)
         author_details = model_to_dict(author_query)
         author_details['id'] = author_details['url']
         return author_details

@@ -2,7 +2,7 @@ from rest_framework.generics import get_object_or_404
 from author.models import Author
 from .serializer import AuthorSerializer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets, status, permissions, pagination
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response 
 from django.http import HttpRequest
@@ -32,8 +32,8 @@ class AuthorViewSet(viewsets.ModelViewSet):
             if(page == "None" or size == "None"):
                 author_data = author_list.values()
             else:
-                paginator = Paginator(author_list, size)
-                author_data = paginator.get_page(page)
+                paginator = Paginator(author_list.values(), size)
+                author_data = paginator.get_page(page).object_list
 
             for author in author_data:
                 author["id"] = author["url"]
@@ -70,7 +70,10 @@ class AuthorViewSet(viewsets.ModelViewSet):
         try:
             author = Author.objects.get(id=author_id)
         except:
-            return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:
             ignored_keys = list()

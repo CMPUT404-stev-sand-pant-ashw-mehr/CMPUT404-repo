@@ -5,9 +5,6 @@ from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.models import Author
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
-from django.utils.functional import SimpleLazyObject
-from django.contrib.sites.shortcuts import get_current_site
-
 from knox.models import AuthToken
 
 import uuid
@@ -26,7 +23,7 @@ class RegisterAPI(generics.GenericAPIView):
         # create user
         user = user_serializer.save()
 
-        author_uuid = uuid.uuid4()
+        author_uuid = uuid.uuid4().hex
 
         author_schema = {
             "host" : host,
