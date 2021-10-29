@@ -10,6 +10,12 @@ import {
 import Alert from "./layout/Alert";
 import Header from "./layout/Header";
 import Feed from "./posts/Feed";
+import Create from "./posts/Create";
+import Post from "./posts/Post";
+
+import Landing from "./pages/Landing";
+import Profile from "./pages/Profile";
+
 import Login from "./auth/Login";
 import Register from "./auth/Register";
 import AuthRoute from "./auth/AuthRoute";
@@ -38,12 +44,19 @@ class App extends Component {
           <Router>
             <Fragment>
               <Header />
-              <Alert />
-              <Switch>
-                <AuthRoute exact path="/" component={Feed} />
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/register" component={Register} />
-              </Switch>
+              <div className="col-lg-6 mx-auto pt-4">
+                <Alert />
+                <Switch>
+                  <AuthRoute exact path="/inbox" component={Create} />
+                  <AuthRoute exact path="/posts" component={Feed} />
+                  <AuthRoute exact path="/posts/create" component={Create} />
+                  <AuthRoute exact path="/posts/:id" component={Post} />
+                  <AuthRoute exact path="/profile" component={Profile} />
+                  <Route exact path="/" component={Landing} />
+                  <Route exact path="/login" component={Login} />
+                  <Route exact path="/register" component={Register} />
+                </Switch>
+              </div>
             </Fragment>
           </Router>
         </AlertProvider>

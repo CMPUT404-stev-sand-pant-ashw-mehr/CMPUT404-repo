@@ -1,9 +1,10 @@
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
-
-import Create from "./Create";
+import Moment from "react-moment";
+import { FaRegClock, FaTrashAlt } from "react-icons/fa";
 
 export class Feed extends Component {
   componentDidMount() {
@@ -15,32 +16,44 @@ export class Feed extends Component {
 
     return (
       <Fragment>
-        <h1>Feed</h1>
+        <h1>My Feed</h1>
+
         {posts.posts.map((post) => (
-          <div className="card" key={post.id}>
+          <div className="card mb-4" key={post.id}>
             <div className="card-body">
-              <h5 className="card-title">{post.title}</h5>
+              <div className="small text-muted">
+                <span className="float-end">
+                  <FaRegClock />
+                  &nbsp;<Moment fromNow>{post.published}</Moment>
+                </span>
+                @{post.author.displayName}
+              </div>
+              <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
-              <a href={post.source} className="btn btn-primary">
-                Source
-              </a>
+              <Link
+                to={`/posts/${post.id.split("/").pop()}`}
+                className="btn btn-outline-primary"
+              >
+                View full post →
+              </Link>
               <button
-                className="btn btn-danger"
+                className="btn btn-danger float-end"
                 onClick={deletePost.bind(this, post.id)}
               >
-                Delete Post
+                <FaTrashAlt />
               </button>
             </div>
           </div>
         ))}
-        <nav aria-label="Page navigation example">
+        <nav aria-label="Posts pagination">
           <ul className="pagination">
             <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
               <a
                 className="page-link"
                 href="#"
                 aria-label="Previous"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   getPosts(posts.previous);
                 }}
               >
@@ -57,7 +70,8 @@ export class Feed extends Component {
                 className="page-link"
                 href="#"
                 aria-label="Next"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   getPosts(posts.next);
                 }}
               >
@@ -66,8 +80,6 @@ export class Feed extends Component {
             </li>
           </ul>
         </nav>
-
-        <Create />
       </Fragment>
     );
   }

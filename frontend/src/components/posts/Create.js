@@ -5,7 +5,6 @@ import { createPost } from "../../actions/posts";
 
 export class Create extends Component {
   state = {
-    type: "",
     title: "",
     source: "",
     origin: "",
@@ -18,7 +17,6 @@ export class Create extends Component {
 
   resetForm() {
     this.setState({
-      type: "",
       title: "",
       source: "",
       origin: "",
@@ -38,7 +36,6 @@ export class Create extends Component {
   onSubmit = (e) => {
     e.preventDefault();
     const {
-      type,
       title,
       source,
       origin,
@@ -48,8 +45,7 @@ export class Create extends Component {
       visibility,
     } = this.state;
     const post = {
-      postType: type,
-      author: 1,
+      type: "POST",
       title,
       source,
       origin,
@@ -58,6 +54,7 @@ export class Create extends Component {
       content,
       visibility,
       unlisted: false,
+      categories: ["web"],
     };
     this.props.createPost(post);
     this.resetForm();
@@ -65,7 +62,6 @@ export class Create extends Component {
 
   render() {
     const {
-      type,
       title,
       source,
       origin,
@@ -78,16 +74,6 @@ export class Create extends Component {
     return (
       <div>
         <form onSubmit={this.onSubmit}>
-          <div className="form-group">
-            <label>Type</label>
-            <input
-              className="form-control"
-              type="text"
-              name="type"
-              onChange={this.onChange}
-              value={type}
-            />
-          </div>
           <div className="form-group">
             <label>Title</label>
             <input
@@ -158,6 +144,7 @@ export class Create extends Component {
               value={visibility}
             />
           </div>
+          <br></br>
           <div className="form-group">
             <button type="submit" className="btn btn-primary">
               Submit
