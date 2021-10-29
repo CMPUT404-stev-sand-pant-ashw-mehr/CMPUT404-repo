@@ -38,8 +38,21 @@ NOTE: It is recommended to use a virtual environment.
    $ python manage.py migrate
    ```
 
+4. Change directory to "frontend"
+   ```bash
+   $ cd frontend 
+   ```
+
+5. Run the following commands to install dependencies:
+   ```bash
+   $ npm install
+   $ npm run dev
+   ```
+
+6. If all commands run successfully, you are ready to run the project locally. 
+
 ##  Running Locally
-1. After successful migration, run the project:
+1. While in the root directory, run the project using the following command:
    ```bash
    $ python manage.py runserver 
    ```
@@ -55,3 +68,10 @@ To view documentation for APIs, hit the following endpoint:
    ```bash
    http://localhost:8000/docs/
    ```
+
+## References
+  ##### [Django Documentation](https://docs.djangoproject.com/en/3.2/)
+  ##### [Django REST framework](https://www.django-rest-framework.org/api-guide/serializers/)
+  ##### [Django-Rest-Knox](https://james1345.github.io/django-rest-knox/)
+  ##### [React](https://reactjs.org/docs/getting-started.html)
+  ##### [Redux](https://redux.js.org/introduction/getting-started)
