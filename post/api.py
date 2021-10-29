@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.paginator import Paginator
 
 import uuid
+import ast
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
@@ -118,10 +119,52 @@ class PostViewSet(viewsets.ModelViewSet):
     def create_post(self, request, author_id=None, post_id=None):
         if request.method == "POST":
             post_id = uuid.uuid4
-            get_object_or_404(Author, pk=author_id)
+            try:
+                author = Author.objects.get(id=author_id)
+            except:
+                return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
+            try:
+                request_keys = request.data
 
+                data = dict()
+                data['type'] = request_keys['type']
+                data['title'] = request_keys['title']
+                data['id'] = post_id
+                data['source'] = request_keys['source']
+                data['origin'] = request_keys['origin']
+                data['description'] = request_keys['description']
+                data['contentType'] = request_keys['contentType']
+                data['content'] = request_keys['content']
+                data['author'] = author
 
+                categories = request_keys['categories']
+
+                try:
+                    categories = ast.literal_eval(str(categories))
+                except:
+                    return Response({"detail": "incorrect format for Categories"}, status=status.HTTP_400_BAD_REQUEST)
+
+                visi = request_keys['visibility'].strip()
+                if (visi not in ("PUBLIC", "FRIENDS")):
+                    return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
+                data['visibility'] = visi
+
+                unlisted = request_keys['unlisted']
+                if type(unlisted) != bool:
+                    return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
+
+                data['unlisted'] = bool(unlisted)
+                
+                serializer = PostSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    
+            except KeyError as e:
+                return Response({"detail": "key(s) missing:", "message": e.args()}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == "PUT":
             if not post_id:

@@ -9,7 +9,7 @@ class Post(models.Model):
     # title of a post
     title = models.TextField()
     # id of the post
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4, blank=False, null=False)
     # where did you get this post from?
     source = models.URLField()
     # where is it actually from
@@ -44,7 +44,7 @@ class Post(models.Model):
     # this is to reduce API call counts
     # commentSrc = calculated/loaded value
     # ISO 8601 TIMESTAMP
-    published = models.DateTimeField(default=timezone.now)
+    published = models.DateTimeField(default=timezone.now, blank=False, null=False)
     # visibility ["PUBLIC","FRIENDS"]
     visibility = models.CharField(max_length=255)
     # for visibility PUBLIC means it is open to the wild web

@@ -15,8 +15,8 @@ from urllib.parse import urlparse
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.exclude(user__isnull=True).order_by('id')
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    #authentication_classes = (TokenAuthentication,)
+    #permission_classes = (IsAuthenticated,)
 
     serializer_class = AuthorSerializer
 
@@ -42,9 +42,9 @@ class AuthorViewSet(viewsets.ModelViewSet):
                 "items": serializer.data
             }
             return Response(response, status=status.HTTP_200_OK)
-        except:
+        except Exception as e:
             response = {
-                "message": "Records not found"
+                "message": e.args
             }
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
