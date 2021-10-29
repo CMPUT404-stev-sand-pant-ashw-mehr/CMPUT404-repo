@@ -85,7 +85,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 }
             ),
         },
-        tags=['Check if Follower'],
+        tags=['Get an Author\'s Post'],
     )
     # GET a post with specified author id and post id
     def get_post(self, request, author_id=None, post_id=None):
@@ -199,6 +199,13 @@ class PostViewSet(viewsets.ModelViewSet):
             "405": openapi.Response(
                 description="Method not Allowed"
             ),
+            "404": openapi.Response(
+                description="Bad request",
+                examples={
+                    "application/json":{"detail": "Author not found"},
+
+                }
+            ),
             "400": openapi.Response(
                 description="Bad Request",
                 examples={
@@ -210,7 +217,7 @@ class PostViewSet(viewsets.ModelViewSet):
             ),
 
         },
-        tags=['Delete an Author\'s Post'],
+        tags=['Create an Author\'s Post'],
     )
         
     # POST to create a post with generated post_id, PUT to put a post with specified post id
@@ -289,7 +296,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 }
             ),
             "404": openapi.Response(
-                description="Follower not found",
+                description="Post not found",
                 examples={
                     "application/json":{"detail": "Post not found"}
                 }

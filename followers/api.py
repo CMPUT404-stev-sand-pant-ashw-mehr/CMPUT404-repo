@@ -107,35 +107,10 @@ class FollowerViewSet(viewsets.ModelViewSet):
         operation_description="PUT /service/author/< AUTHOR_ID >/followers/< FOREIGN_AUTHOR_ID >",
         responses={
             "201": openapi.Response(
-                description="CREATED",
-                examples={
-                    "application/json":{
-                        "type": "followers",      
-                        "items":[
-                            {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
-                                "url":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Greg Johnson",
-                                "github": "http://github.com/gjohnson",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            },
-                            {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Lara Croft",
-                                "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "github": "http://github.com/laracroft",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            }
-                        ]
-                    }
-                }
+                description="Created",
             ),
             "400": openapi.Response(
-                description="Invalid content type",
+                description="Bad request",
                 examples={
                     "application/json":{"detail": "invalid content type. Required: application/json"},
                     "application/json":{"detail": "follower id format invalid"},
@@ -143,12 +118,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
                     "application/json":{"detail": "follower url format invalid"},
                     "application/json":{"detail": "author id in URL does not match id in PUT body"},
                     "application/json":{"detail": "Invalid json for author", "errors": "Error details"},
-                    "application/json":{"detail": "error when storing to database", "error": "Error details"}
+                    "application/json":{"detail": "error when storing to database", "error": "Error details"},
+                    "application/json":{"detail": "PUT missing body with content_type: application/json"}
                 }
             ),
 
         },
-        tags=['Add a Follower to an Author(PUT)'],
+        tags=['Add a Follower to an Author'],
     )
 
     # PUT a follower to the specified author
