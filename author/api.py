@@ -152,6 +152,18 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="POST /service/author/< AUTHOR_ID >/",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["type", "id", "host", "url", "github", "profileImage"],
+            properties={
+                    "type": openapi.Schema(type=openapi.TYPE_STRING),
+                    "id": openapi.Schema(type=openapi.TYPE_STRING),
+                    "host": openapi.Schema(type=openapi.TYPE_STRING),
+                    "url": openapi.Schema(type=openapi.TYPE_STRING),
+                    "github": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    "profileImage": openapi.Schema(type=openapi.TYPE_STRING)
+                },
+        ),
         responses={
             "200": openapi.Response(
                 description="OK",
