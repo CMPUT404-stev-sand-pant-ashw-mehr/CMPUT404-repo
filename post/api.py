@@ -64,7 +64,7 @@ class PostViewSet(viewsets.ModelViewSet):
         post_data["count"] = comment_query.distinct().count()
 
         if post_data["count"] > 0:
-            post_data["CommentsSrc"] = {
+            post_data["commentsSrc"] = {
                 "type": "comments",
                 "page": 1,
                 "size": 5,
@@ -73,7 +73,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 "comments": comment_list
             }
         else:
-            post_data["CommentsSrc"] = dict()
+            post_data["commentsSrc"] = dict()
 
         return Response(post_data, status=status.HTTP_200_OK)
 
@@ -131,7 +131,7 @@ class PostViewSet(viewsets.ModelViewSet):
             post_data["count"] = comment_query.distinct().count()
 
             if post_data["count"] > 0:
-                post_data["CommentsSrc"] = {
+                post_data["commentsSrc"] = {
                     "type": "comments",
                     "page": 1,
                     "size": 5,
@@ -140,7 +140,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     "comments": comment_list
                 }
             else:
-                post_data["CommentsSrc"] = dict()
+                post_data["commentsSrc"] = dict()
 
                 return_list.append(post_data)
 
