@@ -16,10 +16,10 @@ class PostSerializer(serializers.ModelSerializer):
             'title', 
             'source', 
             'origin', 
+            'author',
             'description', 
             'contentType', 
             'content', 
-            'categories', 
             'published',
             'visibility',
             'unlisted'    

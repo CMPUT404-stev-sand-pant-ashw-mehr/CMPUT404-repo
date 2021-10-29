@@ -3,9 +3,10 @@ from django.test.client import Client
 from knox.models import AuthToken
 from django.contrib.auth.models import User
 from author.models import Author
+from post.models import Post
 
 # Create your tests here.
-class FollowerTest(TestCase):
+class PostTest(TestCase):
     def setUp(self) -> None:
         # create test user for login
         self.testUserAuthed = User.objects.create(id=1, username="testUser1", password="1234")
@@ -50,6 +51,22 @@ class FollowerTest(TestCase):
         self.testUser1Obj = Author.objects.create(**self.testUser1)
         self.testUser2Obj = Author.objects.create(**self.testUser2)
         self.testUser3Obj = Author.objects.create(**self.testUser3)
+    
+    def test_create_post_POST(self):
+        test_post = {
+            "type":"post",
+            "title":"A post title about a post about web dev",
+            "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+            "origin":"http://whereitcamefrom.com/posts/zzzzz",
+            "description":"This post discusses stuff -- brief",
+            "categories": str(['test1', 'test2']),
+            "contentType":"text/plain",
+            "content":"Test content",
+            "count": 1023,
+            "visibility":"PUBLIC",
+            "unlisted": 'false'
+        }
 
-        Followers.objects.create(author=self.testUser1Obj, follower=self.testUser2Obj)
-        Followers.objects.create(author=self.testUser1Obj, follower=self.testUser3Obj)
+        r = self.client.post('/author/1/posts', test_post)
+        self.assertTrue(200 <= r.status_code < 300)
+        
