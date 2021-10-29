@@ -89,6 +89,10 @@ class PostViewSet(viewsets.ModelViewSet):
     )
     # GET a post with specified author id and post id
     def get_post(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+            
         try:
             # get post with author.
             post_query = Post.objects.get(id=post_id, author=author_id, visibility="PUBLIC")
@@ -99,7 +103,7 @@ class PostViewSet(viewsets.ModelViewSet):
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        post_data = PostSerializer(data=post_query).data
+        post_data = model_to_dict(post_query)
         author_detail = model_to_dict(author_query)
         author_detail['id'] = author_detail['url']
 
@@ -113,28 +117,121 @@ class PostViewSet(viewsets.ModelViewSet):
 
         post_data['comments'] = post_data['id'] + '/comments'
 
-        comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('published')
-        comment_details = Paginator(comment_query, 5) # get first 5 comments
-        comment_serilaizer = CommentSerializer(comment_details.get_page(1), many=True)
+        comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
+        comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
+        comment_object_list = comment_details.get_page(1).object_list.values()
+        comment_serilaizer = CommentSerializer(data=[c for c in comment_object_list], many=True)
 
-        post_data["count"] = comment_query.distinct().count()
+        if comment_serilaizer.is_valid():
+            for entry in comment_serilaizer.data:
+                entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
 
-        post_data["CommentsSrc"] = {
-            "type": "comments",
-            "page": 1,
-            "size": 5,
-            "post": post_data["id"],
-            "id": post_data["comments"],
-            "comments": comment_serilaizer.data
-        }
+            post_data["count"] = comment_query.distinct().count()
 
-        return Response(post_data, status=status.HTTP_200_OK)
+            if post_data["count"] > 0:
+                post_data["CommentsSrc"] = {
+                    "type": "comments",
+                    "page": 1,
+                    "size": 5,
+                    "post": post_data["id"],
+                    "id": post_data["comments"],
+                    "comments": comment_serilaizer.data
+                }
+            else:
+                post_data["CommentsSrc"] = dict()
 
+            return Response(post_data, status=status.HTTP_200_OK)
+        else:
+            return Response(comment_serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # GET recent post
     def get_recent_post(self, request, author_id=None):
-        pass
+        posts_query = Post.objects.filter(author=author_id, visibility="PUBLIC", unlisted=False)
+        if not posts_query.exists():
+            return Response({"detail": "Author not found or does not have public posts"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Order by recent
+        posts_query = posts_query.order_by('-published')
+
+        page = request.GET.get('page', 'None')
+        size = request.GET.get('size', 'None')
+
+        if(page == "None" or size == "None"):
+            post_data_list = posts_query.values()
+        else:
+            paginator = Paginator(posts_query.values(), size)
+            post_data_list = paginator.get_page(page).object_list
+
+        return_list = list()
+
+        for post_data in post_data_list:
+            # This is the same as the get_post
+            # Should've made it in the serializer but too late to figure that out
+            author_id = post_data['author_id']
+            post_id = post_data['id']
+            author_detail = model_to_dict(Author.objects.get(id=author_id))
+            author_detail['id'] = author_detail['url']
+
+            post_data['id'] = author_detail['id'] + '/posts/' + post_data['id']
+            post_data['author'] = author_detail
+
+            categories_query = Categories.objects.filter(post=post_id).values()
+            categories = [c['category'] for c in categories_query]
+
+            post_data['categories'] = categories
+
+            post_data['comments'] = post_data['id'] + '/comments'
+
+            comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
+            comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
+            comment_object_list = comment_details.get_page(1).object_list.values()
+            comment_serilaizer = CommentSerializer(data=[c for c in comment_object_list], many=True)
+
+            if comment_serilaizer.is_valid():
+                for entry in comment_serilaizer.data:
+                    entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
+
+                post_data["count"] = comment_query.distinct().count()
+
+                if post_data["count"] > 0:
+                    post_data["CommentsSrc"] = {
+                        "type": "comments",
+                        "page": 1,
+                        "size": 5,
+                        "post": post_data["id"],
+                        "id": post_data["comments"],
+                        "comments": comment_serilaizer.data
+                    }
+                else:
+                    post_data["CommentsSrc"] = dict()
+
+                return_list.append(post_data)
+
+            else:
+                return Response(comment_serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({
+            "type": "posts",
+            "page": page,
+            "size": size,
+            "id": request.build_absolute_uri(),
+            "items": return_list,
+        }, status=status.HTTP_200_OK)
+
 
     # POST and update a post with given author_id and post_id
     def update_post(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+            
         try:
             post = Post.objects.get(author=author_id, id=post_id)
         except:
@@ -222,12 +319,16 @@ class PostViewSet(viewsets.ModelViewSet):
         
     # POST to create a post with generated post_id, PUT to put a post with specified post id
     def create_post(self, request, author_id=None, post_id=None):
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         if request.method == "POST":
-            post_id = str(uuid.uuid4())
-            try:
-                Author.objects.get(id=author_id)
-            except:
-                return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
+            post_id = str(uuid.uuid4().hex)
 
             try:
                 request_keys = request.data
@@ -248,7 +349,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
                 data['visibility'] = visi
 
-                unlisted = request_keys['unlisted'].strip().lower()
+                unlisted = str(request_keys['unlisted']).strip().lower()
                 if unlisted not in ["false", "true"]:
                     return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
                 elif unlisted == 'false':
@@ -280,9 +381,14 @@ class PostViewSet(viewsets.ModelViewSet):
         elif request.method == "PUT":
             if not post_id:
                 return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-
+            
+            # remove trailing slash
+            if post_id[-1] == '/':
+                post_id = post_id[:-1]
+            
+            #TODO
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+            
         else:
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -305,9 +411,21 @@ class PostViewSet(viewsets.ModelViewSet):
         tags=['Delete an Author\'s Post'],
     )
     def delete_post(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         try:
             post = Post.objects.get(author=author_id, id=post_id)
             post.delete()
             return Response({"detail": "Post deleted"}, status=status.HTTP_200_OK)
-        except:
-            return Response({"detail": "Post not found"}, status=status.HTTP_404_NOT_FOUND)    
+        except Exception as e:
+            return Response({"detail": e.args}, status=status.HTTP_404_NOT_FOUND)    

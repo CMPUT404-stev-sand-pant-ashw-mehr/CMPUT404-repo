@@ -129,7 +129,14 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # PUT a follower to the specified author
     def put_follower(self, request, author_id=None, foreign_author_id=None):
-        get_object_or_404(User, pk=author_id) # Check if user exists
+        # check user
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # Remove trailing slash
         if foreign_author_id[-1] == '/':
@@ -211,7 +218,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
     )
     # DELETE a follower of a given author
     def delete_follower(self, request, author_id=None, foreign_author_id=None):
-        get_object_or_404(User, pk=author_id) # Check if user exists
+        try:
+            author = Author.objects.get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if author.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # remove trailing slash
         if foreign_author_id[-1] == '/':
