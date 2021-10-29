@@ -79,6 +79,11 @@ class CommentViewSet(viewsets.ModelViewSet):
                 "contentType": request.data["contentType"]
             }
             comment = Comment.objects.create(**keys)
-            return Response(comment.save(), status=status.HTTP_201_CREATED)
+            comment.save()
+            return Response({
+                "id": comment.id,
+                "published": comment.published,
+                **keys
+            }, status=status.HTTP_201_CREATED)
         except KeyError as e:
             return Response({"detail": "Missing fields", "message": e.args}, status=status.HTTP_400_BAD_REQUEST)
