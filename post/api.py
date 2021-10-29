@@ -48,6 +48,9 @@ class PostViewSet(viewsets.ModelViewSet):
         comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
         comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
 
+        for entry in comment_serilaizer.data:
+            entry['id'] = author_detail['url'] + '/posts/' + entry['id']
+
         post_data["count"] = comment_query.distinct().count()
 
         post_data["CommentsSrc"] = {
@@ -103,6 +106,9 @@ class PostViewSet(viewsets.ModelViewSet):
             comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
             comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
 
+            for entry in comment_serilaizer.data:
+                entry['id'] = author_detail['url'] + '/posts/' + entry['id']
+                
             post_data["count"] = comment_query.distinct().count()
 
             post_data["CommentsSrc"] = {
