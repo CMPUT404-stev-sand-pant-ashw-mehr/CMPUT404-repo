@@ -44,9 +44,9 @@ class PostViewSet(viewsets.ModelViewSet):
 
         post_data['comments'] = post_data['id'] + '/comments'
 
-        comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('published')
-        comment_details = Paginator(comment_query, 5) # get first 5 comments
-        comment_serilaizer = CommentSerializer(comment_details.get_page(1), many=True)
+        comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
+        comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
+        comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
 
         post_data["count"] = comment_query.distinct().count()
 
@@ -72,6 +72,52 @@ class PostViewSet(viewsets.ModelViewSet):
 
         page = request.GET.get('page', 'None')
         size = request.GET.get('size', 'None')
+
+        if(page == "None" or size == "None"):
+            post_data_list = posts_query.values()
+        else:
+            paginator = Paginator(posts_query.values(), size)
+            post_data_list = paginator.get_page(page).object_list
+
+        return_list = list()
+
+        for post_data in post_data_list:
+            # This is the same as the get_post
+            # Should've made it in the serializer but too late to figure that out
+            author_id = post_data['author_id']
+            post_id = post_data['id']
+            author_detail = model_to_dict(Author.objects.get(id=author_id))
+            author_detail['id'] = author_detail['url']
+
+            post_data['id'] = author_detail['id'] + '/posts/' + post_data['id']
+            post_data['author'] = author_detail
+
+            categories_query = Categories.objects.filter(post=post_id).values()
+            categories = [c['category'] for c in categories_query]
+
+            post_data['categories'] = categories
+
+            post_data['comments'] = post_data['id'] + '/comments'
+
+            comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
+            comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
+            comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
+
+            post_data["count"] = comment_query.distinct().count()
+
+            post_data["CommentsSrc"] = {
+                "type": "comments",
+                "page": 1,
+                "size": 5,
+                "post": post_data["id"],
+                "id": post_data["comments"],
+                "comments": comment_serilaizer.data
+            }
+
+            return_list.append(post_data)
+
+        return Response(return_list, status=status.HTTP_200_OK)
+
 
     # POST and update a post with given author_id and post_id
     def update_post(self, request, author_id=None, post_id=None):
