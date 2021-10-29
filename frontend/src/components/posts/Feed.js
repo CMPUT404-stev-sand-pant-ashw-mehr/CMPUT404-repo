@@ -19,7 +19,7 @@ export class Feed extends Component {
         <h1>My Feed</h1>
 
         {posts.posts.map((post) => (
-          <div className="card mb-4" key={post.id}>
+          <div className="card mb-4" key={post.id.split("/").pop()}>
             <div className="card-body">
               <div className="small text-muted">
                 <span className="float-end">

@@ -62,9 +62,9 @@ export const getPost = (postId) => (dispatch, getState) => {
 
 export const deletePost = (id) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;
-
+  const urlId = id.split("/").pop();
   axios
-    .delete(`/author/${authorId}/posts/${id}`, tokenConfig(getState))
+    .delete(`/author/${authorId}/posts/${urlId}`, tokenConfig(getState))
     .then((res) => {
       dispatch({
         type: CREATE_ALERT,
