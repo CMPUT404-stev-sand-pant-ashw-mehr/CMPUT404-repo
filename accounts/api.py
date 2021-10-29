@@ -8,9 +8,6 @@ from django.contrib.auth.models import User
 
 from knox.models import AuthToken
 
-import json
-
-
 class RegisterAPI(generics.GenericAPIView):
     """
     User & Author Registration
@@ -24,9 +21,6 @@ class RegisterAPI(generics.GenericAPIView):
         # create user
         user = user_serializer.save()
 
-
-        token = AuthToken.objects.create(user=user)
-
         author_schema = {
             "host" : "",
             "displayName": request.data["displayName"],
@@ -36,18 +30,17 @@ class RegisterAPI(generics.GenericAPIView):
 
         author_serialized_data = AuthorSerializer(data = author_schema)
 
-        if not (author_serialized_data .is_valid()):
+        if not (author_serialized_data.is_valid()):
             user.delete()
-            raise validators.ValidationError(author_serialized_data .errors)
+            raise validators.ValidationError(author_serialized_data.errors)
 
         author =  author_serialized_data.save(user=user)
 
         return Response({
             'user': UserSerializer(user).data,
             'author': AuthorSerializer(author).data,
-            'token': 'Token ' + token[1]
+            'token': AuthToken.objects.create(user=user)[1]
         }, status=status.HTTP_201_CREATED)
-
 
 class LoginAPI(generics.GenericAPIView):
     '''
@@ -61,19 +54,12 @@ class LoginAPI(generics.GenericAPIView):
         username = serializer.validated_data['username']
         user = User.objects.select_related('author').get(username=username)
 
-        token = AuthToken.objects.create(user=user)
-
         return Response({
             'user': UserSerializer(user).data,
             'author': AuthorSerializer(user.author).data,
-            'token': 'Token ' + token[1]
+            'token': AuthToken.objects.create(user)[1]
         }, status=status.HTTP_200_OK)
 
-
-
-
-
-# IDK WHAT THIS IS FOR
 class ProfileAPI(generics.RetrieveAPIView):
     permission_classes = [
         permissions.IsAuthenticated,

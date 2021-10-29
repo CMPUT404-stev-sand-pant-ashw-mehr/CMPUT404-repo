@@ -2,7 +2,9 @@ from rest_framework.generics import get_object_or_404
 from author.models import Author
 from .serializer import AuthorSerializer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions, pagination
+from rest_framework.decorators import action
+from rest_framework.response import Response 
 from django.http import HttpRequest
 from rest_framework.response import Response
 # from rest_framework.decorators import action
@@ -13,8 +15,6 @@ from knox.auth import TokenAuthentication
 from urllib.parse import urlparse
 
 # Viewset for Author
-
-
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.exclude(user__isnull=True)
     authentication_classes = (TokenAuthentication,)
