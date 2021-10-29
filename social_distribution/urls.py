@@ -25,7 +25,7 @@ schema_view = get_schema_view(
       title="Social Distribution API",
       default_version='v1',
       description="This is sample description",
-      license=openapi.License(name="BSD License"), # confim this
+      license=openapi.License(name="BSD License"),
    ),
    public=True,
    permission_classes=(permissions.AllowAny,),

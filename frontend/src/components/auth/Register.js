@@ -8,6 +8,8 @@ import { createError } from "../../actions/alerts";
 export class Register extends Component {
   state = {
     username: "",
+    displayName: "",
+    github: "",
     email: "",
     password: "",
     password_confirm: "",
@@ -15,12 +17,15 @@ export class Register extends Component {
 
   onSubmit = (e) => {
     e.preventDefault();
-    const { username, email, password, password_confirm } = this.state;
+    const { username, displayName, github, email, password, password_confirm } =
+      this.state;
     if (password !== password_confirm) {
       this.props.createError("Passwords do not match!");
     } else {
       const user = {
         username,
+        displayName,
+        github,
         email,
         password,
       };
@@ -37,7 +42,8 @@ export class Register extends Component {
     if (this.props.auth.isAuthenticated) {
       return <Redirect to="/" />;
     }
-    const { username, email, password, password_confirm } = this.state;
+    const { username, displayName, github, email, password, password_confirm } =
+      this.state;
     return (
       <div>
         <form onSubmit={this.onSubmit}>
@@ -49,6 +55,26 @@ export class Register extends Component {
               name="username"
               onChange={this.onChange}
               value={username}
+            />
+          </div>
+          <div className="form-group">
+            <label>Display Name</label>
+            <input
+              className="form-control"
+              type="text"
+              name="displayName"
+              onChange={this.onChange}
+              value={displayName}
+            />
+          </div>
+          <div className="form-group">
+            <label>GitHub</label>
+            <input
+              className="form-control"
+              type="text"
+              name="github"
+              onChange={this.onChange}
+              value={github}
             />
           </div>
           <div className="form-group">

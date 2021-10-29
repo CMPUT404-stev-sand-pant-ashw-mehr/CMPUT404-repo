@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework',
     'drf_yasg', 
-    'knox'
+    'knox',
+    'rest_framework.authtoken'
 ]
 
 REST_FRAMEWORK = {

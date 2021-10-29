@@ -1,8 +1,10 @@
 from rest_framework.generics import get_object_or_404
 from author.models import Author
-from .serializer import AuthorSerializer 
+from .serializer import AuthorSerializer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions, pagination
+from rest_framework.decorators import action
+from rest_framework.response import Response 
 from django.http import HttpRequest
 from rest_framework.response import Response
 # from rest_framework.decorators import action
@@ -48,7 +50,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
             }
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-
     # GET using author id
     def get_author(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
@@ -61,8 +62,8 @@ class AuthorViewSet(viewsets.ModelViewSet):
         result['id'] = result['url']
         return Response(result, status=status.HTTP_200_OK)
 
-
     # POST and update author's profile
+
     def update(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
 
@@ -71,41 +72,41 @@ class AuthorViewSet(viewsets.ModelViewSet):
         except:
             return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        try:            
+        try:
             ignored_keys = list()
             request_data = request.data.keys()
-            
+
             if len(request_data) == 0:
                 return Response({"detail": "No POST data is sent"}, status=status.HTTP_400_BAD_REQUEST)
 
             for key in request.data.keys():
-                if(key=="displayName"):
-                    author.displayName=request.data[key]
+                if(key == "displayName"):
+                    author.displayName = request.data[key]
 
-                elif(key=="github"):
-                    author.github=request.data[key]
+                elif(key == "github"):
+                    author.github = request.data[key]
 
-                elif(key=="profileImage"):
-                    author.profileImage=request.data[key]
+                elif(key == "profileImage"):
+                    author.profileImage = request.data[key]
                 else:
                     ignored_keys.append(key)
 
                 author.save()
             if len(ignored_keys) == 0:
-                response={
+                response = {
                     "message": "Record updated"
                 }
             else:
-                response={
+                response = {
                     "detail": "The following keys supplied are ignored: " + str(ignored_keys)
                 }
-            return Response(response,status.HTTP_200_OK)
+            return Response(response, status.HTTP_200_OK)
         except Exception as e:
-            response={
+            response = {
                 "message": "Record not updated",
                 "detail": e.args
             }
-            return Response(response,status.HTTP_400_BAD_REQUEST)
+            return Response(response, status.HTTP_400_BAD_REQUEST)
 
     # validate if the url is the correct format
     def validate_url(self, url: str) -> bool:
