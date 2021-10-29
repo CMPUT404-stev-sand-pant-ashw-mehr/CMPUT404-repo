@@ -116,7 +116,14 @@ class PostViewSet(viewsets.ModelViewSet):
 
             return_list.append(post_data)
 
-        return Response(return_list, status=status.HTTP_200_OK)
+        
+        return Response({
+            "type": "posts",
+            "page": page,
+            "size": size,
+            "id": request.build_absolute_url(),
+            "items": return_list,
+        }, status=status.HTTP_200_OK)
 
 
     # POST and update a post with given author_id and post_id
