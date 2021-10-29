@@ -12,6 +12,8 @@ from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from knox.auth import TokenAuthentication
 from urllib.parse import urlparse
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -20,6 +22,63 @@ class AuthorViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     serializer_class = AuthorSerializer
+
+    @swagger_auto_schema(
+        operation_description="GET /service/authors",
+        manual_parameters=[
+            openapi.Parameter(
+                'page', 
+                openapi.IN_QUERY, 
+                description="optional", 
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'size', 
+                openapi.IN_QUERY, 
+                description="optional", 
+                type=openapi.TYPE_INTEGER
+            ),
+        ],
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":
+                        {
+                            "type": "authors",      
+                            "items":[
+                                        {
+                                            "type":"author",
+                                            "id":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                            "url":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                            "host":"http://127.0.0.1:5454/",
+                                            "displayName":"Greg Johnson",
+                                            "github": "http://github.com/gjohnson",
+                                            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                        },
+                                        {
+                                            "type":"author",
+                                            "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                            "host":"http://127.0.0.1:5454/",
+                                            "displayName":"Lara Croft",
+                                            "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                            "github": "http://github.com/laracroft",
+                                            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                        }
+                                ]
+                        }
+                }
+                
+            ),
+            "400": openapi.Response(
+                description="Bad Request",
+                examples={
+                    "application/json":{"message": "Error details..."}
+                }
+            )
+        },
+        tags=['Get all Authors'],
+    )
 
     # GET all authors
     def list(self, request: HttpRequest):
@@ -49,6 +108,33 @@ class AuthorViewSet(viewsets.ModelViewSet):
             }
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "type":"author",
+                        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host":"http://127.0.0.1:5454/",
+                        "displayName":"Lara Croft",
+                        "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "github": "http://github.com/laracroft",
+                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    }
+                }
+            ),
+            "404": openapi.Response(
+                description="Author not found",
+                examples={
+                    "application/json": {"detail": "Author not found"}
+                }
+            ),
+        },
+        tags=['Get Author by Author ID'],
+    )
+
     # GET using author id
     def get_author(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
@@ -63,6 +149,39 @@ class AuthorViewSet(viewsets.ModelViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     # POST and update author's profile
+
+    @swagger_auto_schema(
+        operation_description="POST /service/author/< AUTHOR_ID >/",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "message": "Record updated"
+                    },
+                     "application/json":{
+                        "detail": "The following keys supplied are ignored: ..."
+                     }
+                }
+            ),
+            "404": openapi.Response(
+                description="Author not found",
+                examples={
+                    "application/json": {"detail": "Author not found"},
+                }
+            ),
+            "400": openapi.Response(
+                description="Author not found",
+                examples={
+                    "application/json": {"detail": "No POST data is sent"},
+                    "application/json": {
+                        "message": "Record not updated",
+                        "detail": "Error details..."}
+                }
+            ), 
+        },
+        tags=['Update Author by Author ID'],
+    )
 
     def update(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
