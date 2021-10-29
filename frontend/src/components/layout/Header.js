@@ -61,7 +61,7 @@ export class Header extends Component {
 
     return (
       <div>
-        <div className="col-lg-8 mx-auto pt-4">
+        <div className="col-lg-6 mx-auto pt-4">
           <header>
             <div className="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
               <Link
