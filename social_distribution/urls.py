@@ -25,7 +25,7 @@ schema_view = get_schema_view(
       title="Social Distribution API",
       default_version='v1',
       description="This is sample description",
-      license=openapi.License(name="BSD License"), # confim this
+      license=openapi.License(name="BSD License"),
    ),
    public=True,
    permission_classes=(permissions.AllowAny,),
@@ -34,7 +34,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('followers.urls')),
-    path('', include('backend.urls')),
     path('swagger-ui/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('', include('frontend.urls')),

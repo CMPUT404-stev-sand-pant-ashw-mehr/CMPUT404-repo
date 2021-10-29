@@ -26,6 +26,5 @@ class Author(models.Model):
     # Image from a public domain
     profileImage = models.CharField(max_length=255, blank=True)
 
-    
     def get_full_path(self):
         return str(self.host) + f"/author/{self.id}"
