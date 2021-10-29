@@ -20,6 +20,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
     # GET a post with specified author id and post id
     def get_post(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+            
         try:
             # get post with author.
             post_query = Post.objects.get(id=post_id, author=author_id, visibility="PUBLIC")
@@ -30,7 +34,7 @@ class PostViewSet(viewsets.ModelViewSet):
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        post_data = PostSerializer(data=post_query).data
+        post_data = model_to_dict(post_query)
         author_detail = model_to_dict(author_query)
         author_detail['id'] = author_detail['url']
 
@@ -46,7 +50,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
         comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
         comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
-        comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
+        comment_object_list = comment_details.get_page(1).object_list.values()
+        comment_serilaizer = CommentSerializer(data=[c for c in comment_object_list], many=True)
 
         if comment_serilaizer.is_valid():
             for entry in comment_serilaizer.data:
@@ -54,14 +59,17 @@ class PostViewSet(viewsets.ModelViewSet):
 
             post_data["count"] = comment_query.distinct().count()
 
-            post_data["CommentsSrc"] = {
-                "type": "comments",
-                "page": 1,
-                "size": 5,
-                "post": post_data["id"],
-                "id": post_data["comments"],
-                "comments": comment_serilaizer.data
-            }
+            if post_data["count"] > 0:
+                post_data["CommentsSrc"] = {
+                    "type": "comments",
+                    "page": 1,
+                    "size": 5,
+                    "post": post_data["id"],
+                    "id": post_data["comments"],
+                    "comments": comment_serilaizer.data
+                }
+            else:
+                post_data["CommentsSrc"] = dict()
 
             return Response(post_data, status=status.HTTP_200_OK)
         else:
@@ -107,7 +115,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
             comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
             comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
-            comment_serilaizer = CommentSerializer(comment_details.get_page(1).object_list, many=True)
+            comment_object_list = comment_details.get_page(1).object_list.values()
+            comment_serilaizer = CommentSerializer(data=[c for c in comment_object_list], many=True)
 
             if comment_serilaizer.is_valid():
                 for entry in comment_serilaizer.data:
@@ -115,19 +124,22 @@ class PostViewSet(viewsets.ModelViewSet):
 
                 post_data["count"] = comment_query.distinct().count()
 
-                post_data["CommentsSrc"] = {
-                    "type": "comments",
-                    "page": 1,
-                    "size": 5,
-                    "post": post_data["id"],
-                    "id": post_data["comments"],
-                    "comments": comment_serilaizer.data
-                }
+                if post_data["count"] > 0:
+                    post_data["CommentsSrc"] = {
+                        "type": "comments",
+                        "page": 1,
+                        "size": 5,
+                        "post": post_data["id"],
+                        "id": post_data["comments"],
+                        "comments": comment_serilaizer.data
+                    }
+                else:
+                    post_data["CommentsSrc"] = dict()
 
                 return_list.append(post_data)
-            else:
-                return Response({comment_serilaizer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+            else:
+                return Response(comment_serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({
             "type": "posts",
@@ -140,6 +152,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
     # POST and update a post with given author_id and post_id
     def update_post(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+
         try:
             post = Post.objects.get(author=author_id, id=post_id)
         except:
@@ -249,14 +265,25 @@ class PostViewSet(viewsets.ModelViewSet):
         elif request.method == "PUT":
             if not post_id:
                 return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            
+            # remove trailing slash
+            if post_id[-1] == '/':
+                post_id = post_id[:-1]
+            
             #TODO
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+            
         else:
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def delete_post(self, request, author_id=None, post_id=None):
+        # remove trailing slash
+        if post_id[-1] == '/':
+            post_id = post_id[:-1]
+
         try:
             post = Post.objects.get(author=author_id, id=post_id)
             post.delete()
             return Response({"detail": "Post deleted"}, status=status.HTTP_200_OK)
-        except:
-            return Response({"detail": "Post not found"}, status=status.HTTP_404_NOT_FOUND)    
+        except Exception as e:
+            return Response({"detail": e.args}, status=status.HTTP_404_NOT_FOUND)    
