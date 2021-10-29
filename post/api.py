@@ -143,7 +143,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
                 data['visibility'] = visi
 
-                unlisted = request_keys['unlisted'].strip().lower()
+                unlisted = str(request_keys['unlisted']).strip().lower()
                 if unlisted not in ["false", "true"]:
                     return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
                 elif unlisted == 'false':
