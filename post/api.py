@@ -144,6 +144,34 @@ class PostViewSet(viewsets.ModelViewSet):
         else:
             return Response(comment_serilaizer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/posts/",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {
+                        "type": "posts",
+                        "page": "5",
+                        "size": "2",
+                        "id": "http://127.0.0.1:8000/author/46527adf186c48a993bab65ed54c26e2/posts",
+                        "items": "[Post Object 1, Post Object 2]",
+                    }
+                }
+            ),
+            "404": openapi.Response(
+                description="Post not found",
+                examples={
+                    "application/json":{"detail": "Author not found or does not have public posts"}
+                }
+            ),
+            "400": openapi.Response(
+                description="Bad request",
+            ),
+        },
+        tags=['Get an Author\'s Recent Posts'],
+    )
     # GET recent post
     def get_recent_post(self, request, author_id=None):
         posts_query = Post.objects.filter(author=author_id, visibility="PUBLIC", unlisted=False)
@@ -219,6 +247,43 @@ class PostViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_200_OK)
 
 
+    @swagger_auto_schema(
+        operation_description="PUT service/author/< AUTHOR_ID >/posts/< POST_ID >",
+        request_body=openapi.Schema(    
+            type=openapi.TYPE_OBJECT,
+            properties={
+                        "title": openapi.Schema(type=openapi.TYPE_STRING),
+                        "description": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+        ),
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"message": "Record updated"},
+                   "application/json":  {
+                        "message": "Record not updated",
+                        "detail": "Error details"
+                    }
+                }
+            ),
+            "404": openapi.Response(
+                description="Author not found",
+                examples={
+                    "application/json":{"detail": "author not found"},
+                    "application/json":{"detail": "post not found"}
+                }
+            ),
+            "400": openapi.Response(
+                description="Bad request",
+                examples={
+                    "application/json":{"detail": "No POST data is sent"},
+                    "application/json":{"detail": "Invalid visibility key"}
+                }
+            ),
+        },
+        tags=['Update an Author\'s Post'],
+    )
     # POST and update a post with given author_id and post_id
     def update_post(self, request, author_id=None, post_id=None):
         # remove trailing slash
@@ -284,14 +349,28 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="POST /service/author/< AUTHOR_ID >/posts/< POST_ID >",
+        request_body=openapi.Schema(    
+            type=openapi.TYPE_OBJECT,
+            required=["type", "id", "title", "source", "origin", "author", "description", "contentType", "content", "published", "visibility", "unlisted"],
+            properties=
+                {
+                    'type': openapi.Schema(type=openapi.TYPE_STRING),
+                    'id': openapi.Schema(type=openapi.TYPE_STRING),
+                    'title': openapi.Schema(type=openapi.TYPE_STRING), 
+                    'source': openapi.Schema(type=openapi.TYPE_STRING), 
+                    'origin': openapi.Schema(type=openapi.TYPE_STRING), 
+                    'author': openapi.Schema(type=openapi.TYPE_STRING),
+                    'description': openapi.Schema(type=openapi.TYPE_STRING), 
+                    'contentType': openapi.Schema(type=openapi.TYPE_STRING),
+                    'content': openapi.Schema(type=openapi.TYPE_STRING),
+                    'published': openapi.Schema(type=openapi.TYPE_NUMBER),
+                    'visibility': openapi.Schema(type=openapi.TYPE_STRING),
+                    'unlisted': openapi.Schema(type=openapi.TYPE_BOOLEAN),  
+                },
+        ),
         responses={
             "201": openapi.Response(
-                description="CREATED",
-                examples={
-                   "application/json": {
-                       
-                   }
-                }
+                description="Created",
             ),
             "405": openapi.Response(
                 description="Method not Allowed"
@@ -300,7 +379,6 @@ class PostViewSet(viewsets.ModelViewSet):
                 description="Bad request",
                 examples={
                     "application/json":{"detail": "Author not found"},
-
                 }
             ),
             "400": openapi.Response(
