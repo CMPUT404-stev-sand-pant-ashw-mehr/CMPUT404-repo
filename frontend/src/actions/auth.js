@@ -8,6 +8,7 @@ import {
   LOGOUT_SUCCESS,
   REGISTER_SUCCESS,
   REGISTER_FAIL,
+  GET_AUTHORS,
 } from "./types";
 
 export const tokenConfig = (getState) => {
@@ -31,8 +32,10 @@ export const loadUser = () => (dispatch, getState) => {
     type: USER_LOADING,
   });
 
+  const authorId = getState().auth.user.author;
+
   axios
-    .get("/auth/profile", tokenConfig(getState))
+    .get(`/author/${authorId}`, tokenConfig(getState))
     .then((res) => {
       dispatch({
         type: USER_LOADED,
@@ -137,5 +140,25 @@ export const logout = () => (dispatch, getState) => {
         },
       });
       localStorage.removeItem("token");
+    });
+};
+
+export const getAuthors = () => (dispatch, getState) => {
+  axios
+    .get(`/authors/`, tokenConfig(getState))
+    .then((res) => {
+      dispatch({
+        type: GET_AUTHORS,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      dispatch({
+        type: CREATE_ALERT,
+        payload: {
+          msg: { error: "Failed to get authors!" },
+          status: err.response.status,
+        },
+      });
     });
 };
