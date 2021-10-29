@@ -1,5 +1,4 @@
 from django.forms.models import model_to_dict
-from rest_framework.generics import get_object_or_404
 from author.models import Author
 from comment.models import Comment
 from comment.serializers import CommentSerializer
@@ -40,6 +39,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         categories_query = Categories.objects.filter(post=post_id).values()
         categories = [c['category'] for c in categories_query]
+
         post_data['categories'] = categories
 
         post_data['comments'] = post_data['id'] + '/comments'
@@ -118,9 +118,9 @@ class PostViewSet(viewsets.ModelViewSet):
     # POST to create a post with generated post_id, PUT to put a post with specified post id
     def create_post(self, request, author_id=None, post_id=None):
         if request.method == "POST":
-            post_id = uuid.uuid4
+            post_id = str(uuid.uuid4())
             try:
-                author = Author.objects.get(id=author_id)
+                Author.objects.get(id=author_id)
             except:
                 return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -136,35 +136,41 @@ class PostViewSet(viewsets.ModelViewSet):
                 data['description'] = request_keys['description']
                 data['contentType'] = request_keys['contentType']
                 data['content'] = request_keys['content']
-                data['author'] = author
-
-                categories = request_keys['categories']
-
-                try:
-                    categories = ast.literal_eval(str(categories))
-                except:
-                    return Response({"detail": "incorrect format for Categories"}, status=status.HTTP_400_BAD_REQUEST)
+                data['author'] = author_id
 
                 visi = request_keys['visibility'].strip()
                 if (visi not in ("PUBLIC", "FRIENDS")):
                     return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
                 data['visibility'] = visi
 
-                unlisted = request_keys['unlisted']
-                if type(unlisted) != bool:
+                unlisted = request_keys['unlisted'].strip().lower()
+                if unlisted not in ["false", "true"]:
                     return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
-
-                data['unlisted'] = bool(unlisted)
+                elif unlisted == 'false':
+                    data['unlisted'] = False
+                else:
+                    data['unlisted'] = True
                 
                 serializer = PostSerializer(data=data)
                 if serializer.is_valid():
                     serializer.save()
+
+                    categories = request_keys['categories']
+
+                    try:
+                        categories = ast.literal_eval(str(categories))
+                    except:
+                        return Response({"detail": "incorrect format for Categories"}, status=status.HTTP_400_BAD_REQUEST)
+
+                    for label in categories:
+                        Categories.objects.create(post_id=post_id, category=label)
+
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             except KeyError as e:
-                return Response({"detail": "key(s) missing:", "message": e.args()}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "key(s) missing:", "message": e.args}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == "PUT":
             if not post_id:
