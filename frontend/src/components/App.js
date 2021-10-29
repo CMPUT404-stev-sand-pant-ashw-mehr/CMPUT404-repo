@@ -12,7 +12,9 @@ import Header from "./layout/Header";
 import Feed from "./posts/Feed";
 import Create from "./posts/Create";
 import Login from "./auth/Login";
+
 import Landing from "./pages/Landing";
+import Profile from "./pages/Profile";
 
 import Register from "./auth/Register";
 import AuthRoute from "./auth/AuthRoute";
@@ -47,6 +49,7 @@ class App extends Component {
                   <AuthRoute exact path="/inbox" component={Create} />
                   <AuthRoute exact path="/posts" component={Feed} />
                   <AuthRoute exact path="/posts/create" component={Create} />
+                  <AuthRoute exact path="/profile" component={Profile} />
                   <Route exact path="/" component={Landing} />
                   <Route exact path="/login" component={Login} />
                   <Route exact path="/register" component={Register} />

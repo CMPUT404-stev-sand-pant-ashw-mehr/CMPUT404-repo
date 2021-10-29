@@ -16,20 +16,21 @@ export class Feed extends Component {
     return (
       <Fragment>
         <h1>My Feed</h1>
-        <br></br>
+
         {posts.posts.map((post) => (
-          <div className="card" key={post.id}>
+          <div className="card mb-4">
             <div className="card-body">
-              <h5 className="card-title">{post.title}</h5>
+              <div className="small text-muted">4 mins ago</div>
+              <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
-              <a href={post.source} className="btn btn-primary">
-                Source
+              <a className="btn btn-primary" href="#">
+                View full post →
               </a>
               <button
-                className="btn btn-danger"
+                className="btn btn-danger float-end"
                 onClick={deletePost.bind(this, post.id)}
               >
-                Delete Post
+                Delete
               </button>
             </div>
           </div>
