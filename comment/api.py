@@ -63,7 +63,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
-            
+
         try:
             Author.objects.exclude(user__isnull=True).get(id=author_id)
             Post.objects.get(id=post_id, author=author_id)
@@ -79,5 +79,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                 "contentType": request.data["contentType"]
             }
             comment = Comment.objects.create(**keys)
+            return Response(comment.save(), status=status.HTTP_201_CREATED)
         except KeyError as e:
             return Response({"detail": "Missing fields", "message": e.args}, status=status.HTTP_400_BAD_REQUEST)
