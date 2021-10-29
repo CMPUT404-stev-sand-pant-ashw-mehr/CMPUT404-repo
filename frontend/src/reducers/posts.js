@@ -19,7 +19,7 @@ export default function (state = initialState, action) {
     case GET_POSTS:
       return {
         ...state,
-        posts: action.payload.results,
+        posts: action.payload.items,
         count: action.payload.count,
         next: action.payload.next,
         previous: action.payload.previous,

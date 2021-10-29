@@ -26,16 +26,13 @@ export const tokenConfig = (getState) => {
 
   return config;
 };
-
 export const loadUser = () => (dispatch, getState) => {
   dispatch({
     type: USER_LOADING,
   });
 
-  const authorId = getState().auth.user.author;
-
   axios
-    .get(`/author/${authorId}`, tokenConfig(getState))
+    .get("/auth/profile", tokenConfig(getState))
     .then((res) => {
       dispatch({
         type: USER_LOADED,

@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
+import Moment from "react-moment";
 
 import Create from "./Create";
 
@@ -20,7 +21,9 @@ export class Feed extends Component {
         {posts.posts.map((post) => (
           <div className="card mb-4">
             <div className="card-body">
-              <div className="small text-muted">4 mins ago</div>
+              <div className="small text-muted">
+                <Moment fromNow>{post.published}</Moment>
+              </div>
               <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
               <a className="btn btn-primary" href="#">
@@ -42,7 +45,8 @@ export class Feed extends Component {
                 className="page-link"
                 href="#"
                 aria-label="Previous"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   getPosts(posts.previous);
                 }}
               >
@@ -59,7 +63,8 @@ export class Feed extends Component {
                 className="page-link"
                 href="#"
                 aria-label="Next"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   getPosts(posts.next);
                 }}
               >

@@ -32,7 +32,7 @@ export class Header extends Component {
           {user ? user.username : ""}
         </a>
         <ul
-          class="dropdown-menu dropdown-menu-dark"
+          className="dropdown-menu dropdown-menu-dark"
           aria-labelledby="navbarDarkDropdownMenuLink"
         >
           <li>

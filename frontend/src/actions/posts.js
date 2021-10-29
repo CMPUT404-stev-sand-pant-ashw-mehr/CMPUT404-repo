@@ -13,17 +13,9 @@ import {
 import { tokenConfig } from "./auth";
 
 export const getPosts =
-  (pageUrl = "") =>
+  (page = 1) =>
   (dispatch, getState) => {
-    let page = 1;
-    if (pageUrl) {
-      const url = new URL(pageUrl);
-      const urlparams = new URLSearchParams(url.search);
-      page = urlparams.has("page") ? urlparams.get("page") : 1;
-    }
-
     const authorId = getState().auth.user.author;
-
     axios
       .get(`/author/${authorId}/posts?page=${page}`, tokenConfig(getState))
       .then((res) => {
@@ -35,8 +27,8 @@ export const getPosts =
       })
       .catch((err) => {
         const alert = {
-          msg: err.response.data,
-          status: err.response.status,
+          msg: err.response,
+          status: err.response,
         };
         dispatch({
           type: GET_ALERTS,
