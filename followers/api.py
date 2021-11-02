@@ -74,7 +74,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # GET list of followers
     def list(self, request, author_id=None):
-        get_object_or_404(User, pk=author_id) # Check if user exists
+        get_object_or_404(Author, pk=author_id) # Check if user exists
 
         follower_rows = Followers.objects.filter(author=author_id).values()
         # check if follower_rows is empty

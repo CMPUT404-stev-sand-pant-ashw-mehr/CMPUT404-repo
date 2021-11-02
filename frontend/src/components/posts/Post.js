@@ -1,35 +1,63 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getPost } from "../../actions/posts";
+import { getPost, createPostComment } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock } from "react-icons/fa";
 
 export class Post extends Component {
+  state = {
+    commentContent: "",
+  };
+
+  resetForm() {
+    this.setState({
+      commentContent: "",
+    });
+  }
+
+  onChange = (e) =>
+    this.setState({
+      [e.target.name]: e.target.value,
+    });
+
+  onSubmit = (e) => {
+    e.preventDefault();
+    const { commentContent } = this.state;
+    const comment = {
+      type: "comment",
+      contentType: "text/markdown",
+      comment: commentContent,
+    };
+    this.props.createPostComment(this.props.match.params.id, comment);
+    this.resetForm();
+    this.forceUpdate();
+  };
+
   componentDidMount() {
     this.props.getPost(this.props.match.params.id);
   }
 
   render() {
-    const { post } = this.props;
+    const { post, commentContent } = this.props;
 
     return (
       post && (
         <Fragment>
-          <div class="card">
-            <div class="card-header">
+          <div className="card">
+            <div className="card-header">
               @{post.author.displayName}
               <span className="float-end">
                 <FaRegClock />
                 &nbsp;<Moment fromNow>{post.published}</Moment>
               </span>
             </div>
-            <div class="card-body">
-              <h5 class="card-title">{post.title}</h5>
-              <p class="card-text">{post.description}</p>
+            <div className="card-body">
+              <h5 className="card-title">{post.title}</h5>
+              <p className="card-text">{post.description}</p>
               <p>{post.content}</p>
-              <a href="#" class="btn btn-primary">
+              <a href="#" className="btn btn-primary">
                 Go somewhere
               </a>
             </div>
@@ -38,11 +66,31 @@ export class Post extends Component {
             </div>
           </div>
           <br />
+          <div className="card">
+            <div className="card-body">
+              <form onSubmit={this.onSubmit}>
+                <h5 className="card-title">Add a comment</h5>
+                <p className="card-text">
+                  <input
+                    className="form-control"
+                    type="text"
+                    name="commentContent"
+                    onChange={this.onChange}
+                    value={commentContent}
+                  />
+                </p>
+                <button type="submit" className="btn btn-primary">
+                  Post
+                </button>
+              </form>
+            </div>
+          </div>
+          <br />
           {post.commentsSrc.comments &&
             post.commentsSrc.comments.map((comment) => (
               <div key={comment.id}>
-                <div class="card">
-                  <div class="card-body">{comment.comment}</div>
+                <div className="card">
+                  <div className="card-body">{comment.comment}</div>
                 </div>
                 <br />
               </div>
@@ -55,6 +103,7 @@ export class Post extends Component {
   static propTypes = {
     post: PropTypes.object.isRequired,
     getPost: PropTypes.func.isRequired,
+    createPostComment: PropTypes.func.isRequired,
   };
 }
 
@@ -62,4 +111,4 @@ const mapStateToProps = (state) => ({
   post: state.post.post,
 });
 
-export default connect(mapStateToProps, { getPost })(Post);
+export default connect(mapStateToProps, { getPost, createPostComment })(Post);

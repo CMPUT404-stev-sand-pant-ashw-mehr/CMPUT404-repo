@@ -40,5 +40,6 @@ urlpatterns = [
     # path('swagger-ui/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('', include('frontend.urls')),
     path('', include('accounts.urls')),
+    path('', include('likes.urls')),
     path('', include('author.urls')), # author URL MUST BE put LAST because of multi slash URL
 ]

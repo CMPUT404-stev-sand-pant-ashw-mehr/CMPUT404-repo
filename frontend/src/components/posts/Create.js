@@ -9,9 +9,9 @@ export class Create extends Component {
     source: "",
     origin: "",
     description: "",
-    contentType: "",
+    contentType: "text/plain",
     content: "",
-    visibility: "",
+    visibility: "PUBLIC",
     unlisted: false,
   };
 
@@ -116,33 +116,39 @@ export class Create extends Component {
           </div>
           <div className="form-group">
             <label>Content Type</label>
-            <input
+            <select
               className="form-control"
               type="text"
               name="contentType"
               onChange={this.onChange}
               value={contentType}
-            />
+            >
+              <option value="text/plain">text/plain</option>
+            </select>
           </div>
           <div className="form-group">
             <label>Content</label>
-            <input
+            <textarea
               className="form-control"
-              type="text"
+              id="content"
               name="content"
               onChange={this.onChange}
-              value={content}
-            />
+              rows="4"
+            >
+              {content}
+            </textarea>
           </div>
           <div className="form-group">
             <label>Visibility</label>
-            <input
+            <select
               className="form-control"
               type="text"
               name="visibility"
               onChange={this.onChange}
               value={visibility}
-            />
+            >
+              <option value="PUBLIC">PUBLIC</option>
+            </select>
           </div>
           <br></br>
           <div className="form-group">

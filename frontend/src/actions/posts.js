@@ -7,6 +7,7 @@ import {
   CREATE_POST,
   GET_ALERTS,
   CREATE_ALERT,
+  CREATE_POST_COMMENT,
   LIKE_POST,
   LIKE_POST_COMMENT,
 } from "./types";
@@ -104,6 +105,40 @@ export const createPost = (post) => (dispatch, getState) => {
       });
       dispatch({
         type: CREATE_POST,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      const alert = {
+        msg: err.response.data,
+        status: err.response.status,
+      };
+      dispatch({
+        type: GET_ALERTS,
+        payload: alert,
+      });
+    });
+};
+
+export const createPostComment = (postId, comment) => (dispatch, getState) => {
+  console.log("fml", postId, comment);
+  const authorId = getState().auth.user.author;
+  axios
+    .post(
+      `/author/${authorId}/posts/${postId}/comments`,
+      comment,
+      tokenConfig(getState)
+    )
+    .then((res) => {
+      dispatch({
+        type: CREATE_ALERT,
+        payload: {
+          msg: { success: "Comment has been added!" },
+          status: res.status,
+        },
+      });
+      dispatch({
+        type: CREATE_POST_COMMENT,
         payload: res.data,
       });
     })
