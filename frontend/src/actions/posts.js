@@ -121,7 +121,6 @@ export const createPost = (post) => (dispatch, getState) => {
 };
 
 export const createPostComment = (postId, comment) => (dispatch, getState) => {
-  console.log("fml", postId, comment);
   const authorId = getState().auth.user.author;
   axios
     .post(

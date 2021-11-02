@@ -19,7 +19,6 @@ class RegisterAPI(generics.GenericAPIView):
         host = 'http://' + str(request.get_host())
         user_serializer = self.get_serializer(data = request.data)
         user_serializer.is_valid(raise_exception=True)
-        print(user_serializer.errors)
         # create user
         user = user_serializer.save()
 

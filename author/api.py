@@ -139,7 +139,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
     def get_author(self, request: HttpRequest, author_id=None):
         author_id = self.remove_backslash(author_id)
         try:
-            print(self.get_queryset().values())
             query = self.get_queryset().get(id=author_id)
         except:
             return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
