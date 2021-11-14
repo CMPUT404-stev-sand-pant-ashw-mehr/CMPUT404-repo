@@ -59,9 +59,7 @@ class CommentTest(TestCase):
 
         r = self.client.post(f'/author/1/posts/{self.post_id}/comments', data=test_comment)
         self.assertTrue(200 <= r.status_code < 300)
-        print(r.content)
         r = self.client.post(f'/author/1/posts/{self.post_id}/comments', data=test_comment)
         self.assertTrue(200 <= r.status_code < 300)
-        print(r.content)
         r = self.client.get(f'/author/1/posts/{self.post_id}/comments')
         self.assertTrue(200 <= r.status_code < 300)
