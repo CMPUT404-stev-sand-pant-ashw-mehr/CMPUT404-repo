@@ -6,7 +6,7 @@ from post.models import Post
 
 class Like(models.Model):
     
-    id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4().hex, blank=False, null=False)
+    id = models.CharField(primary_key=True, max_length=255, blank=False, null=False)
     
     type = models.CharField(max_length=255, default='Like')
     

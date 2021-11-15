@@ -9,7 +9,7 @@ class Post(models.Model):
     # title of a post
     title = models.TextField()
     # id of the post
-    id = models.CharField(primary_key=True, max_length=255, default=uuid.uuid4().hex, blank=False, null=False)
+    id = models.CharField(primary_key=True, max_length=255, blank=False, null=False)
     # where did you get this post from?
     source = models.URLField()
     # where is it actually from
