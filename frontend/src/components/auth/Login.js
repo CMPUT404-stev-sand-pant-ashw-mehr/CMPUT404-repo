@@ -30,7 +30,7 @@ export class Login extends Component {
         <div className="col-6">
           <form onSubmit={this.onSubmit}>
             <div className="mb-3">
-              <label for="username" className="form-label">
+              <label htmlFor="username" className="form-label">
                 Username
               </label>
               <input
@@ -42,7 +42,7 @@ export class Login extends Component {
               />
             </div>
             <div className="mb-3">
-              <label for="password" className="form-label">
+              <label htmlFor="password" className="form-label">
                 Password
               </label>
               <input
