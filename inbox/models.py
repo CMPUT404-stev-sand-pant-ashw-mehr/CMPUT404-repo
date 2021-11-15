@@ -4,7 +4,7 @@ from django.db.models import Q
 from author.models import Author
 from post.models import Post
 from followers.models import FriendRequest
-from comment.models import Comment
+from likes.models import Like
 
 class Inbox(models.Model):
     type = models.CharField(max_length=10, default="inbox")
@@ -13,13 +13,13 @@ class Inbox(models.Model):
 
     post_item = models.ForeignKey(Post, related_name="inbox_post", on_delete=models.CASCADE, blank=True, null=True)
 
-    comment_item = models.ForeignKey(Comment, related_name="inbox_comment", on_delete=models.CASCADE, blank=True, null=True)
+    like_item = models.ForeignKey(Like, related_name="inbox_like", on_delete=models.CASCADE, blank=True, null=True)
 
     follow_item = models.ForeignKey(FriendRequest, related_name="inbox_request", on_delete=models.CASCADE, blank=True, null=True)
 
     def clean(self) -> None:
-        if not (self.post_item or self.comment_item or self.follow_item):
-            raise ValidationError("Item has to be either a post, comment or follow")
+        if not (self.post_item or self.like_item or self.follow_item):
+            raise ValidationError("Item has to be either a post, like or follow")
         return super().clean()
 
     class Meta:
@@ -27,15 +27,15 @@ class Inbox(models.Model):
             models.CheckConstraint(
                 check=(
                     Q(post_item__isnull=False) &
-                    Q(comment_item__isnull=True) &
+                    Q(like_item__isnull=True) &
                     Q(follow_item__isnull=True)
                 ) | (
                     Q(post_item__isnull=True) &
-                    Q(comment_item__isnull=False) &
+                    Q(like_item__isnull=False) &
                     Q(follow_item__isnull=True)
                 ) | (
                     Q(post_item__isnull=True) &
-                    Q(comment_item__isnull=True) &
+                    Q(like_item__isnull=True) &
                     Q(follow_item__isnull=False)
                 ),
                 name="only_one_item_type",

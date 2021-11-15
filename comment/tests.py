@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.test.client import Client
 from author.models import Author
 from knox.models import AuthToken
-from django.forms.models import model_to_dict
+from comment.api import CommentViewSet
 
 # Create your tests here.
 class CommentTest(TestCase):
@@ -63,3 +63,4 @@ class CommentTest(TestCase):
         self.assertTrue(200 <= r.status_code < 300)
         r = self.client.get(f'/author/1/posts/{self.post_id}/comments')
         self.assertTrue(200 <= r.status_code < 300)
+        
