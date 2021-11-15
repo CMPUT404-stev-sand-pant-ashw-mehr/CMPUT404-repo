@@ -2,7 +2,7 @@ import React, { Component, Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getPost, createPostComment, likeObject } from "../../actions/posts";
+import { getPost, createPostComment,} from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock } from "react-icons/fa";
 
@@ -110,7 +110,6 @@ export class Post extends Component {
     post: PropTypes.object.isRequired,
     getPost: PropTypes.func.isRequired,
     createPostComment: PropTypes.func.isRequired,
-    //likeObject: PropTypes.func.isRequired,
   };
 }
 
@@ -120,5 +119,5 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
    getPost, 
-   createPostComment
+   createPostComment,
    })(Post);
