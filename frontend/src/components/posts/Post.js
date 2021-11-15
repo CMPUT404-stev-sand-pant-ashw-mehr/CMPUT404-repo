@@ -2,7 +2,7 @@ import React, { Component, Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getPost, createPostComment } from "../../actions/posts";
+import { getPost, createPostComment, likeObject } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock } from "react-icons/fa";
 
@@ -16,7 +16,7 @@ export class Post extends Component {
       commentContent: "",
     });
   }
-
+  
   onChange = (e) =>
     this.setState({
       [e.target.name]: e.target.value,
@@ -24,12 +24,14 @@ export class Post extends Component {
 
   onSubmit = (e) => {
     e.preventDefault();
+    console.log("Clicked!")
     const { commentContent } = this.state;
     const comment = {
       type: "comment",
       contentType: "text/markdown",
       comment: commentContent,
     };
+    
     this.props.createPostComment(this.props.match.params.id, comment);
     this.resetForm();
     this.forceUpdate();
@@ -73,6 +75,7 @@ export class Post extends Component {
                 <p className="card-text">
                   <input
                     className="form-control"
+                    placholder="Add a comment"
                     type="text"
                     name="commentContent"
                     onChange={this.onChange}
@@ -90,7 +93,10 @@ export class Post extends Component {
             post.commentsSrc.comments.map((comment) => (
               <div key={comment.id}>
                 <div className="card">
-                  <div className="card-body">{comment.comment}</div>
+                  <div className="card-body">
+                    <b>{comment.author.displayName}</b>
+                    <p>{comment.comment} </p>
+                  </div>
                 </div>
                 <br />
               </div>
@@ -104,6 +110,7 @@ export class Post extends Component {
     post: PropTypes.object.isRequired,
     getPost: PropTypes.func.isRequired,
     createPostComment: PropTypes.func.isRequired,
+    //likeObject: PropTypes.func.isRequired,
   };
 }
 
@@ -111,4 +118,7 @@ const mapStateToProps = (state) => ({
   post: state.post.post,
 });
 
-export default connect(mapStateToProps, { getPost, createPostComment })(Post);
+export default connect(mapStateToProps, {
+   getPost, 
+   createPostComment
+   })(Post);
