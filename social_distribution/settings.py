@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'post',
     'comment',
-    'frontend',
     'author',
     'accounts',
     'followers',
@@ -103,8 +102,12 @@ WSGI_APPLICATION = 'social_distribution.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'c404t03db', 
+        'USER': 'postgres', 
+        'PASSWORD': 'c404t03',
+        'HOST': '127.0.0.1', 
+        'PORT': '5432',
     }
 
 }
