@@ -5,6 +5,7 @@ from author.models import Author
 from post.models import Post
 from followers.models import FriendRequest
 from likes.models import Like
+from comment.models import Comment
 
 class Inbox(models.Model):
     type = models.CharField(max_length=10, default="inbox")
