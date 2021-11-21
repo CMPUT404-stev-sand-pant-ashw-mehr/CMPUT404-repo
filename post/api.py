@@ -523,5 +523,5 @@ class PostViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 def get_posts(request):
     if request.method == "GET":
-        post_set = Post.objects.all()
+        post_set = Post.objects.filter(visibility="PUBLIC")
         return Response({"posts": post_set}, status=status.HTTP_200_OK)
