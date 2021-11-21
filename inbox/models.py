@@ -1,17 +1,17 @@
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from author.models import Author
-from post.models import Post
-from followers.models import FriendRequest
-from likes.models import Like
-from comment.models import Comment
+from django.contrib.postgres.fields import ArrayField
+
 
 class Inbox(models.Model):
     type = models.CharField(max_length=10, default="inbox")
 
     author = models.ForeignKey(Author, related_name="owner", on_delete=models.CASCADE)
 
+    inbox_items = ArrayField(models.JSONField(), default=list)
+
+    '''
     post_item = models.ForeignKey(Post, related_name="inbox_post", on_delete=models.CASCADE, blank=True, null=True)
 
     like_item = models.ForeignKey(Like, related_name="inbox_like", on_delete=models.CASCADE, blank=True, null=True)
@@ -42,3 +42,4 @@ class Inbox(models.Model):
                 name="only_one_item_type",
             )
         ]
+        '''
