@@ -1,4 +1,5 @@
 from django.forms.models import model_to_dict
+from rest_framework.decorators import api_view
 from author.models import Author
 from comment.models import Comment
 from comment.serializers import CommentSerializer
@@ -498,6 +499,7 @@ class PostViewSet(viewsets.ModelViewSet):
         },
         tags=['Delete an Author\'s Post'],
     )
+    
     def delete_post(self, request, author_id=None, post_id=None):
         # remove trailing slash
         if post_id[-1] == '/':
@@ -517,3 +519,9 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Post deleted"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"detail": e.args}, status=status.HTTP_404_NOT_FOUND)    
+        
+@api_view(['GET'])
+def get_posts(request):
+    if request.method == "GET":
+        post_set = Post.objects.filter(visibility="PUBLIC")
+        return Response({"posts": post_set}, status=status.HTTP_200_OK)
