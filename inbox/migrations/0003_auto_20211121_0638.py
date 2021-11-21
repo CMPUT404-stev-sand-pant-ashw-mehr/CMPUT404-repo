@@ -11,14 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveConstraint(
-            model_name='inbox',
-            name='only_one_item_type',
-        ),
-        migrations.RemoveField(
-            model_name='inbox',
-            name='follow_item',
-        ),
         migrations.RemoveField(
             model_name='inbox',
             name='like_item',

@@ -6,7 +6,6 @@ from inbox.models import Inbox
 from post.api import PostViewSet
 from author.models import Author
 from post.models import Post
-from followers.models import FriendRequest
 from likes.models import Like
 
 class InboxViewSet(viewsets.ModelViewSet):
