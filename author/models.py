@@ -27,6 +27,7 @@ class Author(models.Model):
     # Image from a public domain
     profileImage = models.CharField(max_length=255, blank=True)
 
+    is_active = models.BooleanField(default=False)
 
 
     # using this to get full path for author

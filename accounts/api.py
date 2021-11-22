@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status, validators
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response 
 from knox.models import AuthToken
 from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
@@ -43,8 +44,6 @@ class RegisterAPI(generics.GenericAPIView):
 
         return Response({
             'user': UserSerializer(user).data,
-            'author': AuthorSerializer(author).data,
-            'token': AuthToken.objects.create(user=user)[1]
         }, status=status.HTTP_201_CREATED)
 
 class LoginAPI(generics.GenericAPIView):
@@ -58,7 +57,13 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['username']
         user = User.objects.select_related('author').get(username=username)
-
+        try:
+            get_object_or_404(Author, id=user.author.id, is_active=True)
+        except:
+            return Response({
+                "message": "Unauthorized User"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
         return Response({
             'user': UserSerializer(user).data,
             'author': AuthorSerializer(user.author).data,
