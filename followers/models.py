@@ -16,18 +16,3 @@ class Followers(models.Model):
 
     class Meta:
         unique_together = (("author", "follower"),)
-
-
-# Friend request
-class FriendRequest(models.Model):
-    # Summary of the action
-    summary = models.TextField()
-    # The person sending the request
-    actor = models.JSONField()
-    # The receiver. Named "object" in the spec. 
-    receiver = models.JSONField()
-
-    request_date = models.DateTimeField(default=now, editable=False)
-    
-    class Meta:
-        unique_together = (("actor", "receiver"),)

@@ -1,5 +1,4 @@
 from django.db import models
-import uuid
 from author.models import Author
 from comment.models import Comment
 from post.models import Post
