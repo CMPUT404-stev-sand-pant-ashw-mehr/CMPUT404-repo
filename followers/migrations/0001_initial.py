@@ -15,19 +15,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='FriendRequest',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('summary', models.TextField()),
-                ('actor', models.JSONField()),
-                ('receiver', models.JSONField()),
-                ('request_date', models.DateTimeField(default=django.utils.timezone.now, editable=False)),
-            ],
-            options={
-                'unique_together': {('actor', 'receiver')},
-            },
-        ),
-        migrations.CreateModel(
             name='Followers',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
