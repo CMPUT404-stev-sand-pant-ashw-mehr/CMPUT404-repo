@@ -98,7 +98,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
             
 
             if(page == "None" or size == "None"):
-                author_data = author_list.values()
+                author_data = author_list.filter(is_active=True).values()
             else:
                 paginator = Paginator(author_list.values(), size)
                 author_data = paginator.get_page(page).object_list
@@ -158,7 +158,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         
         author_id = self.remove_backslash(author_id)
         try:
-            query = self.get_queryset().get(id=author_id)
+            query = self.get_queryset().get(id=author_id, is_active=True)
         except:
             return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -226,7 +226,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         author_id = self.remove_backslash(author_id)
 
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.get(id=author_id, is_active=True)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
