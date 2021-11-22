@@ -26,7 +26,7 @@ class InboxViewSet(viewsets.ModelViewSet):
 
         response = InboxSerializer(inboxItems).data
 
-        response["author"] = self.get_author_uri(request)
+        response["author"] = author.url
 
         return Response(response, status=status.HTTP_200_OK)
             

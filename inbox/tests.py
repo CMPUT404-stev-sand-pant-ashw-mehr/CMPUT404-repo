@@ -98,6 +98,5 @@ class InboxTest(TestCase):
         # test if items are cleared
         r = self.client.get('/author/1/inbox')
         self.assertTrue(200 <= r.status_code < 300)
-
         data = r.json()
         self.assertEqual(len(data['items']), 0)
