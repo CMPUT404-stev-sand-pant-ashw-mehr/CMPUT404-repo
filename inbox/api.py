@@ -26,8 +26,7 @@ class InboxViewSet(viewsets.ModelViewSet):
 
         response = InboxSerializer(inboxItems).data
 
-        if len(response) > 0:
-            response["author"] = self.get_author_uri(request)
+        response["author"] = self.get_author_uri(request)
 
         return Response(response, status=status.HTTP_200_OK)
             
