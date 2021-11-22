@@ -3,7 +3,7 @@ from author.models import Author
 from .serializer import AuthorSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, authentication_classes, permission_classes
 from rest_framework.response import Response 
 from django.http import HttpRequest
 from rest_framework.response import Response
@@ -14,12 +14,12 @@ from knox.auth import TokenAuthentication
 from urllib.parse import urlparse
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.helper import is_valid_node
+from accounts.permissions import CustomAuthentication, AccessPermission
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.exclude(user__isnull=True).order_by('id')
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
 
     serializer_class = AuthorSerializer
 
@@ -81,7 +81,16 @@ class AuthorViewSet(viewsets.ModelViewSet):
     )
 
     # GET all authors
+    # NEED CONNECTION
     def list(self, request: HttpRequest):
+        self.authentication_classes = [CustomAuthentication]
+        self.permission_classes = [AccessPermission]
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         try:
             page = request.GET.get('page', 'None')
             size = request.GET.get('size', 'None')
@@ -136,7 +145,17 @@ class AuthorViewSet(viewsets.ModelViewSet):
     )
 
     # GET using author id
+    # NEED CONNECTION
     def get_author(self, request: HttpRequest, author_id=None):
+        
+        self.authentication_classes = [CustomAuthentication]
+        self.permission_classes = [AccessPermission]
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         author_id = self.remove_backslash(author_id)
         try:
             query = self.get_queryset().get(id=author_id)
@@ -195,6 +214,15 @@ class AuthorViewSet(viewsets.ModelViewSet):
     )
 
     def update(self, request: HttpRequest, author_id=None):
+        
+        self.authentication_classes = [TokenAuthentication]
+        self.permission_classes = [IsAuthenticated]
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         author_id = self.remove_backslash(author_id)
 
         try:
