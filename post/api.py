@@ -89,7 +89,7 @@ class PostViewSet(viewsets.ModelViewSet):
         tags=['Get an Author\'s Post'],
     )
     # GET a post with specified author id and post id
-    def get_post(self, request, author_id=None, post_id=None):
+    def get_post(self, request, author_id=None, post_id=None) -> Response:
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]

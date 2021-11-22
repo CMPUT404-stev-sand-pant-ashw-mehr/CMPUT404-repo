@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'accounts',
     'followers',
     'likes',
+    'inbox',
     'frontend',
     'django.contrib.admin',
     'django.contrib.auth',
