@@ -9,14 +9,30 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .serializers import LikeSerializer
 from author.serializer import AuthorSerializer
+from accounts.permissions import CustomAuthentication, AccessPermission
 
 import uuid
 import ast
 
 class PostLikeViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     serializer_class = LikeSerializer
+    
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["get_post_likes"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["get_post_likes"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
+        
 
     def get_post_likes(self, request, author_id, post_id):
         query_set = Like.objects.filter(post=Post.objects.get(id=post_id))
@@ -26,7 +42,6 @@ class PostLikeViewSet(viewsets.ModelViewSet):
             likeObj['@context'] = "https://www.w3.org/ns/activitystreams"
             likeObj['author'] = AuthorSerializer(Author.objects.get(id=likeObj["author"])).data
             name = likeObj['author']["displayName"]
-            likeObj["summary"] = f"{name} Likes your post"
             
         return Response(response, status=status.HTTP_200_OK)
         
@@ -35,8 +50,8 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
         try:
             query_set = Post.objects.get(id=post_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
-        except:
-            return Response({"message": "You have already liked the post!"}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({"message": e.args}, status=status.HTTP_409_CONFLICT)
         
         response = LikeSerializer(query_set).data
 
@@ -49,9 +64,23 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
         
 class CommentLikeViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     serializer_class = LikeSerializer
+    
+    def initialize_request(self, request, *args, **kwargs):
+        self.action = self.action_map.get(request.method.lower())
+        return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["get_comment_likes"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["get_comment_likes"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
     
     def get_comment_likes(self, request, author_id, post_id, comment_id):
         query_set = Like.objects.filter(comment=Comment.objects.get(id=comment_id))
@@ -70,8 +99,8 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
         
         try:
             query_set = Comment.objects.get(id=comment_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
-        except:
-            return Response({"message": "You have already liked the comment!"}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({"message": e.args}, status=status.HTTP_409_CONFLICT)
         
         response = LikeSerializer(query_set).data
 
@@ -85,11 +114,14 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
 
 
 class AuthorLikeViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = (CustomAuthentication,)
+    permission_classes = (AccessPermission,)
     serializer_class = LikeSerializer
 
     def get_likes(self, request, author_id):
+        if not Author.objects.filter(id=author_id).exists():
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+            
         query_set = Like.objects.filter(author=author_id).all()
         data = LikeSerializer(query_set, many=True).data
         
@@ -97,7 +129,14 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
             likeObj['@context'] = "https://www.w3.org/ns/activitystreams"
             likeObj['author'] = AuthorSerializer(Author.objects.get(id=likeObj["author"])).data
             name = likeObj['author']["displayName"]
-            likeObj["summary"] = f"{name} Likes your comment"
+
+            objUrlsplitted = likeObj['object'].split('/')
+            if {"post", "posts"}.intersection(set(objUrlsplitted)):
+                ptype = "post"
+            else:
+                ptype = "comment"
+
+            likeObj["summary"] = f"{name} Likes your {ptype}"
         
         response = {
             'type': 'liked',
@@ -105,4 +144,3 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
         }
         
         return Response(response, status=status.HTTP_200_OK)
-        
