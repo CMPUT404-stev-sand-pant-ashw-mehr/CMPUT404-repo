@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.helper import is_valid_node
 
 import io
 from rest_framework.parsers import JSONParser
@@ -73,7 +74,14 @@ class FollowerViewSet(viewsets.ModelViewSet):
     )
 
     # GET list of followers
+    # NEED CONNECTION
     def list(self, request, author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         get_object_or_404(Author, pk=author_id) # Check if user exists
 
         follower_rows = Followers.objects.filter(author=author_id).values()
@@ -128,8 +136,15 @@ class FollowerViewSet(viewsets.ModelViewSet):
     )
 
     # PUT a follower to the specified author
+    # NEED CONNECTION
     def put_follower(self, request, author_id=None, foreign_author_id=None):
-        # check user
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
+        #check user
         try:
             author = Author.objects.get(id=author_id)
         except:
@@ -217,7 +232,14 @@ class FollowerViewSet(viewsets.ModelViewSet):
         tags=['Delete a Follower'],
     )
     # DELETE a follower of a given author
+    # NEED CONNECTION
     def delete_follower(self, request, author_id=None, foreign_author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         try:
             author = Author.objects.get(id=author_id)
         except:
@@ -257,7 +279,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
         tags=['Check if Follower'],
     )
     # GET if the author has the follower with the given id on the server
+    # NEED CONNECTION
     def check_follower(self, request, author_id=None, foreign_author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
         get_object_or_404(User, pk=author_id) # Check if user exists
 
