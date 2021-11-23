@@ -42,7 +42,6 @@ class PostLikeViewSet(viewsets.ModelViewSet):
             likeObj['@context'] = "https://www.w3.org/ns/activitystreams"
             likeObj['author'] = AuthorSerializer(Author.objects.get(id=likeObj["author"])).data
             name = likeObj['author']["displayName"]
-            likeObj["summary"] = f"{name} Likes your post"
             
         return Response(response, status=status.HTTP_200_OK)
         
@@ -127,7 +126,14 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
             likeObj['@context'] = "https://www.w3.org/ns/activitystreams"
             likeObj['author'] = AuthorSerializer(Author.objects.get(id=likeObj["author"])).data
             name = likeObj['author']["displayName"]
-            likeObj["summary"] = f"{name} Likes your comment"
+
+            objUrlsplitted = likeObj['object'].split('/')
+            if {"post", "posts"}.intersection(set(objUrlsplitted)):
+                ptype = "post"
+            else:
+                ptype = "comment"
+
+            likeObj["summary"] = f"{name} Likes your {ptype}"
         
         response = {
             'type': 'liked',
@@ -135,4 +141,4 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
         }
         
         return Response(response, status=status.HTTP_200_OK)
-        
+        HTTP_403_FORBIDDEN
