@@ -2,23 +2,26 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getPosts, deletePost } from "../../actions/posts";
+import { getPosts, getPublicPosts, deletePost } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock, FaTrashAlt } from "react-icons/fa";
 
 export class Feed extends Component {
   componentDidMount() {
-    this.props.getPosts();
+    console.log("props");
+    // this.props.getPosts();
+    getPublicPosts();
   }
 
   render() {
-    const { posts, deletePost, getPosts } = this.props;
+    // const { posts, deletePost, getPosts } = this.props;
+    console.log("in feed");
 
     return (
       <Fragment>
         <h1>My Feed</h1>
 
-        {posts.posts.map((post) => (
+        {/* {posts.posts.map((post) => (
           <div className="card mb-4" key={post.id.split("/").pop()}>
             <div className="card-body">
               <div className="small text-muted">
@@ -79,20 +82,22 @@ export class Feed extends Component {
               </a>
             </li>
           </ul>
-        </nav>
+        </nav> */}
       </Fragment>
     );
   }
 
-  static propTypes = {
-    posts: PropTypes.object.isRequired,
-    getPosts: PropTypes.func.isRequired,
-    deletePost: PropTypes.func.isRequired,
-  };
+  // static propTypes = {
+  //   posts: PropTypes.object.isRequired,
+  //   getPosts: PropTypes.func.isRequired,
+  //   deletePost: PropTypes.func.isRequired,
+  // };
 }
 
-const mapStateToProps = (state) => ({
-  posts: state.posts,
-});
+// const mapStateToProps = (state) => ({
+//   posts: state.posts,
+// });
 
-export default connect(mapStateToProps, { getPosts, deletePost })(Feed);
+// export default connect(mapStateToProps, { getPosts, deletePost })(Feed);
+export default Feed;
+

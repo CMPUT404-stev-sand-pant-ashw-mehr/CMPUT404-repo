@@ -39,6 +39,27 @@ export const getPosts =
       });
   };
 
+  export const getPublicPosts = (postId) => (dispatch, getState) => {
+    console.log("id - ", postId);
+    // TO DO: send get request
+      // axios
+      //   .get(`/posts`, tokenConfig(getState))
+      //   .then((res) => {
+      //    console.log("response - ", res);
+      //   })
+      //   .catch((err) => {
+      //     console.log("error - ", err);
+      //     // const alert = {
+      //     //   msg: err.response,
+      //     //   status: err.response,
+      //     // };
+      //     // dispatch({
+      //     //   type: GET_ALERTS,
+      //     //   payload: alert,
+      //     // });
+      //   });s
+  };
+
 export const getPost = (postId) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;
   axios

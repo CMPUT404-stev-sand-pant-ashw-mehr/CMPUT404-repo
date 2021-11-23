@@ -100,10 +100,11 @@ export const register =
         },
       })
       .then((res) => {
-        localStorage.setItem("token", res.data.token);
         dispatch({
-          type: REGISTER_SUCCESS,
-          payload: res.data,
+          type: CREATE_ALERT,
+          payload: {
+            msg: "Registered",
+          },
         });
       })
       .catch((err) => {

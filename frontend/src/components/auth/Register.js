@@ -13,12 +13,12 @@ export class Register extends Component {
     email: "",
     password: "",
     password_confirm: "",
+    redirect:false
   };
 
   onSubmit = (e) => {
     e.preventDefault();
-    const { username, displayName, github, email, password, password_confirm } =
-      this.state;
+    const { username, displayName, github, email, password, password_confirm, redirect } = this.state;
     if (password !== password_confirm) {
       this.props.createError("Passwords do not match!");
     } else {
@@ -29,6 +29,10 @@ export class Register extends Component {
         email,
         password,
       };
+      this.setState({
+        redirect : true
+      });
+      
       this.props.register(user);
     }
   };
@@ -39,8 +43,8 @@ export class Register extends Component {
     });
 
   render() {
-    if (this.props.auth.isAuthenticated) {
-      return <Redirect to="/" />;
+    if (this.state.redirect === true) {
+      return <Redirect to="/login" />;
     }
     const { username, displayName, github, email, password, password_confirm } =
       this.state;
