@@ -119,6 +119,9 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
 
     def get_likes(self, request, author_id):
+        if not Author.objects.filter(id=author_id).exists():
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+            
         query_set = Like.objects.filter(author=author_id).all()
         data = LikeSerializer(query_set, many=True).data
         
@@ -141,4 +144,3 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
         }
         
         return Response(response, status=status.HTTP_200_OK)
-        HTTP_403_FORBIDDEN
