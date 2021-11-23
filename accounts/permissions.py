@@ -3,10 +3,11 @@ import base64
 
 class AccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        print("worked1")
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token_type, _, credentials = auth_header.partition(' ')
 
-        expected = base64.b64encode(b'socialdistribution_t21:c404t21').decode()
+        expected = base64.b64encode(b'socialdistribution_t03:c404t03').decode()
         if token_type == 'Basic' and credentials == expected:
             return True
         else:
@@ -14,10 +15,11 @@ class AccessPermission(permissions.BasePermission):
 
 class CustomAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
+        print("worked2")
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token_type, _, credentials = auth_header.partition(' ')
 
-        expected = base64.b64encode(b'socialdistribution_t21:c404t21').decode()
+        expected = base64.b64encode(b'socialdistribution_t03:c404t03').decode()
         if token_type == 'Basic' and credentials == expected:
             return (True, None)
         else:
