@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import LikeSerializer
 from author.serializer import AuthorSerializer
 from accounts.permissions import CustomAuthentication, AccessPermission
+from accounts.helper import is_valid_node
 
 import uuid
 import ast
@@ -35,6 +36,12 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
 
     def get_post_likes(self, request, author_id, post_id):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         query_set = Like.objects.filter(post=Post.objects.get(id=post_id))
         response = LikeSerializer(query_set, many=True).data
         
@@ -47,6 +54,11 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
     def add_post_like(self, request, author_id, post_id):
         author_inst = Author.objects.get(user = request.user)
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
         try:
             query_set = Post.objects.get(id=post_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
@@ -83,6 +95,12 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated()]
     
     def get_comment_likes(self, request, author_id, post_id, comment_id):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         query_set = Like.objects.filter(comment=Comment.objects.get(id=comment_id))
         response = LikeSerializer(query_set, many=True).data
         
@@ -95,6 +113,12 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
         return Response(response, status=status.HTTP_200_OK)
         
     def add_comment_like(self, request, author_id, post_id, comment_id):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         author_inst = Author.objects.get(user = request.user)
         
         try:
@@ -119,6 +143,12 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
 
     def get_likes(self, request, author_id):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         if not Author.objects.filter(id=author_id).exists():
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
             

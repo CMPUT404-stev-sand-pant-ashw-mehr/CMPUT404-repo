@@ -13,7 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from accounts.permissions import CustomAuthentication, AccessPermission
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-
+from accounts.helper import  is_valid_node
 
 import uuid
 import ast
@@ -106,6 +106,12 @@ class PostViewSet(viewsets.ModelViewSet):
     )
     # GET a post with specified author id and post id
     def get_post(self, request, author_id=None, post_id=None) -> Response:
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
@@ -193,6 +199,12 @@ class PostViewSet(viewsets.ModelViewSet):
     )
     # GET recent post
     def get_recent_post(self, request, author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         posts_query = Post.objects.filter(author=author_id, visibility="PUBLIC", unlisted=False)
         if not posts_query.exists():
             return Response({"detail": "Author not found or does not have public posts"}, status=status.HTTP_404_NOT_FOUND)
@@ -313,6 +325,12 @@ class PostViewSet(viewsets.ModelViewSet):
     )
     # POST and update a post with given author_id and post_id
     def update_post(self, request, author_id=None, post_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
@@ -424,6 +442,12 @@ class PostViewSet(viewsets.ModelViewSet):
         
     # POST to create a post with generated post_id, PUT to put a post with specified post id
     def create_post(self, request, author_id=None, post_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         try:
             author = Author.objects.get(id=author_id)
         except:
@@ -517,6 +541,12 @@ class PostViewSet(viewsets.ModelViewSet):
     )
     
     def delete_post(self, request, author_id=None, post_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
@@ -540,6 +570,12 @@ class PostViewSet(viewsets.ModelViewSet):
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
 def get_posts(request):
+    
+    # node check
+    valid = is_valid_node(request)
+    if not valid:
+        return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+    
     if request.method == "GET":
         post_set = Post.objects.filter(visibility="PUBLIC").values()
         return Response({"posts": post_set}, status=status.HTTP_200_OK)
