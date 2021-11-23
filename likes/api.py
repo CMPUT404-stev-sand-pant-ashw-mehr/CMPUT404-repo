@@ -33,7 +33,6 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         else:
             return [IsAuthenticated()]
         
-        
 
     def get_post_likes(self, request, author_id, post_id):
         query_set = Like.objects.filter(post=Post.objects.get(id=post_id))
@@ -52,8 +51,8 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
         try:
             query_set = Post.objects.get(id=post_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
-        except:
-            return Response({"message": "You have already liked the post!"}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({"message": e.args}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         response = LikeSerializer(query_set).data
 
