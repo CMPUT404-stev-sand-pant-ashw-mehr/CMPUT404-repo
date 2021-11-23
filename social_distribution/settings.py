@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg', 
     'knox',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = {
@@ -70,6 +71,7 @@ REDOC_SETTINGS = {
    'LAZY_RENDERING': False,
 }
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
