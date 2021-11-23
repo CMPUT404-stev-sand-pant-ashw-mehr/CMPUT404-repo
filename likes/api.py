@@ -9,14 +9,31 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .serializers import LikeSerializer
 from author.serializer import AuthorSerializer
+from accounts.permissions import CustomAuthentication, AccessPermission
 
 import uuid
 import ast
 
 class PostLikeViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     serializer_class = LikeSerializer
+    
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["get_post_likes"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["get_post_likes"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
+        
+        
 
     def get_post_likes(self, request, author_id, post_id):
         query_set = Like.objects.filter(post=Post.objects.get(id=post_id))
@@ -49,9 +66,23 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
         
 class CommentLikeViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     serializer_class = LikeSerializer
+    
+    def initialize_request(self, request, *args, **kwargs):
+        self.action = self.action_map.get(request.method.lower())
+        return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["get_comment_likes"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["get_comment_likes"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
     
     def get_comment_likes(self, request, author_id, post_id, comment_id):
         query_set = Like.objects.filter(comment=Comment.objects.get(id=comment_id))
@@ -85,8 +116,8 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
 
 
 class AuthorLikeViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = (CustomAuthentication,)
+    permission_classes = (AccessPermission,)
     serializer_class = LikeSerializer
 
     def get_likes(self, request, author_id):
