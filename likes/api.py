@@ -52,7 +52,7 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         try:
             query_set = Post.objects.get(id=post_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
         except Exception as e:
-            return Response({"message": e.args}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": e.args}, status=status.HTTP_409_CONFLICT)
         
         response = LikeSerializer(query_set).data
 
@@ -101,7 +101,7 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
         try:
             query_set = Comment.objects.get(id=comment_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
         except Exception as e:
-            return Response({"message": e.args}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": e.args}, status=status.HTTP_409_CONFLICT)
         
         response = LikeSerializer(query_set).data
 
