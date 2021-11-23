@@ -199,11 +199,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        # node check
-        valid = is_valid_node(request)
-        if not valid:
-            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
-        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
