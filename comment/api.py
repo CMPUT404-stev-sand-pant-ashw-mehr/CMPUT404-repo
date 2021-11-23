@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+import uuid
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -176,10 +177,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             author = Author.objects.get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        if author.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
 
         try:
             Post.objects.get(id=post_id, author=author_id)
@@ -187,7 +184,9 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
+            comment_id = uuid.uuid4().hex
             keys = {
+                "id": comment_id,
                 "type": request.data["type"],
                 "author_id": author_id,
                 "post_id": post_id,
@@ -197,7 +196,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = Comment.objects.create(**keys)
             comment.save()
             return Response({
-                "id": comment.id,
+                "id": comment_id,
                 "published": comment.published,
                 **keys
             }, status=status.HTTP_201_CREATED)
