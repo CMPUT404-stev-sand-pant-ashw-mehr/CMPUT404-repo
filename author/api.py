@@ -19,7 +19,7 @@ from accounts.permissions import CustomAuthentication, AccessPermission
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
-    queryset = Author.objects.exclude(user__isnull=True).exclude(is_active=False).order_by('id')
+    queryset = Author.objects.exclude(user__isnull=True).exclude(is_active=False).defer('is_active').order_by('id')
     serializer_class = AuthorSerializer
 
     @swagger_auto_schema(
