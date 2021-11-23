@@ -7,7 +7,7 @@ from django.utils import timezone
 # Create your models here.
 class Comment(models.Model):
     # ID of the Comment (UUID)
-    id = models.CharField(max_length=255, primary_key=True, default='1', editable=False)
+    id = models.CharField(max_length=255, primary_key=True, unique=True, editable=True)
     
     type = models.CharField(max_length=255, default = "comment")
     
@@ -27,7 +27,3 @@ class Comment(models.Model):
         
     def __str__(self):
         return str(self.comment)
-
-    def save(self, *args, **kwargs):
-        self.id = uuid.uuid4().hex
-        super(Comment, self).save(args, kwargs)

@@ -2,6 +2,7 @@ from rest_framework import response
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
+from accounts.permissions import AccessPermission, CustomAuthentication
 from followers.serializers import FollowerModelSerializer
 from author.serializer import AuthorSerializer
 from author.models import Author
@@ -19,8 +20,22 @@ from rest_framework.parsers import JSONParser
 
 class FollowerViewSet(viewsets.ModelViewSet):
     serializer_class = FollowerModelSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    
+    def initialize_request(self, request, *args, **kwargs):
+        self.action = self.action_map.get(request.method.lower())
+        return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["list", "check_follower"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["list", "check_follower"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
 
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/followers",
