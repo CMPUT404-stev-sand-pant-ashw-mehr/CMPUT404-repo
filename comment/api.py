@@ -1,3 +1,5 @@
+from re import I
+import uuid
 from comment.models import Comment
 from author.models import Author
 from post.models import Post
@@ -12,13 +14,28 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.permissions import AccessPermission, CustomAuthentication
 
 import uuid
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["get_post_comments", ]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["get_post_comments",]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
 
 
     @swagger_auto_schema(
@@ -182,6 +199,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             Post.objects.get(id=post_id, author=author_id)
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
+        
 
         try:
             comment_id = uuid.uuid4().hex
@@ -198,7 +216,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({
                 "id": comment_id,
                 "published": comment.published,
-                **keys
+                **keys,
             }, status=status.HTTP_201_CREATED)
+      
         except KeyError as e:
             return Response({"detail": "Missing fields", "message": e.args}, status=status.HTTP_400_BAD_REQUEST)
