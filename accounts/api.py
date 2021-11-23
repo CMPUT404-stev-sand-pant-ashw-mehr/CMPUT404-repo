@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from author.models import Author
 from knox.models import AuthToken
 from .helper import is_valid_node
+from author.models import Author
 
 import uuid
 
@@ -85,9 +86,11 @@ class LoginAPI(generics.GenericAPIView):
 
 
 class ProfileAPI(generics.RetrieveAPIView):
-    permission_classes = [
-        permissions.IsAuthenticated,
-    ]
+    
+    #AUTH REMOVED
+    # permission_classes = [
+    #     permissions.IsAuthenticated,
+    # ]
 
     serializer_class = UserSerializer
 
