@@ -11,14 +11,31 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.paginator import Paginator
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.permissions import CustomAuthentication, AccessPermission
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+
 
 import uuid
 import ast
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["get_post", "get_recent_post"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["get_post", "get_recent_post"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
 
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/posts/< POST_ID >",
@@ -332,7 +349,7 @@ class PostViewSet(viewsets.ModelViewSet):
                 elif(key=="visibility"):
                     visi = request.data[key].strip()
                     if (visi not in ("PUBLIC", "FRIENDS")):
-                        return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
+                        return Response({"detail": "Invalid visibility key"}, status=status.HTTP_400_BAD_REQUEST)
                     post.visibility = visi
 
                 else:
@@ -425,8 +442,8 @@ class PostViewSet(viewsets.ModelViewSet):
                 data['type'] = request_keys['type']
                 data['title'] = request_keys['title']
                 data['id'] = post_id
-                data['source'] = request_keys['source']
-                data['origin'] = request_keys['origin']
+                data['source'] = request.build_absolute_uri('/')
+                data['origin'] = request.build_absolute_uri('/')
                 data['description'] = request_keys['description']
                 data['contentType'] = request_keys['contentType']
                 data['content'] = request_keys['content']
@@ -520,7 +537,9 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"detail": e.args}, status=status.HTTP_404_NOT_FOUND)    
         
 @api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
 def get_posts(request):
     if request.method == "GET":
-        post_set = Post.objects.filter(visibility="PUBLIC")
+        post_set = Post.objects.filter(visibility="PUBLIC").values()
         return Response({"posts": post_set}, status=status.HTTP_200_OK)
