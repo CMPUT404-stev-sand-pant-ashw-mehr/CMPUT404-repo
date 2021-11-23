@@ -33,7 +33,6 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         else:
             return [IsAuthenticated()]
         
-        
 
     def get_post_likes(self, request, author_id, post_id):
         query_set = Like.objects.filter(post=Post.objects.get(id=post_id))

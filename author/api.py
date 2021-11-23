@@ -19,8 +19,7 @@ from accounts.permissions import CustomAuthentication, AccessPermission
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
-    queryset = Author.objects.exclude(user__isnull=True).order_by('id')
-
+    queryset = Author.objects.exclude(user__isnull=True).exclude(is_active=False).defer('is_active').order_by('id')
     serializer_class = AuthorSerializer
     
     def initialize_request(self, request, *args, **kwargs):
@@ -85,12 +84,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
                         }
                 }
                 
-            ),
-            "400": openapi.Response(
-                description="Bad Request",
-                examples={
-                    "application/json":{"message": "Error details..."}
-                }
             )
         },
         tags=['Get all Authors'],
@@ -112,7 +105,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
             
 
             if(page == "None" or size == "None"):
-                author_data = author_list.filter(is_active=True).values()
+                author_data = author_list.values()
             else:
                 paginator = Paginator(author_list.values(), size)
                 author_data = paginator.get_page(page).object_list
@@ -169,7 +162,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         
         author_id = self.remove_backslash(author_id)
         try:
-            query = self.get_queryset().get(id=author_id, is_active=True)
+            query = self.get_queryset().get(id=author_id)
         except:
             return Response({"detail": "Author not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -178,7 +171,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     # POST and update author's profile
-
     @swagger_auto_schema(
         operation_description="POST /service/author/< AUTHOR_ID >/",
         request_body=openapi.Schema(
@@ -234,7 +226,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         author_id = self.remove_backslash(author_id)
 
         try:
-            author = Author.objects.get(id=author_id, is_active=True)
+            author = Author.objects.get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         

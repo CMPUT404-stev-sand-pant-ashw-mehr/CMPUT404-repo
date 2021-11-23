@@ -2,10 +2,11 @@ from django.db import models
 from author.models import Author
 from comment.models import Comment
 from post.models import Post
+import uuid
 
 class Like(models.Model):
     
-    id = models.CharField(primary_key=True, max_length=255, blank=False, null=False)
+    id = models.UUIDField(primary_key=True)
     
     type = models.CharField(max_length=255, default='Like')
     
@@ -23,3 +24,6 @@ class Like(models.Model):
     def __str__(self):
         return str(self.author)
 
+    def save(self, *args, **kwargs):
+        self.id = uuid.uuid4().hex
+        super(Comment, self).save(args, kwargs)

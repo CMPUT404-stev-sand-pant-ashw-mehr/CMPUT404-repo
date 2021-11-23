@@ -5,6 +5,7 @@ from knox.models import AuthToken
 from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
+from author.models import Author
 from knox.models import AuthToken
 from .helper import is_valid_node
 from author.models import Author
