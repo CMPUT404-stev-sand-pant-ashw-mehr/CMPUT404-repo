@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status, validators
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response 
 from knox.models import AuthToken
@@ -7,8 +8,9 @@ from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
 from knox.models import AuthToken
-from .helper import is_valid_node
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node
 from author.models import Author
+from .permissions import AccessPermission, CustomAuthentication
 
 import uuid
 
@@ -96,3 +98,28 @@ class ProfileAPI(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user 
+    
+    
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def get_foregin_authors(request):
+    if request.method == "GET":
+        foreign_authors = get_list_foregin_authors()
+        print(foreign_authors)
+        return Response({"foregin authors": foreign_authors})
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        
+
+
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def get_foregin_posts(request):
+    if request.method == "GET":
+        foreign_posts = get_list_foregin_posts()
+        print(foreign_posts)
+        return Response({"foregin posts": foreign_posts})
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

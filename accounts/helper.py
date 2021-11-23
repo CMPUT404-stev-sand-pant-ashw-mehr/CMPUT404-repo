@@ -24,14 +24,17 @@ def is_valid_node(request):
             return False
     return True
 
-def get_list_ids():
-    req = requests.get('https://otherteam.herokuapp.com/service/authors/', auth=('',''), headers={'Referer': "https://social-dis.herokuapp.com/"}).json()
-    ids = []
-    authors = req["items"]
-    for i in authors:
-        ids.append(i["id"])
-    return ids
+def get_list_foregin_authors():
+    req = requests.get('https://cmput-404-socialdistribution.herokuapp.com/service/author/', auth=('socialdistribution_t18','c404t18'), headers={'Referer': "http://127.0.0.1:9000/"})
+    j_req = req.json()
+    authors = []
+    for i in j_req:
+        authors.append(i)
+    return authors
 
-def find_remote_author_by_id(id):
-    req = requests.get('https://otherteam.herokuapp.com/service/author/'+id+'/', auth=('',''), headers={'Referer': "https://social-dis.herokuapp.com/"}).json()
-    return req
+
+def get_list_foregin_posts():
+    req = requests.get('https://cmput-404-socialdistribution.herokuapp.com/service/allposts/', auth=('socialdistribution_t18','c404t18'), headers={'Referer': "http://127.0.0.1:9000/"})
+    j_req = req.json()
+    foregin_posts = j_req['posts']
+    return foregin_posts
