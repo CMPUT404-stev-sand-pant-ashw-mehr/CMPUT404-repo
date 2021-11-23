@@ -1,4 +1,3 @@
-from rest_framework import response
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from rest_framework import viewsets, status
