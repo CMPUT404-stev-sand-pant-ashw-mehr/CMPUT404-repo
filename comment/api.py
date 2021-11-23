@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from accounts.permissions import AccessPermission, CustomAuthentication
+from accounts.helper import is_valid_node
 
 import uuid
 
@@ -100,6 +101,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     )
 
     def get_post_comments(self, request, author_id=None, post_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
@@ -186,6 +193,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     # POST to add new comment
     def add_comment_to_post(self, request, author_id=None, post_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
