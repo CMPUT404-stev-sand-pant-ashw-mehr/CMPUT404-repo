@@ -22,6 +22,22 @@ class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.exclude(user__isnull=True).order_by('id')
 
     serializer_class = AuthorSerializer
+    
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["list", "get_author"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["list", "get_author"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
 
     @swagger_auto_schema(
         operation_description="GET /service/authors",
@@ -83,8 +99,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
     # GET all authors
     # NEED CONNECTION
     def list(self, request: HttpRequest):
-        self.authentication_classes = [CustomAuthentication]
-        self.permission_classes = [AccessPermission]
         
         # node check
         valid = is_valid_node(request)
@@ -147,9 +161,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
     # GET using author id
     # NEED CONNECTION
     def get_author(self, request: HttpRequest, author_id=None):
-        
-        self.authentication_classes = [CustomAuthentication]
-        self.permission_classes = [AccessPermission]
         
         # node check
         valid = is_valid_node(request)
@@ -215,9 +226,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     def update(self, request: HttpRequest, author_id=None):
         
-        self.authentication_classes = [TokenAuthentication]
-        self.permission_classes = [IsAuthenticated]
-        
         # node check
         valid = is_valid_node(request)
         if not valid:
@@ -268,6 +276,11 @@ class AuthorViewSet(viewsets.ModelViewSet):
                 "detail": e.args
             }
             return Response(response, status.HTTP_400_BAD_REQUEST)
+        
+    # def get_authenticators(self):   
+    #     if self.request.method == "POST":
+    #         self.authentication_classes = [TokenAuthentication]
+    #     return [auth() for auth in self.authentication_classes]
 
     # validate if the url is the correct format
     def validate_url(self, url: str) -> bool:
