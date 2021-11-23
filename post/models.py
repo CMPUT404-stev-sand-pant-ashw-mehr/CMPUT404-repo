@@ -11,9 +11,9 @@ class Post(models.Model):
     # id of the post
     id = models.CharField(primary_key=True, max_length=255, blank=False, null=False)
     # where did you get this post from?
-    source = models.URLField()
+    source = models.CharField(max_length=255)
     # where is it actually from
-    origin = models.URLField()
+    origin = models.CharField(max_length=255)
     # a brief description of the post
     description = models.TextField()
 
