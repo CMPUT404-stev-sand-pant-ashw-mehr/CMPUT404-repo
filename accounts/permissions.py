@@ -1,4 +1,5 @@
 from rest_framework import authentication, permissions
+from knox.auth import TokenAuthentication
 import base64
 
 class AccessPermission(permissions.BasePermission):
@@ -10,6 +11,8 @@ class AccessPermission(permissions.BasePermission):
         expected = base64.b64encode(b'socialdistribution_t03:c404t03').decode()
         if token_type == 'Basic' and credentials == expected:
             return True
+        elif token_type == 'Token':
+            return permissions.IsAuthenticated().has_permission(request=request, view=view)
         else:
             return False
 
@@ -22,6 +25,8 @@ class CustomAuthentication(authentication.BaseAuthentication):
         expected = base64.b64encode(b'socialdistribution_t03:c404t03').decode()
         if token_type == 'Basic' and credentials == expected:
             return (True, None)
+        elif token_type == 'Token':
+            return TokenAuthentication().authenticate(request=request)
         else:
             return None
 
