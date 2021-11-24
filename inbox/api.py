@@ -137,7 +137,7 @@ class InboxViewSet(viewsets.ModelViewSet):
             # validate if author format is valid
             author_json = input["author"]
             try:
-                author_dict = json.loads(author_json)
+                author_dict = json.loads(str(author_json))
             except json.JSONDecodeError as e:
                 return False, e.msg
 
