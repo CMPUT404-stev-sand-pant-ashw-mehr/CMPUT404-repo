@@ -137,9 +137,12 @@ class InboxViewSet(viewsets.ModelViewSet):
             # validate if author format is valid
             author_json = input["author"]
             try:
-                author_dict = json.loads(author_json)
+                if type(author_json) == dict:
+                    author_dict = author_json
+                else:
+                    author_dict = json.loads(author_json)
             except json.JSONDecodeError as e:
-                return False, e.msg
+                return False, "Invalid author JSON: " + e.msg
 
             author_validation = AuthorSerializer(data=author_dict)
             if not author_validation.is_valid():
@@ -148,7 +151,8 @@ class InboxViewSet(viewsets.ModelViewSet):
             # validate if categories is a list
             category_list = input["categories"]
             try:
-                ast.literal_eval(category_list)
+                if type(category_list) != list:
+                    ast.literal_eval(category_list)
             except Exception as e:
                 return False, f"invalid cetegories list: {e}, Posted value: {category_list}"
 
@@ -158,7 +162,7 @@ class InboxViewSet(viewsets.ModelViewSet):
             if input["visibility"] not in ["PUBLIC", "FRIENDS"]:
                 return False, f"The key {input['visibility']} for field 'visibility' is invalid. 'visibility' must be either 'PUBLIC' or 'FRIENDS'"
 
-            if input["unlisted"].lower() not in ["true", "false"]:
+            if str(input["unlisted"]).lower() not in ["true", "false"]:
                 return False, f"field 'unlisted' can only be 'true' or 'false'. Current value: {input['unlisted']}"
 
         elif itemType == "like":
@@ -171,9 +175,12 @@ class InboxViewSet(viewsets.ModelViewSet):
             # validate if author format is valid
             author_json = input["author"]
             try:
-                author_dict = json.loads(author_json)
+                if type(author_json) == dict:
+                    author_dict = author_json
+                else:
+                    author_dict = json.loads(author_json)
             except json.JSONDecodeError as e:
-                return False, e.msg
+                return False, f"Invalid author JSON: " + e.msg
 
             author_validation = AuthorSerializer(data=author_dict)
             if not author_validation.is_valid():
@@ -184,9 +191,12 @@ class InboxViewSet(viewsets.ModelViewSet):
             for f in author_validation_fields:
                 author_json = input[f]
                 try:
-                    author_dict = json.loads(author_json)
+                    if type(author_json) == dict:
+                        author_dict = author_json
+                    else:
+                        author_dict = json.loads(author_json)
                 except json.JSONDecodeError as e:
-                    return False, e.msg
+                    return False, f"Invalid {f} JSON: {e.msg}"
 
                 author_validation = AuthorSerializer(data=author_dict)
                 if not author_validation.is_valid():
