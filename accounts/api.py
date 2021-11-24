@@ -38,19 +38,14 @@ class RegisterAPI(generics.GenericAPIView):
         author_schema = {
             "host" : host,
             "id": str(author_uuid),
+            "user_id": user.id,
             "url": host + '/author/' + str(author_uuid),
             "displayName": request.data["displayName"],
             "github": request.data["github"],
-            "user": user.id
+            "is_active": True
         }
 
-        author_serialized_data = AuthorSerializer(data = author_schema)
-
-        if not (author_serialized_data.is_valid()):
-            user.delete()
-            raise validators.ValidationError(author_serialized_data.errors)
-
-        author =  author_serialized_data.save(user=user)
+        Author.objects.create(**author_schema)
 
         return Response({
             'user': UserSerializer(user).data,
