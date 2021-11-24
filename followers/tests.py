@@ -93,7 +93,7 @@ class FollowerTest(TestCase):
         }
 
         r = self.client.put('/author/1/followers/http://127.0.0.1:8000/author/4/', testUser4, content_type='application/json')
-        follower_id = r.json()["follower"]
+        follower_id = r.json()["follower"]["id"]
 
         self.assertTrue(Followers.objects.filter(follower=follower_id).exists())
 

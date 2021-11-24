@@ -6,5 +6,5 @@ from .models import Followers
 class FollowerModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Followers
-        fields = ("author", "follower")
+        fields = ("author", "follower", "follow_date")
         
