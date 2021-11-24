@@ -39,16 +39,16 @@ def get_list_foregin_authors():
     if team_15_req.status_code == 500:
         pass
     else:
-        j_req_15 = team_15_req.json()
+        j_req_15 = team_15_req.json()['items']
         authors = authors + j_req_15
     
     # foreign authors from team17
-    team_17_req = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
-    if team_17_req.status_code == 500:
-        pass
-    else:
-        j_req_17 = team_17_req.json()
-        authors = authors + j_req_17
+    # team_17_req = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
+    # if team_17_req.status_code == 500:
+    #     pass
+    # else:
+    #     j_req_17 = team_17_req.json()
+    #     authors = authors + j_req_17
         
     #another team
     
@@ -75,12 +75,12 @@ def get_list_foregin_posts():
         posts = posts + j_req_15
     
     # foreign posts from team17
-    team_17_req = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
-    if team_17_req.status_code == 500:
-        pass
-    else:
-        j_req_17 = team_17_req.json()
-        posts = posts + j_req_17
+    # team_17_req = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
+    # if team_17_req.status_code == 500:
+    #     pass
+    # else:
+    #     j_req_17 = team_17_req.json()
+    #     posts = posts + j_req_17
         
     #another team
     
