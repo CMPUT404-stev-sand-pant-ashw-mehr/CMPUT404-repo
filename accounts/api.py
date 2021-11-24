@@ -11,9 +11,13 @@ from knox.models import AuthToken
 from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
+from drf_yasg.utils import swagger_auto_schema
 
 import uuid
 
+@swagger_auto_schema(
+    tags=['Register an author'],
+)
 class RegisterAPI(generics.GenericAPIView):
     """
     User & Author Registration
@@ -55,7 +59,9 @@ class RegisterAPI(generics.GenericAPIView):
             'user': UserSerializer(user).data,
         }, status=status.HTTP_201_CREATED)
 
-
+@swagger_auto_schema(
+    tags=['Author login with username and password'],
+)
 class LoginAPI(generics.GenericAPIView):
     '''
     Takes username & password to autheticate the user
@@ -86,20 +92,17 @@ class LoginAPI(generics.GenericAPIView):
             'token': AuthToken.objects.create(user)[1]
         }, status=status.HTTP_200_OK)
 
-
+@swagger_auto_schema(
+    tags=["Get all authors' profiels"],
+)
 class ProfileAPI(generics.RetrieveAPIView):
-    
-    #AUTH REMOVED
-    # permission_classes = [
-    #     permissions.IsAuthenticated,
-    # ]
-
     serializer_class = UserSerializer
 
     def get_object(self):
         return self.request.user 
-    
-    
+
+
+
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
@@ -111,7 +114,6 @@ def get_foregin_authors(request):
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
-
 
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
