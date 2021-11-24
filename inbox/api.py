@@ -142,7 +142,7 @@ class InboxViewSet(viewsets.ModelViewSet):
                 else:
                     author_dict = json.loads(author_json)
             except json.JSONDecodeError as e:
-                return False, e.msg
+                return False, "Invalid author JSON: " + e.msg
 
             author_validation = AuthorSerializer(data=author_dict)
             if not author_validation.is_valid():
@@ -180,7 +180,7 @@ class InboxViewSet(viewsets.ModelViewSet):
                 else:
                     author_dict = json.loads(author_json)
             except json.JSONDecodeError as e:
-                return False, e.msg
+                return False, f"Invalid author JSON: " + e.msg
 
             author_validation = AuthorSerializer(data=author_dict)
             if not author_validation.is_valid():
@@ -196,7 +196,7 @@ class InboxViewSet(viewsets.ModelViewSet):
                     else:
                         author_dict = json.loads(author_json)
                 except json.JSONDecodeError as e:
-                    return False, e.msg
+                    return False, f"Invalid {f} JSON: {e.msg}"
 
                 author_validation = AuthorSerializer(data=author_dict)
                 if not author_validation.is_valid():
