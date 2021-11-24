@@ -12,13 +12,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'password', 'author',)
         extra_kwargs = {'password': {'write_only': True}}
 
-    # 
     def retrieve_author(self, object):
-        try:
-            author = object.author
-            return AuthorSerializer(author).data
-        except:
-            return None
+        author = object.author
+        return AuthorSerializer(author).data
 
 class RegisterSerializer(serializers.ModelSerializer):
     

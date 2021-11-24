@@ -166,9 +166,12 @@ class FollowerViewSet(viewsets.ModelViewSet):
         
         if author.user != request.user:
             return Response(status=status.HTTP_403_FORBIDDEN)
-
-        stream = io.BytesIO(request.body)
-        put_data = JSONParser().parse(stream)
+        
+        try:
+            stream = io.BytesIO(request.body)
+            put_data = JSONParser().parse(stream)
+        except:
+            put_data = dict()
 
         # remove trailing slash
         if foreign_author_id[-1] == '/':
@@ -270,7 +273,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         
         Followers.objects.filter(follower=foreign_author_id).delete()
 
-        return Response(status=status.HTTP_200_OK)
+        return Response({"detail": "follower deleted"}, status=status.HTTP_200_OK)
 
 
     @swagger_auto_schema(
