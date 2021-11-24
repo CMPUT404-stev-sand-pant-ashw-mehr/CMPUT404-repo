@@ -69,6 +69,10 @@ To view documentation for APIs, hit the following endpoint:
    http://localhost:8000/docs/
    ```
 
+## Basic Auth
+1. username: socialdistribution_t03
+2. password: c404t03
+
 ## References
   ##### [Django Documentation](https://docs.djangoproject.com/en/3.2/)
   ##### [Django REST framework](https://www.django-rest-framework.org/api-guide/serializers/)
