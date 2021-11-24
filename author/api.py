@@ -103,11 +103,12 @@ class AuthorViewSet(viewsets.ModelViewSet):
             size = request.GET.get('size', 'None')
             author_list = self.get_queryset()
             
+            serialized_data = self.get_serializer(author_list, many=True).data
 
             if(page == "None" or size == "None"):
-                author_data = author_list.values()
+                author_data = serialized_data
             else:
-                paginator = Paginator(author_list.values(), size)
+                paginator = Paginator(serialized_data, size)
                 author_data = paginator.get_page(page).object_list
 
             for author in author_data:
