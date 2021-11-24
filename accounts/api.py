@@ -15,9 +15,6 @@ from drf_yasg.utils import swagger_auto_schema
 
 import uuid
 
-@swagger_auto_schema(
-    tags=['Register an author'],
-)
 class RegisterAPI(generics.GenericAPIView):
     """
     User & Author Registration
@@ -54,9 +51,7 @@ class RegisterAPI(generics.GenericAPIView):
             'user': UserSerializer(user).data,
         }, status=status.HTTP_201_CREATED)
 
-@swagger_auto_schema(
-    tags=['Author login with username and password'],
-)
+
 class LoginAPI(generics.GenericAPIView):
     '''
     Takes username & password to autheticate the user
@@ -87,9 +82,6 @@ class LoginAPI(generics.GenericAPIView):
             'token': AuthToken.objects.create(user)[1]
         }, status=status.HTTP_200_OK)
 
-@swagger_auto_schema(
-    tags=["Get all authors' profiels"],
-)
 class ProfileAPI(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 

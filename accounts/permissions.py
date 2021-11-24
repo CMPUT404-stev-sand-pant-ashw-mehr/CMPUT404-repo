@@ -4,7 +4,6 @@ import base64
 
 class AccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        print("worked1")
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token_type, _, credentials = auth_header.partition(' ')
 
@@ -18,7 +17,6 @@ class AccessPermission(permissions.BasePermission):
 
 class CustomAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
-        print("worked2")
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         token_type, _, credentials = auth_header.partition(' ')
 
