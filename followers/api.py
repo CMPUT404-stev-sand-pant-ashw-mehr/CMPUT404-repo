@@ -20,7 +20,7 @@ from rest_framework.parsers import JSONParser
 
 class FollowerViewSet(viewsets.ModelViewSet):
     serializer_class = FollowerModelSerializer
-    
+
     def initialize_request(self, request, *args, **kwargs):
         self.action = self.action_map.get(request.method.lower())
         return super().initialize_request(request, *args, kwargs)
@@ -151,7 +151,6 @@ class FollowerViewSet(viewsets.ModelViewSet):
     )
 
     # PUT a follower to the specified author
-    # NEED CONNECTION
     def put_follower(self, request, author_id=None, foreign_author_id=None):
         
         # node check
@@ -162,73 +161,72 @@ class FollowerViewSet(viewsets.ModelViewSet):
         #check user
         try:
             author = Author.objects.get(id=author_id)
-        except:
+        except Author.DoesNotExist:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
         if author.user != request.user:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        # Remove trailing slash
+        stream = io.BytesIO(request.body)
+        put_data = JSONParser().parse(stream)
+
+        # remove trailing slash
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
-
-        try:
-            content_type = request.META["CONTENT_TYPE"]
-
-            if content_type != "application/json":
-                return Response({"detail": "invalid content type. Required: application/json"}, status=status.HTTP_400_BAD_REQUEST)
-
-            stream = io.BytesIO(request.body)
-            data = JSONParser().parse(stream)
-
-            # Remove trailing slashes of the url
-            try:
-                id_url = data["id"]
-                
-                if not self.validate_url(id_url):
-                    return Response({"detail": "follower id format invalid"}, status=status.HTTP_400_BAD_REQUEST)
-
-                # Remove trailing slash
-                if id_url[-1] == '/':
-                    data["id"] = id_url[:-1]
-            except KeyError:
-                return Response({"detail": "id Field of PUT data missing"}, status=status.HTTP_400_BAD_REQUEST)
-
-            serializer = AuthorSerializer(data=data)
-
-            if serializer.is_valid():
-                # validate if the id in request body matches the foreign_author_id
-                request_body = serializer.validated_data
-                follower_url = str(request_body["url"])
-
-                if not self.validate_url(follower_url):
-                    return Response({"detail": "follower url format invalid"}, status=status.HTTP_400_BAD_REQUEST)
-
-                # Remove trailing slash
-                if follower_url[-1] == '/':
-                    follower_url = follower_url[:-1]
             
-                if follower_url != foreign_author_id.strip():
-                    return Response({"detail": "author id in URL does not match id in PUT body"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            foreign_author = Author.objects.get(id=foreign_author_id)
+            invalid_keys = list()
+            #Update the foreign_author in Author model by given key
+            for key in put_data:
+                if self.check_author_key(key.strip(), ['displayName', 'github', 'profileImage']):
+                    value = put_data[key]
+                    setattr(foreign_author, key, value)
+                    foreign_author.save()
                 else:
-                    # Save author to database via serializer
-                    serializer.save()
-            else:
-                return Response({"detail": "Invalid json for author", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"detail": "PUT missing body with content_type: application/json"}, status=status.HTTP_400_BAD_REQUEST)
+                    invalid_keys.append(key)            
+            
+            newFollow = Followers.objects.create(author=author, follower=foreign_author)
 
-        # Store to Follower Database
-        data = dict()
-        data["author"] = author_id
-        data["follower"] = foreign_author_id.strip()
-        serializer = FollowerModelSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"detail": "error when storing to database", "error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "follow": FollowerModelSerializer(newFollow).data, 
+                "follower": AuthorSerializer(foreign_author).data,
+                "object": AuthorSerializer(author).data,
+                "invalid keys": invalid_keys
+            }, status=status.HTTP_201_CREATED)
 
+        except Author.DoesNotExist:
+
+            if request.META.get('CONTENT_TYPE') != 'application/json':
+                return Response({"detail": "PUT missing body with content_type: application/json"}, status=status.HTTP_400_BAD_REQUEST)
+
+            required_fields = {'displayName', 'github', 'profileImage', 'host', 'url'}
+            
+            if not required_fields.issubset(set(put_data)):
+                return Response({"detail": f"Keys missing for put: {required_fields.difference(put_data)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            newAuthorKeys = {
+                "id": foreign_author_id,
+                "is_active": True
+            }
+
+            invalid_keys = list()
+            for key in put_data:
+                if self.check_author_key(key.strip(), required_fields):
+                    newAuthorKeys[key] = put_data[key]
+                else:
+                    invalid_keys.append(key)
+
+            newAuthor = Author.objects.create(**newAuthorKeys)
+
+            newFollow = Followers.objects.create(author=author, follower=newAuthor)
+            
+            return Response({
+                "follow": FollowerModelSerializer(newFollow).data, 
+                "follower": AuthorSerializer(newAuthor).data,
+                "object": AuthorSerializer(author).data,
+                "invalid keys": invalid_keys
+            }, status=status.HTTP_201_CREATED)
 
 
     @swagger_auto_schema(
@@ -321,3 +319,9 @@ class FollowerViewSet(viewsets.ModelViewSet):
         except:
             return False
 
+    def check_author_key(self, key, valid_keys):
+        # Only these keys are allowed to be changed for Author
+        if key in valid_keys:
+            return True
+        else:
+            return False
