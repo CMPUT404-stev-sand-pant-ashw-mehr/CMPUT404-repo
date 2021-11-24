@@ -49,6 +49,8 @@ def get_list_foregin_authors():
     else:
         j_req_17 = team_17_req.json()
         authors = authors + j_req_17
+        
+    #another team
     
     return authors
 
@@ -79,6 +81,8 @@ def get_list_foregin_posts():
     else:
         j_req_17 = team_17_req.json()
         posts = posts + j_req_17
+        
+    #another team
     
     
     return posts
