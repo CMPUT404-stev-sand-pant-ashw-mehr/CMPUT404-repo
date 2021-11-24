@@ -5,6 +5,7 @@ import re
 
 from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
+from accounts.permissions import CustomAuthentication, AccessPermission
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from author.serializer import AuthorSerializer
@@ -13,9 +14,24 @@ from inbox.models import Inbox
 from author.models import Author
 
 class InboxViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     serializer_class = InboxSerializer
+
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["post_inbox"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["post_inbox"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
+
 
     # GET the inbox of the author
     def get_inbox(self, request, author_id=None):
