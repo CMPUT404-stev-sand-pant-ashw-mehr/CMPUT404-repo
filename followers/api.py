@@ -1,4 +1,5 @@
 from rest_framework import response
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
@@ -328,3 +329,48 @@ class FollowerViewSet(viewsets.ModelViewSet):
             return True
         else:
             return False
+
+        
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def get_friends(request, author_id):
+    valid = is_valid_node(request)
+    if not valid:
+        return Response({"message":"not a valid node"}, status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        Author.objects.filter(id = author_id)
+    except Author.DoesNotExist:
+        return Response({"message": "author does not exist"}, status=status.HTTP_404_NOT_FOUND)
+    
+    follow = Followers.objects.filter(author_id=author_id)
+    serializer = FollowerModelSerializer(follow, many=True)
+    
+    print(serializer.data)
+    followers = []
+    friends = []
+    
+    for author in serializer.data:
+        follower_id = author['follower']
+        try:
+            follower = Author.objects.get(id=follower_id)
+            serializer = AuthorSerializer(follower)
+            followers.append(serializer.data)
+        except not follow.exists():
+            return Response({"message": "No such follower!"})
+        
+    for f in followers:
+        follower_id = f['id'].split("/")[-1]
+        if Followers.objects.filter(follower_id=author_id, author_id=follower_id).exists():
+            # check if mutually followed, if ture, friend
+            friends.append(f)
+            
+    return Response({"type": "friends","items":friends}, status=status.HTTP_200_OK)
+    
+    
+    
+    
+    
+    
+    
