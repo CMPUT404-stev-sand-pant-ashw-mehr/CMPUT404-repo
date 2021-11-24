@@ -25,8 +25,9 @@ def is_valid_node(request):
     return True
 
 def get_list_foregin_authors():
-    req = requests.get('https://cmput-404-socialdistribution.herokuapp.com/service/author/', auth=('socialdistribution_t18','c404t18'), headers={'Referer': "http://127.0.0.1:9000/"})
-    j_req = req.json()
+    # foreign posts for team15
+    team_15_req = requests.get('https://unhindled.herokuapp.com/service/authors/', headers={'Referer': "http://127.0.0.1:9000/"})
+    j_req = team_15_req.json()['items']
     authors = []
     for i in j_req:
         authors.append(i)
@@ -34,7 +35,8 @@ def get_list_foregin_authors():
 
 
 def get_list_foregin_posts():
-    req = requests.get('https://cmput-404-socialdistribution.herokuapp.com/service/allposts/', auth=('socialdistribution_t18','c404t18'), headers={'Referer': "http://127.0.0.1:9000/"})
-    j_req = req.json()
-    foregin_posts = j_req['posts']
+    # foreign posts for team15
+    team_15_req = requests.get('https://unhindled.herokuapp.com/service/allposts/', headers={'Referer': "http://127.0.0.1:9000/"})
+    j_req = team_15_req.json()
+    foregin_posts = j_req
     return foregin_posts
