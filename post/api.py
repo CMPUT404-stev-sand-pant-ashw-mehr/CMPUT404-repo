@@ -169,6 +169,23 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return Response(post_data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema (
+        operation_description="GET /service/posts/",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {
+                        "type": "posts",
+                        "page": "5",
+                        "size": "2",
+                        "id": "http://127.0.0.1:8000/author/46527adf186c48a993bab65ed54c26e2/posts",
+                        "items": "[Post Object 1, Post Object 2]",
+                    }
+                }
+            )   
+        }
+    )
     # GET all public posts on this server
     def get_public_posts(self, request):
         # node check
@@ -178,7 +195,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         post_set = Post.objects.filter(visibility="PUBLIC", unlisted=False)
         
-        return Response(self.get_post_from_query(posts_query=post_set), status=status.HTTP_200_OK)
+        return Response(self.get_post_from_query(posts_query=post_set, request=request), status=status.HTTP_200_OK)
             
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/posts/",
@@ -219,7 +236,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if not posts_query.exists():
             return Response({"detail": "Author not found or does not have public posts"}, status=status.HTTP_404_NOT_FOUND)
         
-        return Response(self.get_post_from_query(posts_query=posts_query), status=status.HTTP_200_OK)
+        return Response(self.get_post_from_query(posts_query=posts_query, request=request), status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="PUT service/author/< AUTHOR_ID >/posts/< POST_ID >",
