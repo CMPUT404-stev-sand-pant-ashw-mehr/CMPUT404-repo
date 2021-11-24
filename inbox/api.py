@@ -151,7 +151,8 @@ class InboxViewSet(viewsets.ModelViewSet):
             # validate if categories is a list
             category_list = input["categories"]
             try:
-                ast.literal_eval(category_list)
+                if type(category_list) != list:
+                    ast.literal_eval(category_list)
             except Exception as e:
                 return False, f"invalid cetegories list: {e}, Posted value: {category_list}"
 
