@@ -360,7 +360,7 @@ def get_friends(request, author_id):
             follower = Author.objects.get(id=follower_id)
             serializer = AuthorSerializer(follower)
             followers.append(serializer.data)
-        except not follow.exists():
+        except Author.DoesNotExist:
             return Response({"message": "No such follower!"})
         
     for f in followers:
