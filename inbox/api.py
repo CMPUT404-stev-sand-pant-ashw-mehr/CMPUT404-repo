@@ -137,7 +137,10 @@ class InboxViewSet(viewsets.ModelViewSet):
             # validate if author format is valid
             author_json = input["author"]
             try:
-                author_dict = json.loads(str(author_json))
+                if type(author_json) == dict:
+                    author_dict = author_json
+                else:
+                    author_dict = json.loads(author_json)
             except json.JSONDecodeError as e:
                 return False, e.msg
 
@@ -171,7 +174,10 @@ class InboxViewSet(viewsets.ModelViewSet):
             # validate if author format is valid
             author_json = input["author"]
             try:
-                author_dict = json.loads(str(author_json))
+                if type(author_json) == dict:
+                    author_dict = author_json
+                else:
+                    author_dict = json.loads(author_json)
             except json.JSONDecodeError as e:
                 return False, e.msg
 
@@ -184,7 +190,10 @@ class InboxViewSet(viewsets.ModelViewSet):
             for f in author_validation_fields:
                 author_json = input[f]
                 try:
-                    author_dict = json.loads(str(author_json))
+                    if type(author_json) == dict:
+                        author_dict = author_json
+                    else:
+                        author_dict = json.loads(author_json)
                 except json.JSONDecodeError as e:
                     return False, e.msg
 
