@@ -1,6 +1,6 @@
 from django.forms.models import model_to_dict
-from rest_framework.decorators import api_view
 from author.models import Author
+from author.serializer import AuthorSerializer
 from comment.models import Comment
 from post.models import Post, Categories
 from rest_framework import viewsets, status
@@ -12,7 +12,7 @@ from django.core.paginator import Paginator
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from accounts.permissions import CustomAuthentication, AccessPermission
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import api_view
 from accounts.helper import  is_valid_node
 
 import uuid
@@ -26,13 +26,13 @@ class PostViewSet(viewsets.ModelViewSet):
      return super().initialize_request(request, *args, kwargs)
     
     def get_authenticators(self):
-        if self.action in ["get_post", "get_recent_post"]:
+        if self.action in ["get_post", "get_public_posts", "get_recent_post"]:
             return [CustomAuthentication()]
         else:
             return [TokenAuthentication()]
     
     def get_permissions(self):
-        if self.action in ["get_post", "get_recent_post"]:
+        if self.action in ["get_post", "get_public_posts", "get_recent_post"]:
             return [AccessPermission()]
         else:
             return [IsAuthenticated()]
@@ -169,7 +169,17 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return Response(post_data, status=status.HTTP_200_OK)
 
+    # GET all public posts on this server
+    def get_public_posts(self, request):
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
 
+        post_set = Post.objects.filter(visibility="PUBLIC", unlisted=False)
+        
+        return Response(self.get_post_from_query(posts_query=post_set), status=status.HTTP_200_OK)
+            
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/posts/",
         responses={
@@ -209,82 +219,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if not posts_query.exists():
             return Response({"detail": "Author not found or does not have public posts"}, status=status.HTTP_404_NOT_FOUND)
         
-        # Order by recent
-        posts_query = posts_query.order_by('-published')
-
-        page = request.GET.get('page', "1")
-        size = request.GET.get('size', "5")
-
-        if(page == "None" or size == "None"):
-            post_data_list = posts_query.values()
-        else:
-            paginator = Paginator(posts_query.values(), size)
-            post_data_list = paginator.get_page(page).object_list
-
-        return_list = list()
-
-        for post_data in post_data_list:
-            # This is the same as the get_post
-            # Should've made it in the serializer but too late to figure that out
-            author_id = post_data['author_id']
-            post_id = post_data['id']
-            author_detail = model_to_dict(Author.objects.get(id=author_id))
-            author_detail['id'] = author_detail['url']
-
-            post_data['id'] = author_detail['id'] + '/posts/' + post_data['id']
-            post_data['author'] = author_detail
-
-            categories_query = Categories.objects.filter(post=post_id).values()
-            categories = [c['category'] for c in categories_query]
-
-            post_data['categories'] = categories
-
-            post_data['comments'] = post_data['id'] + '/comments'
-
-            comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
-            comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
-            comment_object_list = comment_details.get_page(1).object_list.values()
-
-            comment_list = list()
-            for entry in comment_object_list:
-                comment_author_id = entry.pop('author_id', None)
-                author_details = model_to_dict(Author.objects.get(id=comment_author_id))
-                author_details['id'] = author_details['url']
-                entry['author'] = author_details
-                entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
-                comment_list.append(entry)
-
-            post_data["count"] = comment_query.distinct().count()
-
-            if post_data["count"] > 0:
-                post_data["commentsSrc"] = {
-                    "type": "comments",
-                    "page": 1,
-                    "size": 5,
-                    "post": post_data["id"],
-                    "id": post_data["comments"],
-                    "comments": comment_list
-                }
-            else:
-                post_data["commentsSrc"] = dict()
-            return_list.append(post_data)   
-
-        next = None
-        previous = None
-        if(page != "None"):
-            next = ((int(page) + 1)) if Paginator(posts_query.values(), size).get_page(page).has_next() else None 
-            previous = ((int(page) - 1)) if Paginator(posts_query.values(), size).get_page(page).has_previous() else None
-
-        return Response({
-            "type": "posts",
-            "page": page,
-            "size": size,
-            "id": request.build_absolute_uri(),
-            "items": return_list,
-            "next": next, 
-            "previous": previous
-        }, status=status.HTTP_200_OK)
-
+        return Response(self.get_post_from_query(posts_query=posts_query), status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="PUT service/author/< AUTHOR_ID >/posts/< POST_ID >",
@@ -565,17 +500,80 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Post deleted"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"detail": e.args}, status=status.HTTP_404_NOT_FOUND)    
-        
-@api_view(['GET'])
-@authentication_classes([CustomAuthentication])
-@permission_classes([AccessPermission])
-def get_posts(request):
-    
-    # node check
-    valid = is_valid_node(request)
-    if not valid:
-        return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
-    
-    if request.method == "GET":
-        post_set = Post.objects.filter(visibility="PUBLIC").values()
-        return Response({"posts": post_set}, status=status.HTTP_200_OK)
+
+
+    def get_post_from_query(self, request, posts_query) -> dict():
+        # Order by recent
+        posts_query = posts_query.order_by('-published')
+
+        page = request.GET.get('page', "1")
+        size = request.GET.get('size', "5")
+
+        if(page == "None" or size == "None"):
+            post_data_list = posts_query.values()
+        else:
+            paginator = Paginator(posts_query.values(), size)
+            post_data_list = paginator.get_page(page).object_list
+
+        return_list = list()
+
+        for post_data in post_data_list:
+            # This is the same as the get_post
+            # Should've made it in the serializer but too late to figure that out
+            author_id = post_data['author_id']
+            post_id = post_data['id']
+            author_detail = model_to_dict(Author.objects.get(id=author_id))
+
+            post_data['id'] = author_detail['url'] + '/posts/' + post_data['id']
+            post_data['author'] = author_detail
+
+            categories_query = Categories.objects.filter(post=post_id).values()
+            categories = [c['category'] for c in categories_query]
+
+            post_data['categories'] = categories
+
+            post_data['comments'] = post_data['id'] + '/comments'
+
+            comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
+            comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
+            comment_object_list = comment_details.get_page(1).object_list.values()
+
+            comment_list = list()
+            for entry in comment_object_list:
+                comment_author_id = entry.pop('author_id', None)
+                author_details = model_to_dict(Author.objects.get(id=comment_author_id))
+                author_details['id'] = author_details['url']
+                entry['author'] = author_details
+                entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']
+                comment_list.append(entry)
+
+            post_data["count"] = comment_query.distinct().count()
+
+            if post_data["count"] > 0:
+                post_data["commentsSrc"] = {
+                    "type": "comments",
+                    "page": 1,
+                    "size": 5,
+                    "post": post_data["id"],
+                    "id": post_data["comments"],
+                    "comments": comment_list
+                }
+            else:
+                post_data["commentsSrc"] = dict()
+            return_list.append(post_data)   
+
+        next = None
+        previous = None
+        if(page != "None"):
+            next = ((int(page) + 1)) if Paginator(posts_query.values(), size).get_page(page).has_next() else None 
+            previous = ((int(page) - 1)) if Paginator(posts_query.values(), size).get_page(page).has_previous() else None
+
+        return {
+            "type": "posts",
+            "page": page,
+            "size": size,
+            "id": request.build_absolute_uri(),
+            "items": return_list,
+            "next": next, 
+            "previous": previous
+        }
