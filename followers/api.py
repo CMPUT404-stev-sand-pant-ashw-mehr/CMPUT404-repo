@@ -168,6 +168,9 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if author.user != request.user:
             return Response(status=status.HTTP_403_FORBIDDEN)
         
+        if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
+            return Response({"detail": "follower already added!"}, status=status.HTTP_409_CONFLICT)
+            
         try:
             stream = io.BytesIO(request.body)
             put_data = JSONParser().parse(stream)
