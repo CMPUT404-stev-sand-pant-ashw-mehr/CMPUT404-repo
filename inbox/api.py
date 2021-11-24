@@ -162,7 +162,7 @@ class InboxViewSet(viewsets.ModelViewSet):
             if input["visibility"] not in ["PUBLIC", "FRIENDS"]:
                 return False, f"The key {input['visibility']} for field 'visibility' is invalid. 'visibility' must be either 'PUBLIC' or 'FRIENDS'"
 
-            if input["unlisted"].lower() not in ["true", "false"]:
+            if str(input["unlisted"]).lower() not in ["true", "false"]:
                 return False, f"field 'unlisted' can only be 'true' or 'false'. Current value: {input['unlisted']}"
 
         elif itemType == "like":
