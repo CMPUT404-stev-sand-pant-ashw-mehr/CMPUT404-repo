@@ -25,7 +25,8 @@ class FollowerTest(TestCase):
             "displayName": "TestUser1",
             "url": "http://127.0.0.1:8000/author/1",
             "github": "https://github.com/testUser1",
-            "profileImage":"None"
+            "profileImage":"None",
+            "is_active": True
         }
 
         self.testUser2 = {
@@ -35,7 +36,8 @@ class FollowerTest(TestCase):
             "displayName": "TestUser2",
             "url": "http://127.0.0.1:8000/author/2",
             "github": "https://github.com/testUser2",
-            "profileImage":"None"
+            "profileImage":"None",
+            "is_active": True
         }
 
         self.testUser3 = {
@@ -45,7 +47,8 @@ class FollowerTest(TestCase):
             "displayName": "TestUser3",
             "url": "http://127.0.0.1:8000/author/3",
             "github": "https://github.com/testUser3",
-            "profileImage":"None"
+            "profileImage":"None",
+            "is_active": True
         }
 
         self.testUser1Obj = Author.objects.create(**self.testUser1)

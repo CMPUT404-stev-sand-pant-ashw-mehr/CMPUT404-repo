@@ -149,7 +149,7 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        if not Author.objects.filter(id=author_id).exists():
+        if not Author.objects.exclude(is_active=False).filter(id=author_id).exists():
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
             
         query_set = Like.objects.filter(author=author_id).all()

@@ -225,7 +225,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         author_id = self.remove_backslash(author_id)
 
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         

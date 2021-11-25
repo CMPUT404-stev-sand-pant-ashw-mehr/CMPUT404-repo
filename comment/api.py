@@ -112,7 +112,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             post_id = post_id[:-1]
 
         try:
-            author = Author.objects.exclude(user__isnull=True).get(id=author_id)
+            author = Author.objects.exclude(is_active=False).exclude(user__isnull=True).get(id=author_id)
             Post.objects.get(id=post_id, author_id=author_id)
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -204,7 +204,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             post_id = post_id[:-1]
         
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
 
