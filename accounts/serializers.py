@@ -3,21 +3,18 @@ from rest_framework import serializers
 from django.contrib.auth.models import User 
 from django.contrib.auth import authenticate
 from author.models import Author
+from . models import Node
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User 
         # add 'email' back
-        fields = ('id', 'username', 'password', 'author')
+        fields = ('id', 'username', 'password', 'author',)
         extra_kwargs = {'password': {'write_only': True}}
 
-    # 
     def retrieve_author(self, object):
-        try:
-            author = object.author
-            return AuthorSerializer(author).data
-        except:
-            return None
+        author = object.author
+        return AuthorSerializer(author).data
 
 class RegisterSerializer(serializers.ModelSerializer):
     
@@ -62,4 +59,9 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Incorrect username or password.")
         
         return data
+    
+class NodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Node
+        fields = ['host']
 

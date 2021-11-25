@@ -143,7 +143,7 @@ export const logout = () => (dispatch, getState) => {
 
 export const getAuthors = () => (dispatch, getState) => {
   axios
-    .get(`/authors/`, tokenConfig(getState))
+    .get(`/authors/`, {tokenConfig(getState)})
     .then((res) => {
       dispatch({
         type: GET_AUTHORS,

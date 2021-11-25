@@ -1,3 +1,5 @@
+from re import I
+import uuid
 from comment.models import Comment
 from author.models import Author
 from post.models import Post
@@ -12,12 +14,29 @@ from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.permissions import AccessPermission, CustomAuthentication
+from accounts.helper import is_valid_node
 
+import uuid
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["get_post_comments", ]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["get_post_comments",]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
 
 
     @swagger_auto_schema(
@@ -82,12 +101,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     )
 
     def get_post_comments(self, request, author_id=None, post_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
 
         try:
-            author = Author.objects.exclude(user__isnull=True).get(id=author_id)
+            author = Author.objects.exclude(is_active=False).exclude(user__isnull=True).get(id=author_id)
             Post.objects.get(id=post_id, author_id=author_id)
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -168,26 +193,31 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     # POST to add new comment
     def add_comment_to_post(self, request, author_id=None, post_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
         
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        if author.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
 
         try:
             Post.objects.get(id=post_id, author=author_id)
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
+        
 
         try:
+            comment_id = uuid.uuid4().hex
             keys = {
+                "id": comment_id,
                 "type": request.data["type"],
                 "author_id": author_id,
                 "post_id": post_id,
@@ -197,9 +227,10 @@ class CommentViewSet(viewsets.ModelViewSet):
             comment = Comment.objects.create(**keys)
             comment.save()
             return Response({
-                "id": comment.id,
+                "id": comment_id,
                 "published": comment.published,
-                **keys
+                **keys,
             }, status=status.HTTP_201_CREATED)
+      
         except KeyError as e:
             return Response({"detail": "Missing fields", "message": e.args}, status=status.HTTP_400_BAD_REQUEST)

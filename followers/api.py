@@ -1,7 +1,9 @@
 from rest_framework import response
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
+from accounts.permissions import AccessPermission, CustomAuthentication
 from followers.serializers import FollowerModelSerializer
 from author.serializer import AuthorSerializer
 from author.models import Author
@@ -12,14 +14,29 @@ from rest_framework.permissions import IsAuthenticated
 from urllib.parse import urlparse
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.helper import is_valid_node
 
 import io
 from rest_framework.parsers import JSONParser
 
 class FollowerViewSet(viewsets.ModelViewSet):
     serializer_class = FollowerModelSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.action = self.action_map.get(request.method.lower())
+        return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["list", "check_follower"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["list", "check_follower"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
 
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/followers",
@@ -73,7 +90,14 @@ class FollowerViewSet(viewsets.ModelViewSet):
     )
 
     # GET list of followers
+    # NEED CONNECTION
     def list(self, request, author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         get_object_or_404(Author, pk=author_id) # Check if user exists
 
         follower_rows = Followers.objects.filter(author=author_id).values()
@@ -129,76 +153,87 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # PUT a follower to the specified author
     def put_follower(self, request, author_id=None, foreign_author_id=None):
-        # check user
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
+        #check user
         try:
-            author = Author.objects.get(id=author_id)
-        except:
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
+        except Author.DoesNotExist:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
         if author.user != request.user:
             return Response(status=status.HTTP_403_FORBIDDEN)
+        
+        if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
+            return Response({"detail": "follower already added!"}, status=status.HTTP_409_CONFLICT)
+            
+        try:
+            stream = io.BytesIO(request.body)
+            put_data = JSONParser().parse(stream)
+        except:
+            put_data = dict()
 
-        # Remove trailing slash
+        # remove trailing slash
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
-
-        try:
-            content_type = request.META["CONTENT_TYPE"]
-
-            if content_type != "application/json":
-                return Response({"detail": "invalid content type. Required: application/json"}, status=status.HTTP_400_BAD_REQUEST)
-
-            stream = io.BytesIO(request.body)
-            data = JSONParser().parse(stream)
-
-            # Remove trailing slashes of the url
-            try:
-                id_url = data["id"]
-                
-                if not self.validate_url(id_url):
-                    return Response({"detail": "follower id format invalid"}, status=status.HTTP_400_BAD_REQUEST)
-
-                # Remove trailing slash
-                if id_url[-1] == '/':
-                    data["id"] = id_url[:-1]
-            except KeyError:
-                return Response({"detail": "id Field of PUT data missing"}, status=status.HTTP_400_BAD_REQUEST)
-
-            serializer = AuthorSerializer(data=data)
-
-            if serializer.is_valid():
-                # validate if the id in request body matches the foreign_author_id
-                request_body = serializer.validated_data
-                follower_url = str(request_body["url"])
-
-                if not self.validate_url(follower_url):
-                    return Response({"detail": "follower url format invalid"}, status=status.HTTP_400_BAD_REQUEST)
-
-                # Remove trailing slash
-                if follower_url[-1] == '/':
-                    follower_url = follower_url[:-1]
             
-                if follower_url != foreign_author_id.strip():
-                    return Response({"detail": "author id in URL does not match id in PUT body"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            foreign_author = Author.objects.exclude(is_active=False).get(id=foreign_author_id)
+            invalid_keys = list()
+            #Update the foreign_author in Author model by given key
+            for key in put_data:
+                if self.check_author_key(key.strip(), ['displayName', 'github', 'profileImage']):
+                    value = put_data[key]
+                    setattr(foreign_author, key, value)
+                    foreign_author.save()
                 else:
-                    # Save author to database via serializer
-                    serializer.save()
-            else:
-                return Response({"detail": "Invalid json for author", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"detail": "PUT missing body with content_type: application/json"}, status=status.HTTP_400_BAD_REQUEST)
+                    invalid_keys.append(key)            
+            
+            newFollow = Followers.objects.create(author=author, follower=foreign_author)
 
-        # Store to Follower Database
-        data = dict()
-        data["author"] = author_id
-        data["follower"] = foreign_author_id.strip()
-        serializer = FollowerModelSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"detail": "error when storing to database", "error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "follow": FollowerModelSerializer(newFollow).data, 
+                "follower": AuthorSerializer(foreign_author).data,
+                "object": AuthorSerializer(author).data,
+                "invalid keys": invalid_keys
+            }, status=status.HTTP_201_CREATED)
 
+        except Author.DoesNotExist:
+
+            if request.META.get('CONTENT_TYPE') != 'application/json':
+                return Response({"detail": "PUT missing body with content_type: application/json"}, status=status.HTTP_400_BAD_REQUEST)
+
+            required_fields = {'displayName', 'github', 'profileImage', 'host', 'url'}
+            
+            if not required_fields.issubset(set(put_data)):
+                return Response({"detail": f"Keys missing for put: {required_fields.difference(put_data)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            newAuthorKeys = {
+                "id": foreign_author_id,
+                "is_active": True
+            }
+
+            invalid_keys = list()
+            for key in put_data:
+                if self.check_author_key(key.strip(), required_fields):
+                    newAuthorKeys[key] = put_data[key]
+                else:
+                    invalid_keys.append(key)
+
+            newAuthor = Author.objects.create(**newAuthorKeys)
+
+            newFollow = Followers.objects.create(author=author, follower=newAuthor)
+            
+            return Response({
+                "follow": FollowerModelSerializer(newFollow).data, 
+                "follower": AuthorSerializer(newAuthor).data,
+                "object": AuthorSerializer(author).data,
+                "invalid keys": invalid_keys
+            }, status=status.HTTP_201_CREATED)
 
 
     @swagger_auto_schema(
@@ -217,9 +252,16 @@ class FollowerViewSet(viewsets.ModelViewSet):
         tags=['Delete a Follower'],
     )
     # DELETE a follower of a given author
+    # NEED CONNECTION
     def delete_follower(self, request, author_id=None, foreign_author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -235,7 +277,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         
         Followers.objects.filter(follower=foreign_author_id).delete()
 
-        return Response(status=status.HTTP_200_OK)
+        return Response({"detail": "follower deleted"}, status=status.HTTP_200_OK)
 
 
     @swagger_auto_schema(
@@ -257,7 +299,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
         tags=['Check if Follower'],
     )
     # GET if the author has the follower with the given id on the server
+    # NEED CONNECTION
     def check_follower(self, request, author_id=None, foreign_author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
         get_object_or_404(User, pk=author_id) # Check if user exists
 
@@ -278,3 +326,54 @@ class FollowerViewSet(viewsets.ModelViewSet):
         except:
             return False
 
+    def check_author_key(self, key, valid_keys):
+        # Only these keys are allowed to be changed for Author
+        if key in valid_keys:
+            return True
+        else:
+            return False
+
+        
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def get_friends(request, author_id):
+    valid = is_valid_node(request)
+    if not valid:
+        return Response({"message":"not a valid node"}, status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        Author.objects.exclude(is_active=False).filter(id = author_id)
+    except Author.DoesNotExist:
+        return Response({"message": "author does not exist"}, status=status.HTTP_404_NOT_FOUND)
+    
+    follow = Followers.objects.filter(author_id=author_id)
+    serializer = FollowerModelSerializer(follow, many=True)
+    
+    print(serializer.data)
+    followers = []
+    friends = []
+    
+    for author in serializer.data:
+        follower_id = author['follower']
+        try:
+            follower = Author.objects.exclude(is_active=False).get(id=follower_id)
+            serializer = AuthorSerializer(follower)
+            followers.append(serializer.data)
+        except Author.DoesNotExist:
+            return Response({"message": "No such follower!"})
+        
+    for f in followers:
+        follower_id = f['id'].split("/")[-1]
+        if Followers.objects.filter(follower_id=author_id, author_id=follower_id).exists():
+            # check if mutually followed, if ture, friend
+            friends.append(f)
+            
+    return Response({"type": "friends","items":friends}, status=status.HTTP_200_OK)
+    
+    
+    
+    
+    
+    
+    

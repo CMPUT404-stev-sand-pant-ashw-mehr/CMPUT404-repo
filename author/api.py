@@ -1,9 +1,7 @@
-from rest_framework.generics import get_object_or_404
 from author.models import Author
 from .serializer import AuthorSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
 from rest_framework.response import Response 
 from django.http import HttpRequest
 from rest_framework.response import Response
@@ -14,14 +12,29 @@ from knox.auth import TokenAuthentication
 from urllib.parse import urlparse
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.helper import is_valid_node
+from accounts.permissions import CustomAuthentication, AccessPermission
 
 # Viewset for Author
 class AuthorViewSet(viewsets.ModelViewSet):
-    queryset = Author.objects.exclude(user__isnull=True).order_by('id')
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
+    queryset = Author.objects.exclude(user__isnull=True).exclude(is_active=False).defer('is_active').order_by('id')
     serializer_class = AuthorSerializer
+    
+    def initialize_request(self, request, *args, **kwargs):
+     self.action = self.action_map.get(request.method.lower())
+     return super().initialize_request(request, *args, kwargs)
+    
+    def get_authenticators(self):
+        if self.action in ["list", "get_author"]:
+            return [CustomAuthentication()]
+        else:
+            return [TokenAuthentication()]
+    
+    def get_permissions(self):
+        if self.action in ["list", "get_author"]:
+            return [AccessPermission()]
+        else:
+            return [IsAuthenticated()]
 
     @swagger_auto_schema(
         operation_description="GET /service/authors",
@@ -69,29 +82,31 @@ class AuthorViewSet(viewsets.ModelViewSet):
                         }
                 }
                 
-            ),
-            "400": openapi.Response(
-                description="Bad Request",
-                examples={
-                    "application/json":{"message": "Error details..."}
-                }
             )
         },
         tags=['Get all Authors'],
     )
 
     # GET all authors
+    # NEED CONNECTION
     def list(self, request: HttpRequest):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         try:
             page = request.GET.get('page', 'None')
             size = request.GET.get('size', 'None')
             author_list = self.get_queryset()
             
+            serialized_data = self.get_serializer(author_list, many=True).data
 
             if(page == "None" or size == "None"):
-                author_data = author_list.values()
+                author_data = serialized_data
             else:
-                paginator = Paginator(author_list.values(), size)
+                paginator = Paginator(serialized_data, size)
                 author_data = paginator.get_page(page).object_list
 
             for author in author_data:
@@ -136,7 +151,14 @@ class AuthorViewSet(viewsets.ModelViewSet):
     )
 
     # GET using author id
+    # NEED CONNECTION
     def get_author(self, request: HttpRequest, author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         author_id = self.remove_backslash(author_id)
         try:
             query = self.get_queryset().get(id=author_id)
@@ -148,7 +170,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     # POST and update author's profile
-
     @swagger_auto_schema(
         operation_description="POST /service/author/< AUTHOR_ID >/",
         request_body=openapi.Schema(
@@ -195,10 +216,16 @@ class AuthorViewSet(viewsets.ModelViewSet):
     )
 
     def update(self, request: HttpRequest, author_id=None):
+        
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
         author_id = self.remove_backslash(author_id)
 
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -240,6 +267,11 @@ class AuthorViewSet(viewsets.ModelViewSet):
                 "detail": e.args
             }
             return Response(response, status.HTTP_400_BAD_REQUEST)
+        
+    # def get_authenticators(self):   
+    #     if self.request.method == "POST":
+    #         self.authentication_classes = [TokenAuthentication]
+    #     return [auth() for auth in self.authentication_classes]
 
     # validate if the url is the correct format
     def validate_url(self, url: str) -> bool:
