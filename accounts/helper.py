@@ -37,11 +37,11 @@ def get_list_foregin_authors():
         authors = authors + j_req_15
     
     # foreign authors from team17
-    team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/author/', headers={'Referer': "http://127.0.0.1:9000/"})
+    team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/author/', auth=('b0951d66-06d3-4d7e-9dc5-d5047e1855f5','123456'), headers={'Referer': "http://127.0.0.1:9000/"})
     if team_17_req.status_code in (500, 404):
         pass
     else:
-        j_req_17 = team_17_req.json()
+        j_req_17 = team_17_req.json()['items']
         authors = authors + j_req_17
         
     #another team
@@ -61,11 +61,11 @@ def get_list_foregin_posts():
         posts = posts + j_req_15
     
     # foreign posts from team17
-    team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/post', headers={'Referer': "http://127.0.0.1:9000/"})
-    if team_17_req.status_code == 500:
+    team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/', auth=('b0951d66-06d3-4d7e-9dc5-d5047e1855f5','123456'), headers={'Referer': "http://127.0.0.1:9000/"})
+    if team_17_req.status_code in (500, 404):
         pass
     else:
-        j_req_17 = team_17_req.json()
+        j_req_17 = team_17_req.json()['items']
         posts = posts + j_req_17
         
     #another team
