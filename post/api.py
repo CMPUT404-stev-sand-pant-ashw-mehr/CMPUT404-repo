@@ -95,6 +95,12 @@ class PostViewSet(viewsets.ModelViewSet):
                    }
                 }
             ),
+            "403": openapi.Response(
+                description="Node not allowed",
+                examples= {
+                    "application/json": {"detail":"Node not allowed"}, 
+                }
+            ),
             "404": openapi.Response(
                 description="Post not found",
                 examples={
@@ -121,7 +127,7 @@ class PostViewSet(viewsets.ModelViewSet):
             post_query = Post.objects.get(id=post_id, author=author_id, visibility="PUBLIC")
 
             # get author. Exclude foreign author
-            author_query = Author.objects.exclude(user__isnull=True).get(id=author_id)
+            author_query = Author.objects.exclude(is_active=False).exclude(user__isnull=True).get(id=author_id)
 
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -183,7 +189,13 @@ class PostViewSet(viewsets.ModelViewSet):
                         "items": "[Post Object 1, Post Object 2]",
                     }
                 }
-            )   
+            ),
+            "403": openapi.Response(
+                description="Node not allowed",
+                examples= {
+                    "application/json": {"detail":"Node not allowed"}, 
+                }
+            ),
         }
     )
     # GET all public posts on this server
@@ -258,6 +270,13 @@ class PostViewSet(viewsets.ModelViewSet):
                     }
                 }
             ),
+            "403": openapi.Response(
+                description="Node or Author not allowed",
+                examples= {
+                    "application/json": {"detail":"Node not allowed"}, 
+                    "application/json": {"detail": "author not allowed"}
+                }
+            ),
             "404": openapi.Response(
                 description="Author not found",
                 examples={
@@ -281,13 +300,13 @@ class PostViewSet(viewsets.ModelViewSet):
         # node check
         valid = is_valid_node(request)
         if not valid:
-            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -369,25 +388,31 @@ class PostViewSet(viewsets.ModelViewSet):
             "201": openapi.Response(
                 description="Created",
             ),
-            "405": openapi.Response(
-                description="Method not Allowed"
-            ),
-            "404": openapi.Response(
-                description="Bad request",
-                examples={
-                    "application/json":{"detail": "Author not found"},
-                }
-            ),
             "400": openapi.Response(
                 description="Bad Request",
                 examples={
                     "application/json":{"detail": "Invalid visibility key"},
                     "application/json":{"detail": "unlisted must be boolean"},
                     "application/json":{"detail": "incorrect format for Categories"},
-                    "application/json":{"detail": "key(s) missing:", "message": "Error details..."},
                 }
             ),
-
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                    "application/json":{"detail": "Author not found"},
+                }
+            ),
+            
+            "403": openapi.Response(
+                description="Node or Author not allowed",
+                examples= {
+                    "application/json": {"detail":"Node not allowed"}, 
+                    "application/json": {"detail": "author not allowed"}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method not Allowed"
+            )
         },
         tags=['Create an Author\'s Post'],
     )
@@ -398,7 +423,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # node check
         valid = is_valid_node(request)
         if not valid:
-            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
         try:
             author = Author.objects.get(id=author_id)
@@ -406,7 +431,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
         if author.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "author not allowed"}, status=status.HTTP_403_FORBIDDEN)
 
         if request.method == "POST":
             post_id = str(uuid.uuid4().hex)
@@ -492,10 +517,19 @@ class PostViewSet(viewsets.ModelViewSet):
                    "application/json": {"detail": "Post deleted"}
                 }
             ),
+            "403": openapi.Response(
+                description="Node or Author not allowed",
+                examples= {
+                    "application/json": {"detail":"Node not allowed"}, 
+                    "application/json": {"detail": "author not allowed"}
+
+                }
+            ),
             "404": openapi.Response(
-                description="Post not found",
+                description="Post or Author not found",
                 examples={
-                    "application/json":{"detail": "Post not found"}
+                    "application/json":{"detail": "Post not found"},
+                    "application/json": {"detail": "author not found"}
                 }
             ),
         },
@@ -507,19 +541,19 @@ class PostViewSet(viewsets.ModelViewSet):
         # node check
         valid = is_valid_node(request)
         if not valid:
-            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
         # remove trailing slash
         if post_id[-1] == '/':
             post_id = post_id[:-1]
 
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
         if author.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "author not allowed"}, status=status.HTTP_403_FORBIDDEN)
 
         try:
             post = Post.objects.get(author=author_id, id=post_id)

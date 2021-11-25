@@ -28,7 +28,8 @@ class CommentTest(TestCase):
             "displayName": "TestUser1",
             "url": "http://127.0.0.1:8000/author/1",
             "github": "https://github.com/testUser1",
-            "profileImage": "None"
+            "profileImage": "None",
+            "is_active": True
         }
 
         self.testUser1Obj = Author.objects.create(**self.testUser1)

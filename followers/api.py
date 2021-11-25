@@ -161,7 +161,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         
         #check user
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except Author.DoesNotExist:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -182,7 +182,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
             foreign_author_id = foreign_author_id[:-1]
             
         try:
-            foreign_author = Author.objects.get(id=foreign_author_id)
+            foreign_author = Author.objects.exclude(is_active=False).get(id=foreign_author_id)
             invalid_keys = list()
             #Update the foreign_author in Author model by given key
             for key in put_data:
@@ -261,7 +261,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
         try:
-            author = Author.objects.get(id=author_id)
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -343,7 +343,7 @@ def get_friends(request, author_id):
         return Response({"message":"not a valid node"}, status=status.HTTP_403_FORBIDDEN)
     
     try:
-        Author.objects.filter(id = author_id)
+        Author.objects.exclude(is_active=False).filter(id = author_id)
     except Author.DoesNotExist:
         return Response({"message": "author does not exist"}, status=status.HTTP_404_NOT_FOUND)
     
@@ -357,7 +357,7 @@ def get_friends(request, author_id):
     for author in serializer.data:
         follower_id = author['follower']
         try:
-            follower = Author.objects.get(id=follower_id)
+            follower = Author.objects.exclude(is_active=False).get(id=follower_id)
             serializer = AuthorSerializer(follower)
             followers.append(serializer.data)
         except Author.DoesNotExist:
