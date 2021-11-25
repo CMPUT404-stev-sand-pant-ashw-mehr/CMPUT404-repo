@@ -1,6 +1,5 @@
 import io
-import json
-from json.decoder import JSONDecoder
+from rest_framework.parsers import JSONParser
 from django.forms.models import model_to_dict
 from author.models import Author
 from comment.models import Comment
@@ -414,7 +413,7 @@ class PostViewSet(viewsets.ModelViewSet):
             request_keys = request.data.copy()
             request_keys['source'] = request.build_absolute_uri('/')
             request_keys['origin'] = request.build_absolute_uri('/')
-        else:
+        elif request.method == "PUT":
             if not post_id:
                 return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -423,10 +422,13 @@ class PostViewSet(viewsets.ModelViewSet):
                 post_id = post_id[:-1]
 
             try:
-                stream = io.StringIO(request.body)
-                request_keys = JSONDecoder(stream)
-            except json.JSONDecodeError:
-                return Response({"detail": "PUT body missing"}, status=status.HTTP_400_BAD_REQUEST)
+                stream = io.BytesIO(request.body)
+                request_keys = JSONParser().parse(stream)
+            except Exception as e:
+                return Response({"detail": f"Cannot parsing PUT body: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        else:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         try:
             data = dict()

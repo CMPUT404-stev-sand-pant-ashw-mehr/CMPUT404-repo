@@ -56,8 +56,6 @@ class PostTest(TestCase):
         test_post = {
             "type":"post",
             "title":"A post title about a post about web dev",
-            "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
-            "origin":"http://whereitcamefrom.com/posts/zzzzz",
             "description":"This post discusses stuff -- brief",
             "categories": str(['test1', 'test2']),
             "contentType":"text/plain",
@@ -73,6 +71,23 @@ class PostTest(TestCase):
         post_id = r.json()['id']
         self.assertTrue(Post.objects.filter(id=post_id).exists())
     
+    def test_create_post_PUT(self):
+        test_post = {
+            "type":"post",
+            "title":"A post title about a post about web dev",
+            "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+            "origin":"http://whereitcamefrom.com/posts/zzzzz",
+            "description":"This post discusses stuff -- brief",
+            "categories": str(['test1', 'test2']),
+            "contentType":"text/plain",
+            "content":"Test content",
+            "count": 1023,
+            "visibility":"PUBLIC",
+            "unlisted": 'false'
+        }
+        r = self.client.put('/author/1/posts/2', data=test_post, content_type="application/json")
+        self.assertTrue(200 <= r.status_code < 300)
+
     def test_delete_post(self):
         test_post = {
             "type":"post",
