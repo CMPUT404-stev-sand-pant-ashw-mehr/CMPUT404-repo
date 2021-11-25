@@ -24,15 +24,9 @@ def is_valid_node(request):
             return False
     return True
 
+
 def get_list_foregin_authors():
     authors = []
-    # test authors
-    test_req = requests.get('https://cmput-404-socialdistribution.herokuapp.com/service/author/', auth=('socialdistribution_t18','c404t18'), headers={'Referer': "http://127.0.0.1:9000/"})
-    if test_req.status_code == 500:
-        pass
-    else:
-        j_req_test = test_req.json()
-        authors = authors + j_req_test
     
     # foreign authors from team15
     team_15_req = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
@@ -43,12 +37,12 @@ def get_list_foregin_authors():
         authors = authors + j_req_15
     
     # foreign authors from team17
-    # team_17_req = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
-    # if team_17_req.status_code == 500:
-    #     pass
-    # else:
-    #     j_req_17 = team_17_req.json()
-    #     authors = authors + j_req_17
+    team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/author/', headers={'Referer': "http://127.0.0.1:9000/"})
+    if team_17_req.status_code in (500, 404):
+        pass
+    else:
+        j_req_17 = team_17_req.json()
+        authors = authors + j_req_17
         
     #another team
     
@@ -57,14 +51,6 @@ def get_list_foregin_authors():
 
 def get_list_foregin_posts():
     posts = []
-    # test posts
-    test_req = requests.get('https://cmput-404-socialdistribution.herokuapp.com/service/allposts/', auth=('socialdistribution_t18','c404t18'), headers={'Referer': "http://127.0.0.1:9000/"})
-    if test_req.status_code == 500:
-        pass
-    else:
-        j_req_test = test_req.json()
-        test_posts = j_req_test['posts']
-        posts = posts + test_posts
     
     # foreign posts from team15
     team_15_req = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
@@ -75,12 +61,12 @@ def get_list_foregin_posts():
         posts = posts + j_req_15
     
     # foreign posts from team17
-    # team_17_req = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
-    # if team_17_req.status_code == 500:
-    #     pass
-    # else:
-    #     j_req_17 = team_17_req.json()
-    #     posts = posts + j_req_17
+    team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/post', headers={'Referer': "http://127.0.0.1:9000/"})
+    if team_17_req.status_code == 500:
+        pass
+    else:
+        j_req_17 = team_17_req.json()
+        posts = posts + j_req_17
         
     #another team
     
