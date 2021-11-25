@@ -1,6 +1,8 @@
+import io
+import json
+from json.decoder import JSONDecoder
 from django.forms.models import model_to_dict
 from author.models import Author
-from author.serializer import AuthorSerializer
 from comment.models import Comment
 from post.models import Post, Categories
 from rest_framework import viewsets, status
@@ -12,7 +14,6 @@ from django.core.paginator import Paginator
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from accounts.permissions import CustomAuthentication, AccessPermission
-from rest_framework.decorators import api_view
 from accounts.helper import  is_valid_node
 
 import uuid
@@ -51,7 +52,7 @@ class PostViewSet(viewsets.ModelViewSet):
                         "origin":"http://whereitcamefrom.com/posts/zzzzz",
                         "description":"This post discusses stuff -- brief",
                         "contentType":"text/plain",
-                        "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge (fæder ellor hwearf, aldor of earde), oð þæt him eft onwōc hēah Healfdene; hēold þenden lifde, gamol and gūð-rēow, glæde Scyldingas. Þǣm fēower bearn forð-gerīmed in worold wōcun, weoroda rǣswan, Heorogār and Hrōðgār and Hālga til; hȳrde ic, þat Elan cwēn Ongenþēowes wæs Heaðoscilfinges heals-gebedde. Þā wæs Hrōðgāre here-spēd gyfen, wīges weorð-mynd, þæt him his wine-māgas georne hȳrdon, oð þæt sēo geogoð gewēox, mago-driht micel. Him on mōd bearn, þæt heal-reced hātan wolde, medo-ærn micel men gewyrcean, þone yldo bearn ǣfre gefrūnon, and þǣr on innan eall gedǣlan geongum and ealdum, swylc him god sealde, būton folc-scare and feorum gumena. Þā ic wīde gefrægn weorc gebannan manigre mǣgðe geond þisne middan-geard, folc-stede frætwan. Him on fyrste gelomp ǣdre mid yldum, þæt hit wearð eal gearo, heal-ærna mǣst; scōp him Heort naman, sē þe his wordes geweald wīde hæfde. Hē bēot ne ālēh, bēagas dǣlde, sinc æt symle. Sele hlīfade hēah and horn-gēap: heaðo-wylma bād, lāðan līges; ne wæs hit lenge þā gēn þæt se ecg-hete āðum-swerian 85 æfter wæl-nīðe wæcnan scolde. Þā se ellen-gǣst earfoðlīce þrāge geþolode, sē þe in þȳstrum bād, þæt hē dōgora gehwām drēam gehȳrde hlūdne in healle; þǣr wæs hearpan swēg, swutol sang scopes. Sægde sē þe cūðe frum-sceaft fīra feorran reccan",
+                        "content":"Test Content",
                         "author":{
                             "type":"author",
                             "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
@@ -345,7 +346,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
 
     @swagger_auto_schema(
-        operation_description="POST /service/author/< AUTHOR_ID >/posts/< POST_ID >",
+        operation_description="POST /service/author/< AUTHOR_ID >/posts/\r\nPUT /service/author/< AUTHOR_ID >/posts/< POST_ID >",
         request_body=openapi.Schema(    
             type=openapi.TYPE_OBJECT,
             required=["type", "id", "title", "source", "origin", "author", "description", "contentType", "content", "published", "visibility", "unlisted"],
@@ -410,68 +411,75 @@ class PostViewSet(viewsets.ModelViewSet):
 
         if request.method == "POST":
             post_id = str(uuid.uuid4().hex)
-
-            try:
-                request_keys = request.data
-
-                data = dict()
-                data['type'] = request_keys['type']
-                data['title'] = request_keys['title']
-                data['id'] = post_id
-                data['source'] = request.build_absolute_uri('/')
-                data['origin'] = request.build_absolute_uri('/')
-                data['description'] = request_keys['description']
-                data['contentType'] = request_keys['contentType']
-                data['content'] = request_keys['content']
-                data['author'] = author_id
-
-                visi = request_keys['visibility'].strip()
-                if (visi not in ("PUBLIC", "FRIENDS")):
-                    return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
-                data['visibility'] = visi
-
-                unlisted = str(request_keys['unlisted']).strip().lower()
-                if unlisted not in ["false", "true"]:
-                    return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
-                elif unlisted == 'false':
-                    data['unlisted'] = False
-                else:
-                    data['unlisted'] = True
-                
-                serializer = PostSerializer(data=data)
-                if serializer.is_valid():
-                    serializer.save()
-
-                    categories = request_keys['categories']
-
-                    try:
-                        categories = ast.literal_eval(str(categories))
-                    except:
-                        return Response({"detail": "incorrect format for Categories"}, status=status.HTTP_400_BAD_REQUEST)
-
-                    for label in categories:
-                        Categories.objects.create(post_id=post_id, category=label)
-
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
-                else:
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            except KeyError as e:
-                return Response({"detail": "key(s) missing:", "message": e.args}, status=status.HTTP_400_BAD_REQUEST)
-
-        elif request.method == "PUT":
+            request_keys = request.data.copy()
+            request_keys['source'] = request.build_absolute_uri('/')
+            request_keys['origin'] = request.build_absolute_uri('/')
+        else:
             if not post_id:
                 return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-            
+
             # remove trailing slash
             if post_id[-1] == '/':
                 post_id = post_id[:-1]
+
+            try:
+                stream = io.StringIO(request.body)
+                request_keys = JSONDecoder(stream)
+            except json.JSONDecodeError:
+                return Response({"detail": "PUT body missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            data = dict()
+            data['type'] = request_keys['type']
+            data['title'] = request_keys['title']
+            data['id'] = post_id
+            data['source'] = request_keys['source']
+            data['origin'] = request_keys['origin']
+            data['description'] = request_keys['description']
+            data['contentType'] = request_keys['contentType']
+            data['content'] = request_keys['content']
+            data['author'] = author_id
+
+            try:
+                visi = request_keys['visibility'].strip()
+            except AttributeError:
+                return Response({"detail": f"'visibility' key must be a string, either 'PUBLIC' or FRIENDS. Request value: {request_keys['visibility']}"}, status=status.HTTP_400_BAD_REQUEST)
+            if (visi not in ("PUBLIC", "FRIENDS")):
+                return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
+            data['visibility'] = visi
+
+            unlisted = str(request_keys['unlisted']).strip().lower()
+            if unlisted not in ["false", "true"]:
+                return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
+            elif unlisted == 'false':
+                data['unlisted'] = False
+            else:
+                data['unlisted'] = True
             
-            #TODO
-            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
-            
-        else:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            serializer = PostSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+
+                categories = request_keys['categories']
+
+                try:
+                    if type(categories)!= list:
+                        categories = ast.literal_eval(str(categories))
+                    #check if it is iterable
+                    iter(categories)
+                except:
+                    return Response({"detail": "incorrect format for Categories"}, status=status.HTTP_400_BAD_REQUEST)
+
+                for label in categories:
+                    Categories.objects.create(post_id=post_id, category=label)
+
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except KeyError as e:
+            return Response({"detail": "key(s) missing: " + e.args}, status=status.HTTP_400_BAD_REQUEST)
+
 
     @swagger_auto_schema(
         operation_description="DELETE /service/author/< AUTHOR_ID >/posts/< POST_ID >",
