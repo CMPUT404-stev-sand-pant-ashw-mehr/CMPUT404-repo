@@ -2,6 +2,7 @@ import io
 from rest_framework.parsers import JSONParser
 from django.forms.models import model_to_dict
 from author.models import Author
+from author.serializer import AuthorSerializer
 from comment.models import Comment
 from post.models import Post, Categories
 from rest_framework import viewsets, status
@@ -133,8 +134,7 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
 
         post_data = model_to_dict(post_query)
-        author_detail = model_to_dict(author_query)
-        author_detail['id'] = author_detail['url']
+        author_detail = AuthorSerializer(author_query).data
 
         post_data['id'] = author_detail['id'] + '/posts/' + post_data['id']
         post_data['author'] = author_detail
@@ -583,7 +583,7 @@ class PostViewSet(viewsets.ModelViewSet):
             # Should've made it in the serializer but too late to figure that out
             author_id = post_data['author_id']
             post_id = post_data['id']
-            author_detail = model_to_dict(Author.objects.get(id=author_id))
+            author_detail = AuthorSerializer(Author.objects.get(id=author_id)).data
 
             post_data['id'] = author_detail['url'] + '/posts/' + post_data['id']
             post_data['author'] = author_detail
@@ -602,7 +602,7 @@ class PostViewSet(viewsets.ModelViewSet):
             comment_list = list()
             for entry in comment_object_list:
                 comment_author_id = entry.pop('author_id', None)
-                author_details = model_to_dict(Author.objects.get(id=comment_author_id))
+                author_details = AuthorSerializer(Author.objects.get(id=comment_author_id)).data
                 author_details['id'] = author_details['url']
                 entry['author'] = author_details
                 entry['id'] = author_detail['url'] + '/posts/' + post_id + '/comments/' + entry['id']

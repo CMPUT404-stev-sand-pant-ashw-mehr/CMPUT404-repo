@@ -44,7 +44,13 @@ def get_list_foregin_authors():
         j_req_17 = team_17_req.json()['items']
         authors = authors + j_req_17
         
-    #another team
+    # foreign authors from team14
+    team_17_req = requests.get('https://linkedspace-staging.herokuapp.com/api/authors/', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:9000/"})
+    if team_17_req.status_code in (500, 404):
+        pass
+    else:
+        j_req_17 = team_17_req.json()['items']
+        authors = authors + j_req_17
     
     return authors
 
@@ -68,7 +74,14 @@ def get_list_foregin_posts():
         j_req_17 = team_17_req.json()['items']
         posts = posts + j_req_17
         
-    #another team
+    # foreign posts from team14
+    team_17_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts/', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:9000/"})
+    if team_17_req.status_code in (500, 404):
+        pass
+    else:
+        j_req_17 = team_17_req.json()
+        posts = posts + j_req_17
+    
     
     
     return posts
