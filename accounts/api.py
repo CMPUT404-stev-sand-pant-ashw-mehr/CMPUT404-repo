@@ -132,6 +132,6 @@ def get_foregin_posts(request):
     if request.method == "GET":
         foreign_posts = get_list_foregin_posts()
         print(foreign_posts)
-        return Response({"foregin posts": foreign_posts})
+        return Response({"items": foreign_posts})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
