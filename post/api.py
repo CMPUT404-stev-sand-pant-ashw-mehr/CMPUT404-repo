@@ -6,7 +6,7 @@ from author.serializer import AuthorSerializer
 from comment.models import Comment
 from post.models import Post, Categories
 from likes.models import Like
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers
 from .serializers import PostSerializer
 from likes.serializers import LikeSerializer
 from rest_framework.response import Response 
@@ -227,9 +227,9 @@ class PostViewSet(viewsets.ModelViewSet):
                 }
             ),
             "404": openapi.Response(
-                description="Post not found",
+                description="Author not found",
                 examples={
-                    "application/json":{"detail": "Author not found or does not have public posts"}
+                    "application/json":{"detail": "author not found"}
                 }
             ),
             "400": openapi.Response(
@@ -246,9 +246,12 @@ class PostViewSet(viewsets.ModelViewSet):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        posts_query = Post.objects.filter(author=author_id, visibility="PUBLIC", unlisted=False)
-        if not posts_query.exists():
-            return Response({"detail": "Author not found or does not have public posts"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            author = Author.objects.exclude(is_active=False).get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        posts_query = Post.objects.filter(author=author, visibility="PUBLIC", unlisted=False)
         
         return Response(self.get_post_from_query(posts_query=posts_query, request=request), status=status.HTTP_200_OK)
 
