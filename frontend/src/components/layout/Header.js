@@ -9,6 +9,12 @@ export class Header extends Component {
     const { isAuthenticated, user } = this.props.auth;
     const authLinks = (
       <Fragment>
+        <Link
+          to="/foreign"
+          className="me-3 py-2 text-dark text-decoration-none"
+        >
+          Foreign Posts
+        </Link>
         <Link to="/posts" className="me-3 py-2 text-dark text-decoration-none">
           Feed
         </Link>
@@ -35,6 +41,14 @@ export class Header extends Component {
           className="dropdown-menu dropdown-menu-dark"
           aria-labelledby="navbarDarkDropdownMenuLink"
         >
+          <li>
+            <Link
+              to={`/profile/${user ? user.author : ""}`}
+              className="dropdown-item btn btn-outline-primary me-2"
+            >
+              My Profile
+            </Link>
+          </li>
           <li>
             <a
               href="#"
