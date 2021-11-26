@@ -53,7 +53,7 @@ class App extends Component {
                   <AuthRoute exact path="/foreign" component={ForeignFeed} />
                   <AuthRoute exact path="/posts/create" component={Create} />
                   <AuthRoute exact path="/posts/:id" component={Post} />
-                  <AuthRoute exact path="/profile" component={Profile} />
+                  <AuthRoute exact path="/profile/:id" component={Profile} />
                   <Route exact path="/" component={Landing} />
                   <Route exact path="/login" component={Login} />
                   <Route exact path="/register" component={Register} />

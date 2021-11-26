@@ -42,6 +42,14 @@ export class Header extends Component {
           aria-labelledby="navbarDarkDropdownMenuLink"
         >
           <li>
+            <Link
+              to={`/profile/${user ? user.author : ""}`}
+              className="dropdown-item btn btn-outline-primary me-2"
+            >
+              My Profile
+            </Link>
+          </li>
+          <li>
             <a
               href="#"
               className="dropdown-item btn btn-outline-primary me-2"
