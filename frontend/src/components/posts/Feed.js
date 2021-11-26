@@ -26,7 +26,12 @@ export class Feed extends Component {
                   <FaRegClock />
                   &nbsp;<Moment fromNow>{post.published}</Moment>
                 </span>
-                @{post.author.displayName}
+                <Link
+                  to={`/profile/${post.author_id}`}
+                  className="text-decoration-none text-secondary"
+                >
+                  @{post.author.displayName}
+                </Link>
               </div>
               <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
