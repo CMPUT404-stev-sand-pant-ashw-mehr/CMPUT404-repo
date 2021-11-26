@@ -11,6 +11,8 @@ from .serializers import LikeSerializer
 from author.serializer import AuthorSerializer
 from accounts.permissions import CustomAuthentication, AccessPermission
 from accounts.helper import is_valid_node
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 import uuid
 import ast
@@ -34,7 +36,38 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         else:
             return [IsAuthenticated()]
         
-
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/post/< POST_ID >/likes",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {
+                        "@context": "https://www.w3.org/ns/activitystreams",
+                        "summary": "Lara Croft Likes your post",         
+                        "type": "Like",
+                        "author":{
+                            "type":"author",
+                            "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "host":"http://127.0.0.1:5454/",
+                            "displayName":"Lara Croft",
+                            "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "github":"http://github.com/laracroft",
+                            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                        },
+                        "object":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e"
+                    }
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
+                }
+            ),
+        },
+        tags=['Get Post Likes'],
+    )
     def get_post_likes(self, request, author_id, post_id):
         
         # node check
@@ -52,6 +85,45 @@ class PostLikeViewSet(viewsets.ModelViewSet):
             
         return Response(response, status=status.HTTP_200_OK)
         
+    
+    @swagger_auto_schema(
+        operation_description="POST /service/author/< AUTHOR_ID >/post/< POST_ID >/likes",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {
+                        "@context": "https://www.w3.org/ns/activitystreams",
+                        "summary": "Lara Croft Likes your post",         
+                        "type": "Like",
+                        "author":{
+                            "type":"author",
+                            "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "host":"http://127.0.0.1:5454/",
+                            "displayName":"Lara Croft",
+                            "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "github":"http://github.com/laracroft",
+                            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                        },
+                        "object":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e"
+                    }
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
+                }
+            ),
+            "409": openapi.Response(
+                description="Conflict",
+                examples={
+                    "application/json":{"message": "error"}
+                }
+            ),
+        },
+        tags=['Like Post'],
+    )
     def add_post_like(self, request, author_id, post_id):
         author_inst = Author.objects.get(user = request.user)
         
@@ -94,6 +166,39 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
         else:
             return [IsAuthenticated()]
     
+    
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/post/< POST_ID >/comments/{ COMMENT_ID }/likes",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {
+                        "@context": "https://www.w3.org/ns/activitystreams",
+                        "summary": "Lara Croft Likes your comment",         
+                        "type": "Like",
+                        "author":{
+                            "type":"author",
+                            "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "host":"http://127.0.0.1:5454/",
+                            "displayName":"Lara Croft",
+                            "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "github":"http://github.com/laracroft",
+                            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                        },
+                        "object":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e/comments/764efa883dda1e11db47671c4a3bbd9f"
+                    }
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
+                }
+            ),
+        },
+        tags=['Get Comment Likes'],
+    )
     def get_comment_likes(self, request, author_id, post_id, comment_id):
         
         # node check
@@ -112,6 +217,45 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
             
         return Response(response, status=status.HTTP_200_OK)
         
+        
+    @swagger_auto_schema(
+        operation_description="POST /service/author/< AUTHOR_ID >/post/< POST_ID >/comments/{ COMMENT_ID }/likes",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {
+                        "@context": "https://www.w3.org/ns/activitystreams",
+                        "summary": "Lara Croft Likes your comment",         
+                        "type": "Like",
+                        "author":{
+                            "type":"author",
+                            "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "host":"http://127.0.0.1:5454/",
+                            "displayName":"Lara Croft",
+                            "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                            "github":"http://github.com/laracroft",
+                            "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                        },
+                        "object":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e/comments/764efa883dda1e11db47671c4a3bbd9f"
+                    }
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
+                }
+            ),
+            "409": openapi.Response(
+                description="Conflict",
+                examples={
+                    "application/json":{"message": "error"}
+                }
+            ),
+        },
+        tags=['Like Comment'],
+    )
     def add_comment_like(self, request, author_id, post_id, comment_id):
         
         # node check
@@ -142,6 +286,47 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
     permission_classes = (AccessPermission,)
     serializer_class = LikeSerializer
 
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >liked",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "type":"liked",
+                    "items":[
+                        {
+                            "@context": "https://www.w3.org/ns/activitystreams",
+                            "summary": "Lara Croft Likes your post",         
+                            "type": "Like",
+                            "author":{
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Lara Croft",
+                                "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "github":"http://github.com/laracroft",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            "object":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e"
+                        }
+                    ]
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
+                }
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                    "application/json":{"detail": "author not found"}
+                }
+            ),
+        },
+        tags=['Get Comment Likes'],
+    )
     def get_likes(self, request, author_id):
         
         # node check
