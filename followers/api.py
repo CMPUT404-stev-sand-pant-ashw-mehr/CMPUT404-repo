@@ -290,10 +290,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
                 }
             ),
             "404": openapi.Response(
-                description="Follower not found",
-                examples={
-                    "application/json":{"detail": False}
-                }
+                description="Author not found",
             ),
         },
         tags=['Check if Follower'],
@@ -316,7 +313,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
             return Response({"detail": True}, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": False}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": False}, status=status.HTTP_200_OK)
 
     # validate if the url format is correct
     def validate_url(self, url: str) -> bool:
