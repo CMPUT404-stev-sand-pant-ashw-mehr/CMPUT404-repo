@@ -154,7 +154,6 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # PUT a follower to the specified author
     def put_follower(self, request, author_id=None, foreign_author_id=None):
-        
         # node check
         valid = is_valid_node(request)
         if not valid:
@@ -170,7 +169,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
         
         if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
-            return Response({"detail": "follower already added!"}, status=status.HTTP_409_CONFLICT)
+            return Response({"detail": "409"}, status=status.HTTP_200_OK)
             
         try:
             stream = io.BytesIO(request.body)
@@ -299,7 +298,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
     # GET if the author has the follower with the given id on the server
     # NEED CONNECTION
     def check_follower(self, request, author_id=None, foreign_author_id=None):
-        
+
         # node check
         valid = is_valid_node(request)
         if not valid:
