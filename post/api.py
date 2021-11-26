@@ -5,7 +5,7 @@ from author.models import Author
 from author.serializer import AuthorSerializer
 from comment.models import Comment
 from post.models import Post, Categories
-from rest_framework import viewsets, status
+from rest_framework import serializers, viewsets, status
 from .serializers import PostSerializer
 from rest_framework.response import Response 
 from knox.auth import TokenAuthentication
@@ -503,7 +503,9 @@ class PostViewSet(viewsets.ModelViewSet):
                 for label in categories:
                     Categories.objects.create(post_id=post_id, category=label)
 
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return_data = serializer.data
+                return_data['author'] = AuthorSerializer(author).data
+                return Response(return_data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
