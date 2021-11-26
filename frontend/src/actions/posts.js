@@ -2,6 +2,7 @@ import axios from "axios";
 
 import {
   GET_POSTS,
+  GET_AUTHOR_POSTS,
   GET_FOREIGN_POSTS,
   GET_POST,
   DELETE_POST,
@@ -18,12 +19,35 @@ import { tokenConfig } from "./auth";
 export const getPosts =
   (page = 1) =>
   (dispatch, getState) => {
-    const authorId = getState().auth.user.author;
+    axios
+      .get(`/posts?page=${page}`, tokenConfig(getState))
+      .then((res) => {
+        dispatch({
+          type: GET_POSTS,
+          payload: res.data,
+          page: page,
+        });
+      })
+      .catch((err) => {
+        const alert = {
+          msg: err.response,
+          status: err.response,
+        };
+        dispatch({
+          type: GET_ALERTS,
+          payload: alert,
+        });
+      });
+  };
+
+export const getAuthorPosts =
+  (authorId = getState().auth.user.author, page = 1) =>
+  (dispatch, getState) => {
     axios
       .get(`/author/${authorId}/posts?page=${page}`, tokenConfig(getState))
       .then((res) => {
         dispatch({
-          type: GET_POSTS,
+          type: GET_AUTHOR_POSTS,
           payload: res.data,
           page: page,
         });
