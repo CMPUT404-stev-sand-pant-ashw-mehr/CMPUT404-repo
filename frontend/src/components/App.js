@@ -10,6 +10,7 @@ import {
 import Alert from "./layout/Alert";
 import Header from "./layout/Header";
 import Feed from "./posts/Feed";
+import ForeignFeed from "./posts/ForeignFeed";
 import Create from "./posts/Create";
 import Post from "./posts/Post";
 
@@ -49,9 +50,10 @@ class App extends Component {
                 <Switch>
                   <AuthRoute exact path="/inbox" component={Create} />
                   <AuthRoute exact path="/posts" component={Feed} />
+                  <AuthRoute exact path="/foreign" component={ForeignFeed} />
                   <AuthRoute exact path="/posts/create" component={Create} />
                   <AuthRoute exact path="/posts/:id" component={Post} />
-                  <AuthRoute exact path="/profile" component={Profile} />
+                  <AuthRoute exact path="/profile/:id" component={Profile} />
                   <Route exact path="/" component={Landing} />
                   <Route exact path="/login" component={Login} />
                   <Route exact path="/register" component={Register} />
