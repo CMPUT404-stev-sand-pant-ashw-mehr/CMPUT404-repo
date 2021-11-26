@@ -111,7 +111,7 @@ NOTE: It is recommended to use a virtual environment.
 To view documentation for APIs, hit the following endpoint:
 
 ```bash
-http://localhost:8000/docs/
+https://social-dis.herokuapp.com/docs/
 ```
 
 ## Basic Auth
