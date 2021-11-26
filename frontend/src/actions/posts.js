@@ -2,6 +2,7 @@ import axios from "axios";
 
 import {
   GET_POSTS,
+  GET_FOREIGN_POSTS,
   GET_POST,
   DELETE_POST,
   CREATE_POST,
@@ -38,6 +39,27 @@ export const getPosts =
         });
       });
   };
+
+export const getForeignPosts = () => (dispatch, getState) => {
+  axios
+    .get(`/connection/posts`, tokenConfig(getState))
+    .then((res) => {
+      dispatch({
+        type: GET_FOREIGN_POSTS,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      const alert = {
+        msg: err.response,
+        status: err.response,
+      };
+      dispatch({
+        type: GET_ALERTS,
+        payload: alert,
+      });
+    });
+};
 
 export const getPost = (postId) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;

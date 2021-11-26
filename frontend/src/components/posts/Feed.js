@@ -16,7 +16,7 @@ export class Feed extends Component {
 
     return (
       <Fragment>
-        <h1>My Feed</h1>
+        <h2>Local Public Feed</h2>
 
         {posts.posts.map((post) => (
           <div className="card mb-4" key={post.id.split("/").pop()}>
