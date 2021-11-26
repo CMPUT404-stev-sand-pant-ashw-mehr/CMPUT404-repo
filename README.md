@@ -42,15 +42,24 @@ On Linux:
 
 ```
 
+2. Restart psql service with
+```bash
+$ sudo service postgresql restart
+```
 
-2. Restart psql service with `sudo service postgresql restart`
-2. To set up the database for postgres:
-        -   `sudo su - postgres`
-        -   `psql`
-        -   `CREATE DATABASE [database_name];`
-        -   `CREATE USER [user] WITH PASSWORD '[password]';`
-        -   `GRANT ALL PRIVILEGES ON DATABASE [database_name] TO [user];`
-        -   Quit psql with `\q` then `exit`
+
+3. To set up the database for postgres:
+```bash
+
+   $ sudo su - postgres
+   $ psql
+   $ CREATE DATABASE [database_name];
+   $ CREATE USER [user] WITH PASSWORD '[password]';
+   $ GRANT ALL PRIVILEGES ON DATABASE [database_name] TO [user]
+   $ Quit psql with `\q` then `exit';
+
+```
+        
 
 NOTE: It is recommended to use a virtual environment.
 
