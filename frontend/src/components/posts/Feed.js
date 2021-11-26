@@ -3,23 +3,128 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
-import Moment from "react-moment";
-import { tokenConfig } from "../../actions/auth";
-import axios from "axios";
-import store from "../../store";
+import { addFollower } from "../../actions/followers";
 import { CREATE_ALERT, LIKE_POST } from "../../actions/types";
+
+import Moment from "react-moment";
 import {
   FaRegClock,
   FaTrashAlt,
+  FaWindowClose,
+  FaUserAlt,
+  FaUserPlus,
+  FaRegTrashAlt,
+  FaRegEnvelope,
   FaRegThumbsUp,
   FaThumbsUp,
 } from "react-icons/fa";
 
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import { Redirect } from "react-router-dom";
+import { tokenConfig } from "../../actions/auth";
+import axios from "axios";
+import store from "../../store";
+
 export class Feed extends Component {
+  init_state = {
+    selectedAuthor: {},
+    isFollower: false,
+    open: false,
+    redirect: "",
+  };
+
+  state = this.init_state;
+
+  parseData(data) {
+    const parseData = data.id.split("/");
+    return parseData[parseData.length - 1];
+  }
+
   componentDidMount() {
     this.props.getPosts();
   }
 
+  onAuthorClick(foreignAuthor) {
+    this.setState({
+      selectedAuthor: foreignAuthor,
+    });
+
+    const auth = this.props.auth;
+
+    const foreignAuthorId = this.parseData(foreignAuthor);
+
+    axios
+      .get(
+        `/author/${auth.user.author}/followers/${foreignAuthorId}`,
+        tokenConfig(store.getState)
+      )
+      .then((resp) => {
+        this.setState({
+          isFollower: resp.data.detail,
+          open: true,
+        });
+      });
+  }
+
+  handleFollow() {
+    if (this.state.isFollower === false) {
+      const foreignAuthorId = this.parseData(this.state.selectedAuthor);
+      const authorId = this.props.auth.user.author;
+
+      axios
+        .put(
+          `/author/${foreignAuthorId}/followers/${authorId}`,
+          {},
+          tokenConfig(store.getState)
+        )
+        .then((response) => {
+          this.setState({
+            open: false,
+          });
+        });
+
+      // send inbox request
+    }
+  }
+
+  handleAcceptRequest() {
+    console.log("accepting request");
+    // redirect to inbox
+  }
+
+  handleDeleteFollower() {
+    if (this.state.isFollower === true) {
+      const foreignAuthorId = this.parseData(this.state.selectedAuthor);
+      const authorId = this.props.auth.user.author;
+
+      axios
+        .delete(
+          `/author/${foreignAuthorId}/followers/${authorId}`,
+          tokenConfig(store.getState),
+          {}
+        )
+        .then((resp) => {
+          this.setState({
+            open: false,
+          });
+        });
+      // delete inbox request
+    }
+  }
+
+  redirectToProfile(data) {
+    const id = this.parseData(data);
+    const path = "/profile/" + id;
+    this.setState({
+      redirect: path,
+    });
+  }
+
+  handleCloseDialog() {
+    this.setState(this.init_state);
+  }
   checkLikedPost(likes) {
     const { user } = this.props;
     for (const like of likes) {
@@ -77,6 +182,7 @@ export class Feed extends Component {
 
     return (
       <Fragment>
+        {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
         <h2>Local Public Feed</h2>
 
         {posts.posts.map((post) => (
@@ -104,12 +210,9 @@ export class Feed extends Component {
                   <FaRegClock />
                   &nbsp;<Moment fromNow>{post.published}</Moment>
                 </span>
-                <Link
-                  to={`/profile/${post.author_id}`}
-                  className="text-decoration-none text-secondary"
-                >
+                <span onClick={() => this.onAuthorClick(post.author)}>
                   @{post.author.displayName}
-                </Link>
+                </span>
               </div>
               <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
@@ -167,6 +270,70 @@ export class Feed extends Component {
             </li>
           </ul>
         </nav>
+        <Dialog open={this.state.open} onClose={() => this.handleCloseDialog()}>
+          <div className="d-flex flex-row">
+            <div className="p-3">
+              {this.state.isFollower ? "Accept Request?" : "Send a Request"}
+            </div>
+            <div className="p-3">
+              <div className="d-flex flex-row-reverse">
+                <div onClick={() => this.handleCloseDialog()}>
+                  <FaWindowClose />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {!this.state.isFollower && (
+            <div className="d-flex flex-row justify-content-center">
+              <DialogContent>
+                @{this.state.selectedAuthor.displayName}
+              </DialogContent>
+              <div className="d-flex flex-row justify-content-center">
+                <DialogActions>
+                  <div className="p-2">
+                    <div
+                      onClick={() =>
+                        this.redirectToProfile(this.state.selectedAuthor)
+                      }
+                    >
+                      <FaUserAlt />
+                    </div>
+                  </div>
+                  <div className="p-2">
+                    <div onClick={() => this.handleFollow()}>
+                      <FaUserPlus />
+                    </div>
+                  </div>
+                </DialogActions>
+              </div>
+            </div>
+          )}
+
+          {this.state.isFollower && (
+            <div className="text-center">
+              <DialogContent>
+                @{this.state.selectedAuthor.displayName}
+              </DialogContent>
+              <div className="d-flex flex-row justify-content-center">
+                <DialogActions>
+                  <div
+                    className="p-2"
+                    onClick={() => this.handleDeleteFollower()}
+                  >
+                    <FaRegTrashAlt />
+                  </div>
+                  <div
+                    className="p-2"
+                    onClick={() => this.handleAcceptRequest()}
+                  >
+                    <FaRegEnvelope />
+                  </div>
+                </DialogActions>
+              </div>
+            </div>
+          )}
+        </Dialog>
       </Fragment>
     );
   }
@@ -175,12 +342,18 @@ export class Feed extends Component {
     posts: PropTypes.object.isRequired,
     getPosts: PropTypes.func.isRequired,
     deletePost: PropTypes.func.isRequired,
+    addFollower: PropTypes.func.isRequired,
+    auth: PropTypes.object.isRequired,
   };
 }
 
 const mapStateToProps = (state) => ({
   posts: state.posts,
+  followers: state.followers,
   user: state.auth,
+  auth: state.auth,
 });
 
-export default connect(mapStateToProps, { getPosts, deletePost })(Feed);
+export default connect(mapStateToProps, { getPosts, deletePost, addFollower })(
+  Feed
+);
