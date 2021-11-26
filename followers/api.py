@@ -307,7 +307,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        get_object_or_404(User, pk=author_id) # Check if user exists
+        get_object_or_404(Author, pk=author_id) # Check if user exists
 
         # remove trailing slash
         if foreign_author_id[-1] == '/':
