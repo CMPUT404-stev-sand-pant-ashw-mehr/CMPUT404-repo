@@ -337,6 +337,52 @@ class FriendViewSet(viewsets.ModelViewSet):
     authentication_classes = (CustomAuthentication,)
     permission_classes = (AccessPermission,)
 
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/friends",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {
+                       "type": "friends",
+                       "items": [
+                           {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                "url":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Lara Croft",
+                                "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "github": "http://github.com/laracroft",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            }
+                       ]
+                   }
+                }
+            ),
+            "404": openapi.Response(
+                description="Author not found",
+                examples= {
+                    "application/json":{"message": "author does not exist"}
+                }
+            ),
+            "403": openapi.Response(
+                description="Node invalid",
+                examples= {
+                    "application/json":{"message":"not a valid node"}
+                }
+            )
+        },
+        tags=['Check if Follower'],
+    )
     def get_friends(request, author_id):
         valid = is_valid_node(request)
         if not valid:
