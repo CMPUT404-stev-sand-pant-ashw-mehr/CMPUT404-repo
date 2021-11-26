@@ -36,7 +36,13 @@ NOTE: Postgres is required
 
 On Linux:
 
-1. Install postgres using `sudo apt-get install libpq-dev postgresql postgresql-contrib`
+1. Install postgres using:
+```bash
+ $ sudo apt-get install libpq-dev postgresql postgresql-contrib
+
+```
+
+
 2. Restart psql service with `sudo service postgresql restart`
 2. To set up the database for postgres:
         -   `sudo su - postgres`
