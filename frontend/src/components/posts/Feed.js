@@ -17,6 +17,8 @@ import { Redirect } from "react-router-dom";
 import axios from "axios";
 import { Reddit } from "@mui/icons-material";
 
+import axios from "axios";
+
 export class Feed extends Component {
 
   init_state = {
@@ -45,6 +47,7 @@ export class Feed extends Component {
   }
 
   onAuthorClick(foreignAuthor){
+<<<<<<< HEAD
 
     this.setState({
       selectedAuthor: foreignAuthor,
@@ -62,6 +65,42 @@ export class Feed extends Component {
           open: true,
         });
       });
+=======
+    // check if the selected author is a follower,
+    console.log(this.props);
+    const auth = this.props.auth;;
+
+    let parseData = foreignAuthor.id.split("/");
+    const foreignAuthorId = parseData[parseData.length - 1];
+
+    const tokenConfig = {
+      headers:{
+        "Content-Type": "application/json",
+        "Authorization": "Token " + auth.token,
+      }
+    }
+
+    axios
+    .get(
+      `/author/${auth.user.author}/followers/${foreignAuthorId}`, tokenConfig)
+      .then((resp) => {
+        if(resp.data.details === false){
+          console.log("false");
+        }
+      })
+    // this.props.checkFollower(id);
+
+    // const { followers } = this.props;
+    // console.log("FOLLOWERS - ", followers.followers);
+
+    // // console.log("is follower - ", isFollower);
+    
+    // this.setState({
+    //   selectedAuthor: author,
+    //   open: true,
+    // });
+    // console.log("is follower - ", isFollower);
+>>>>>>> 9dcad37 (added api call in file)
   }
 
   handleFollow(){
@@ -112,6 +151,7 @@ export class Feed extends Component {
   }
 
   render() {
+    // console.log("props - ", this.props);
     const { posts, deletePost, getPosts } = this.props;
 
     return (
