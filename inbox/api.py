@@ -106,7 +106,7 @@ class InboxViewSet(viewsets.ModelViewSet):
                 }
             ), 
         },
-        tags=['Update Author by Author ID'],
+        tags=['Get Author Inbox'],
     )
     # GET the inbox of the author
     def get_inbox(self, request, author_id=None):
@@ -159,7 +159,7 @@ class InboxViewSet(viewsets.ModelViewSet):
                 }
             ), 
         },
-        tags=['Update Author by Author ID'],
+        tags=['Add Inbox Items'],
     )
     #POST to add new item to the inbox of an author
     def post_inbox(self, request, author_id=None):
@@ -185,6 +185,7 @@ class InboxViewSet(viewsets.ModelViewSet):
             return Response({"detail": e.args}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
     @swagger_auto_schema(
         operation_description="DELETE /service/author/< AUTHOR_ID >/inbox",
         responses={
@@ -207,9 +208,8 @@ class InboxViewSet(viewsets.ModelViewSet):
                 }
             ),
         },
-        tags=['Update Author by Author ID'],
+        tags=['Clear Inbox'],
     )
-
     #DELETE to clear the inbox
     def delete_inbox(self, request, author_id=None):
         result, obj = self.check_author_exists(author_id)
