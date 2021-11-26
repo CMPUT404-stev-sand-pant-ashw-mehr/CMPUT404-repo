@@ -10,6 +10,7 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
+  console.log("IN FOLLOW REDUCER");
   switch (action.type) {
     case DELETE_FOLLOWER:
     case ADD_FOLLOWER:
