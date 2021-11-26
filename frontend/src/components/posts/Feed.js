@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
 import { addFollower } from "../../actions/followers";
+import { CREATE_ALERT, LIKE_POST } from "../../actions/types";
 
 import Moment from "react-moment";
 import {

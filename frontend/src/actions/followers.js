@@ -101,9 +101,9 @@ export const checkFollower = (foreignAuthorId) => (dispatch, getState) => {
   axios
     .get(
       `/author/${authorId}/followers/${foreignAuthorId}`,
-      tokenConfig(getState))
-      .then((res) => {
-      console.log("response - ", res);
+      tokenConfig(getState)
+    )
+    .then((res) => {
       dispatch({
         type: CHECK_FOLLOWER,
         payload: res.data,
