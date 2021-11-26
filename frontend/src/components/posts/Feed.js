@@ -15,6 +15,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import Button from "@mui/material/Button";
 
+import axios from "axios";
+
 export class Feed extends Component {
 
   state = {
@@ -26,18 +28,40 @@ export class Feed extends Component {
     this.props.getPosts();
   }
 
-  onAuthorClick(author){
+  onAuthorClick(foreignAuthor){
     // check if the selected author is a follower,
-    let parseData = author.id.split("/");
-    const id = parseData[parseData.length - 1];
-    const isFollower=this.props.checkFollower(id);
+    console.log(this.props);
+    const auth = this.props.auth;;
 
-    console.log("is follower - ", isFollower);
+    let parseData = foreignAuthor.id.split("/");
+    const foreignAuthorId = parseData[parseData.length - 1];
+
+    const tokenConfig = {
+      headers:{
+        "Content-Type": "application/json",
+        "Authorization": "Token " + auth.token,
+      }
+    }
+
+    axios
+    .get(
+      `/author/${auth.user.author}/followers/${foreignAuthorId}`, tokenConfig)
+      .then((resp) => {
+        if(resp.data.details === false){
+          console.log("false");
+        }
+      })
+    // this.props.checkFollower(id);
+
+    // const { followers } = this.props;
+    // console.log("FOLLOWERS - ", followers.followers);
+
+    // // console.log("is follower - ", isFollower);
     
-    this.setState({
-      selectedAuthor: author,
-      open: true,
-    });
+    // this.setState({
+    //   selectedAuthor: author,
+    //   open: true,
+    // });
     // console.log("is follower - ", isFollower);
   }
 
@@ -53,6 +77,7 @@ export class Feed extends Component {
   }
 
   render() {
+    // console.log("props - ", this.props);
     const { posts, deletePost, getPosts } = this.props;
 
     return (
@@ -152,11 +177,14 @@ export class Feed extends Component {
     deletePost: PropTypes.func.isRequired,
     checkFollower: PropTypes.func.isRequired,
     addFollower: PropTypes.func.isRequired,
+    auth: PropTypes.object.isRequired,
   };
 }
 
 const mapStateToProps = (state) => ({
   posts: state.posts,
+  followers: state.followers,
+  auth: state.auth,
 });
 
 export default connect(mapStateToProps, { getPosts, deletePost, checkFollower, addFollower })(Feed);
