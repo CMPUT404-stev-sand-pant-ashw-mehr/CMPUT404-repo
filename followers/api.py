@@ -154,7 +154,8 @@ class FollowerViewSet(viewsets.ModelViewSet):
 
     # PUT a follower to the specified author
     def put_follower(self, request, author_id=None, foreign_author_id=None):
-        
+
+        print("in put")
         # node check
         valid = is_valid_node(request)
         if not valid:

@@ -19,61 +19,66 @@ import axios from "axios";
 
 export class Feed extends Component {
 
-  state = {
+  init_state = {
     selectedAuthor: {},
+    isFollower: false,
     open: false,
   };
+
+  state = this.init_state;
+  
+  tokenConfig = {
+    headers:{
+      "Content-Type": "application/json",
+      "Authorization": "Token " + this.props.auth.token,
+    }
+  }
+
+  parseData(data) {
+    const parseData = data.id.split("/");
+    return parseData[parseData.length - 1];
+  }
 
   componentDidMount() {
     this.props.getPosts();
   }
 
   onAuthorClick(foreignAuthor){
-    // check if the selected author is a follower,
-    console.log(this.props);
-    const auth = this.props.auth;;
 
-    let parseData = foreignAuthor.id.split("/");
-    const foreignAuthorId = parseData[parseData.length - 1];
+    this.setState({
+      selectedAuthor: foreignAuthor,
+    })
 
-    const tokenConfig = {
-      headers:{
-        "Content-Type": "application/json",
-        "Authorization": "Token " + auth.token,
-      }
-    }
+    const auth = this.props.auth;
 
-    axios
-    .get(
-      `/author/${auth.user.author}/followers/${foreignAuthorId}`, tokenConfig)
+    const foreignAuthorId = this.parseData(foreignAuthor);
+
+    axios.get(
+      `/author/${auth.user.author}/followers/${foreignAuthorId}`, this.tokenConfig)
       .then((resp) => {
-        if(resp.data.details === false){
-          console.log("false");
-        }
-      })
-    // this.props.checkFollower(id);
-
-    // const { followers } = this.props;
-    // console.log("FOLLOWERS - ", followers.followers);
-
-    // // console.log("is follower - ", isFollower);
-    
-    // this.setState({
-    //   selectedAuthor: author,
-    //   open: true,
-    // });
-    // console.log("is follower - ", isFollower);
+        console.log("check- ",resp);
+        this.setState({
+          isFollower:resp.data.detail,
+          open: true,
+        });
+      });
   }
 
   handleFollow(){
-    console.log("follow");
+    if(this.state.isFollower === false){
+      const foreignAuthorId = this.parseData(this.state.selectedAuthor);
+      const authorId = this.props.auth.user.author;
+
+      axios.put(
+        `/author/${foreignAuthorId}/followers/${authorId}`, this.tokenConfig)
+        .then((resp) => {
+          console.log("resp - ", resp);
+        });
+    }
   }
 
   handleCloseDialog() {
-    this.setState({
-      selectedAuthor: "",
-      open: false,
-    });
+    this.setState(this.init_state);
   }
 
   render() {
@@ -159,9 +164,9 @@ export class Feed extends Component {
           <DialogTitle>{this.state.selectedAuthor.displayName}</DialogTitle>
           <DialogContent>{this.state.selectedAuthor.displayName}</DialogContent>
           <DialogActions>
-            <Button onClick={() => this.handleFollow()}>
+            {!this.state.isFollower && <Button onClick={() => this.handleFollow()}>
               Follow  
-            </Button>
+            </Button>}
             <Button onClick={() => this.handleCloseDialog()}>
               Close
             </Button>
