@@ -350,6 +350,7 @@ export class Feed extends Component {
 const mapStateToProps = (state) => ({
   posts: state.posts,
   followers: state.followers,
+  user: state.auth,
   auth: state.auth,
 });
 
