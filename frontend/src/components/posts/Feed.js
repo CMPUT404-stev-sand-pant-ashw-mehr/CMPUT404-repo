@@ -15,8 +15,6 @@ import { Redirect } from "react-router-dom";
 
 import axios from "axios";
 
-import axios from "axios";
-
 export class Feed extends Component {
 
   init_state = {
