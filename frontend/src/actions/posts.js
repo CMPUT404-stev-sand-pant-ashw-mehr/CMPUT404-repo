@@ -199,6 +199,40 @@ export const createPostComment = (postId, comment) => (dispatch, getState) => {
     });
 };
 
+export const likePost = (authorId, postId) => (dispatch, getState) => {
+  const authorId = getState().auth.user.author;
+
+  axios
+    .post(
+      `/author/${authorId}/post/${postId}/likes`,
+      null,
+      tokenConfig(getState)
+    )
+    .then((res) => {
+      dispatch({
+        type: CREATE_ALERT,
+        payload: {
+          msg: { success: `${likeType} has been liked!` },
+          status: res.status,
+        },
+      });
+      dispatch({
+        type: LIKE_POST,
+        payload: id,
+      });
+    })
+    .catch((err) => {
+      const alert = {
+        msg: err.response.data,
+        status: err.response.status,
+      };
+      dispatch({
+        type: GET_ALERTS,
+        payload: alert,
+      });
+    });
+};
+
 export const likeObject = (likeObject, likeType) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;
 

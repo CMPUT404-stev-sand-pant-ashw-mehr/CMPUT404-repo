@@ -5,8 +5,10 @@ from author.models import Author
 from author.serializer import AuthorSerializer
 from comment.models import Comment
 from post.models import Post, Categories
-from rest_framework import serializers, viewsets, status
+from likes.models import Like
+from rest_framework import viewsets, status, serializers
 from .serializers import PostSerializer
+from likes.serializers import LikeSerializer
 from rest_framework.response import Response 
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -597,6 +599,16 @@ class PostViewSet(viewsets.ModelViewSet):
             categories = [c['category'] for c in categories_query]
 
             post_data['categories'] = categories
+
+            like_query = Like.objects.filter(post=Post.objects.get(id=post_id))
+            like_res = LikeSerializer(like_query, many=True).data
+            
+            for likeObj in like_res:
+                likeObj['@context'] = "https://www.w3.org/ns/activitystreams"
+                likeObj['author'] = AuthorSerializer(Author.objects.get(id=likeObj["author"])).data
+                name = likeObj['author']["displayName"]
+                
+            post_data["likes"] = like_res
 
             post_data['comments'] = post_data['id'] + '/comments'
 

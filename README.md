@@ -142,8 +142,18 @@ https://social-dis.herokuapp.com/docs/
 
 ##### [Stackoverflow - Array frontend pagination](https://stackoverflow.com/questions/48405643/reactjs-how-to-always-show-only-certain-number-of-array-items)
 
+##### [Stackoverflow - React dynamic state fields](https://stackoverflow.com/questions/53349628/how-to-make-dynamic-state-for-multiple-fields-in-react)
+
+##### [Stackoverflow - React state modification](https://stackoverflow.com/questions/26253351/correct-modification-of-state-arrays-in-react-js)
+
+##### [Stackoverflow - React state modify object slice](https://stackoverflow.com/questions/29537299/react-how-to-update-state-item1-in-state-using-setstate)
+
+##### [Bootstrap card with image to left](https://tarkhov.github.io/postboot/card/image-left/)
+
+##### [Bootstrap - Flex properties](https://getbootstrap.com/docs/5.0/utilities/flex/)
+
+##### [Bootstrap - Spacing properties](https://getbootstrap.com/docs/5.0/utilities/spacing/)
+
 ##### [Django Authentication](https://docs.djangoproject.com/en/3.2/topics/auth/)
 
 ##### [Django Custom Permissions](https://docs.djangoproject.com/en/3.2/topics/auth/customizing/)
-
-
