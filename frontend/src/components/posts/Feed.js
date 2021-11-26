@@ -11,19 +11,11 @@ import { FaRegClock, FaTrashAlt } from "react-icons/fa";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-<<<<<<< HEAD
 import { Redirect } from "react-router-dom";
 
 
 import axios from "axios";
 import { Reddit } from "@mui/icons-material";
-=======
-import Button from "@mui/material/Button";
-import { IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-// import PersonAddIcon from '@mui/icons-material/PersonAdd';
-// import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
->>>>>>> 3b98c51 (finished follow dialog)
 
 import axios from "axios";
 
@@ -86,28 +78,6 @@ export class Feed extends Component {
       })
 
       // send inbox request
-<<<<<<< HEAD
-=======
-    }
-  }
-
-  handleAcceptRequest() {
-    console.log("accepting request");
-    // redirect to inbox
-  }
-
-  handleDeleteFollower(){
-    if(this.state.isFollower === true){
-      const foreignAuthorId = this.parseData(this.state.selectedAuthor);
-      const authorId = this.props.auth.user.author;
-
-      axios.delete(`/author/${foreignAuthorId}/followers/${authorId}`, this.tokenConfig, {}).then((resp) => {
-        this.setState({
-          open: false,
-        })
-      })
-      // delete inbox request
->>>>>>> 3b98c51 (finished follow dialog)
     }
   }
 
@@ -221,19 +191,13 @@ export class Feed extends Component {
             <div class="p-3">{this.state.isFollower? "Accept Request?": "Send a Request"}</div>
             <div class="p-3">
               <div class="d-flex flex-row-reverse">
-<<<<<<< HEAD
+
                 <i class="bi bi-x-lg p-2" onClick={() => this.handleCloseDialog()}></i>
-=======
-                <IconButton class="p-2" onClick={() => this.handleCloseDialog()}>
-                    <CloseIcon />
-                </IconButton>
->>>>>>> 3b98c51 (finished follow dialog)
               </div>
             </div>
           </div>
 
           {!this.state.isFollower && <div class="d-flex flex-row justify-content-center">
-<<<<<<< HEAD
 
           <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
             <div class="d-flex flex-row justify-content-center">
@@ -253,24 +217,15 @@ export class Feed extends Component {
 
 
             {/* <div class="p-2 text-center">
-=======
-            <div class="p-2 text-center">
->>>>>>> 3b98c51 (finished follow dialog)
               <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
             </div>
             <DialogActions>
               <div class="p-2">
-<<<<<<< HEAD
                 <i class="bi bi-person-circle" onClick={() => this.redirectToProfile(this.state.selectedAuthor)}></i>
               </div>
             </DialogActions>
             <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i> */}
 
-=======
-                  <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i>
-              </div>
-            </DialogActions>
->>>>>>> 3b98c51 (finished follow dialog)
           </div>}
 
           {this.state.isFollower && <div class="text-center">
