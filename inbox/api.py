@@ -12,6 +12,8 @@ from author.serializer import AuthorSerializer
 from inbox.serializers import InboxSerializer
 from inbox.models import Inbox
 from author.models import Author
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 class InboxViewSet(viewsets.ModelViewSet):
     serializer_class = InboxSerializer
@@ -33,6 +35,53 @@ class InboxViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated()]
 
 
+    @swagger_auto_schema(
+        operation_description="Get /service/author/< AUTHOR_ID >/inbox",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "type":"inbox",
+                        "author":"http://127.0.0.1:5454/author/c1e3db8ccea4541a0f3d7e5c75feb3fb",
+                        "items":[
+                            {
+                                "type":"post",
+                                "title":"A Friendly post title about a post about web dev",
+                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                                "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+                                "origin":"http://whereitcamefrom.com/posts/zzzzz",
+                                "description":"This post discusses stuff -- brief",
+                                "contentType":"text/plain",
+                                "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge (fæder ellor hwearf, aldor of earde), oð þæt him eft onwōc hēah Healfdene; hēold þenden lifde, gamol and gūð-rēow, glæde Scyldingas. Þǣm fēower bearn forð-gerīmed in worold wōcun, weoroda rǣswan, Heorogār and Hrōðgār and Hālga til; hȳrde ic, þat Elan cwēn Ongenþēowes wæs Heaðoscilfinges heals-gebedde. Þā wæs Hrōðgāre here-spēd gyfen, wīges weorð-mynd, þæt him his wine-māgas georne hȳrdon, oð þæt sēo geogoð gewēox, mago-driht micel. Him on mōd bearn, þæt heal-reced hātan wolde, medo-ærn micel men gewyrcean, þone yldo bearn ǣfre gefrūnon, and þǣr on innan eall gedǣlan geongum and ealdum, swylc him god sealde, būton folc-scare and feorum gumena. Þā ic wīde gefrægn weorc gebannan manigre mǣgðe geond þisne middan-geard, folc-stede frætwan. Him on fyrste gelomp ǣdre mid yldum, þæt hit wearð eal gearo, heal-ærna mǣst; scōp him Heort naman, sē þe his wordes geweald wīde hæfde. Hē bēot ne ālēh, bēagas dǣlde, sinc æt symle. Sele hlīfade hēah and horn-gēap: heaðo-wylma bād, lāðan līges; ne wæs hit lenge þā gēn þæt se ecg-hete āðum-swerian 85 æfter wæl-nīðe wæcnan scolde. Þā se ellen-gǣst earfoðlīce þrāge geþolode, sē þe in þȳstrum bād, þæt hē dōgora gehwām drēam gehȳrde hlūdne in healle; þǣr wæs hearpan swēg, swutol sang scopes. Sægde sē þe cūðe frum-sceaft fīra feorran reccan",
+                                "author":{
+                                    "type":"author",
+                                    "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "host":"http://127.0.0.1:5454/",
+                                    "displayName":"Lara Croft",
+                                    "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "github": "http://github.com/laracroft",
+                                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                },
+                                "categories":["web","tutorial"],
+                                "comments":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+                                "published":"2015-03-09T13:07:04+00:00",
+                                "visibility":"FRIENDS",
+                                "unlisted":False
+                            }
+                        ]
+                    }
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"detail": "Not authorized"}
+                }
+            ),
+        },
+        tags=['Inbox']
+    )
     # GET the inbox of the author
     def get_inbox(self, request, author_id=None):
         result, obj = self.check_author_exists(author_id)
@@ -51,6 +100,58 @@ class InboxViewSet(viewsets.ModelViewSet):
 
         return Response(response, status=status.HTTP_200_OK)
             
+            
+    @swagger_auto_schema(
+        operation_description="POST /service/author/< AUTHOR_ID >/inbox",
+        responses={
+            "201": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "type":"inbox",
+                        "author":"http://127.0.0.1:5454/author/c1e3db8ccea4541a0f3d7e5c75feb3fb",
+                        "items":[
+                            {
+                                "type":"post",
+                                "title":"A Friendly post title about a post about web dev",
+                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                                "source":"http://lastplaceigotthisfrom.com/posts/yyyyy",
+                                "origin":"http://whereitcamefrom.com/posts/zzzzz",
+                                "description":"This post discusses stuff -- brief",
+                                "contentType":"text/plain",
+                                "content":"Þā wæs on burgum Bēowulf Scyldinga, lēof lēod-cyning, longe þrāge folcum gefrǣge (fæder ellor hwearf, aldor of earde), oð þæt him eft onwōc hēah Healfdene; hēold þenden lifde, gamol and gūð-rēow, glæde Scyldingas. Þǣm fēower bearn forð-gerīmed in worold wōcun, weoroda rǣswan, Heorogār and Hrōðgār and Hālga til; hȳrde ic, þat Elan cwēn Ongenþēowes wæs Heaðoscilfinges heals-gebedde. Þā wæs Hrōðgāre here-spēd gyfen, wīges weorð-mynd, þæt him his wine-māgas georne hȳrdon, oð þæt sēo geogoð gewēox, mago-driht micel. Him on mōd bearn, þæt heal-reced hātan wolde, medo-ærn micel men gewyrcean, þone yldo bearn ǣfre gefrūnon, and þǣr on innan eall gedǣlan geongum and ealdum, swylc him god sealde, būton folc-scare and feorum gumena. Þā ic wīde gefrægn weorc gebannan manigre mǣgðe geond þisne middan-geard, folc-stede frætwan. Him on fyrste gelomp ǣdre mid yldum, þæt hit wearð eal gearo, heal-ærna mǣst; scōp him Heort naman, sē þe his wordes geweald wīde hæfde. Hē bēot ne ālēh, bēagas dǣlde, sinc æt symle. Sele hlīfade hēah and horn-gēap: heaðo-wylma bād, lāðan līges; ne wæs hit lenge þā gēn þæt se ecg-hete āðum-swerian 85 æfter wæl-nīðe wæcnan scolde. Þā se ellen-gǣst earfoðlīce þrāge geþolode, sē þe in þȳstrum bād, þæt hē dōgora gehwām drēam gehȳrde hlūdne in healle; þǣr wæs hearpan swēg, swutol sang scopes. Sægde sē þe cūðe frum-sceaft fīra feorran reccan",
+                                "author":{
+                                    "type":"author",
+                                    "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "host":"http://127.0.0.1:5454/",
+                                    "displayName":"Lara Croft",
+                                    "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                    "github": "http://github.com/laracroft",
+                                    "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                                },
+                                "categories":["web","tutorial"],
+                                "comments":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments",
+                                "published":"2015-03-09T13:07:04+00:00",
+                                "visibility":"FRIENDS",
+                                "unlisted":False
+                            }
+                        ]
+                    }
+                }
+            ),
+            "400": openapi.Response(
+                description="Bad Request",
+                examples={
+                    "application/json":[
+                        {"detail": "error message"},
+                        {"detail": "Missing field: error message"},
+                        {"detail": "error message"}
+                    ]
+                }
+            ),
+        },
+        tags=['Inbox']
+    )
     #POST to add new item to the inbox of an author
     def post_inbox(self, request, author_id=None):
         result, obj = self.check_author_exists(author_id)
@@ -74,6 +175,33 @@ class InboxViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"detail": e.args}, status=status.HTTP_400_BAD_REQUEST)
 
+
+    @swagger_auto_schema(
+        operation_description="POST /service/author/< AUTHOR_ID >/inbox",
+        responses={
+            "201": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "message": "Inbox Cleared!"
+                    }
+                }
+            ),
+            "204": openapi.Response(
+                description="No Content",
+                examples={
+                    "application/json":{"detail": "No Content"}
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"detail": "Not authorized"}
+                }
+            ),
+        },
+        tags=['Inbox']
+    )
     #DELETE to clear the inbox
     def delete_inbox(self, request, author_id=None):
         result, obj = self.check_author_exists(author_id)

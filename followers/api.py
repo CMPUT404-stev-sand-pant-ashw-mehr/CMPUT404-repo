@@ -84,7 +84,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
                             ]
                         }
                 }
-            )
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                    "application/json":{"message": "author does not exist"}
+                }
+            ),
         },
         tags=['Get all Followers'],
     )
@@ -132,18 +138,40 @@ class FollowerViewSet(viewsets.ModelViewSet):
         responses={
             "201": openapi.Response(
                 description="Created",
+                examples={
+                    "application/json":{
+                        "follow": {}, 
+                        "follower": {},
+                        "object": {},
+                        "invalid keys": []
+                    }
+                }
             ),
             "400": openapi.Response(
                 description="Bad request",
                 examples={
-                    "application/json":{"detail": "invalid content type. Required: application/json"},
-                    "application/json":{"detail": "follower id format invalid"},
-                    "application/json":{"detail": "id Field of PUT data missing"},
-                    "application/json":{"detail": "follower url format invalid"},
-                    "application/json":{"detail": "author id in URL does not match id in PUT body"},
-                    "application/json":{"detail": "Invalid json for author", "errors": "Error details"},
-                    "application/json":{"detail": "error when storing to database", "error": "Error details"},
-                    "application/json":{"detail": "PUT missing body with content_type: application/json"}
+                    "application/json":[
+                        {"detail": "invalid content type. Required: application/json"},
+                        {"detail": "follower id format invalid"},
+                        {"detail": "id Field of PUT data missing"},
+                        {"detail": "follower url format invalid"},
+                        {"detail": "author id in URL does not match id in PUT body"},
+                        {"detail": "Invalid json for author", "errors": "Error details"},
+                        {"detail": "error when storing to database", "error": "Error details"},
+                        {"detail": "PUT missing body with content_type: application/json"}
+                    ]
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
+                }
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                    "application/json":{"message": "author does not exist"}
                 }
             ),
 
@@ -240,16 +268,28 @@ class FollowerViewSet(viewsets.ModelViewSet):
         operation_description="DELETE /service/author/< AUTHOR_ID >/followers/< FOREIGN_AUTHOR_ID >",
         responses={
             "200": openapi.Response(
-                description="OK"
+                description="OK",
+                examples={
+                    "application/json":{"detail": "follower deleted"}
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
+                }
             ),
             "404": openapi.Response(
                 description="Follower not found",
                 examples={
-                    "application/json":{"detail": "follower not found"}
+                    "application/json":[
+                        {"detail": "follower not found"},
+                        {"detail": "author not found"},
+                    ]
                 }
             ),
         },
-        tags=['Delete a Follower'],
+        tags=['Delete a Follower']
     )
     # DELETE a follower of a given author
     # NEED CONNECTION
@@ -286,11 +326,23 @@ class FollowerViewSet(viewsets.ModelViewSet):
             "200": openapi.Response(
                 description="OK",
                 examples={
-                   "application/json": {"detail": True}
+                    "application/json": [
+                        {"detail": True},
+                        {"detail": False}
+                    ]
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"Node not allowed"}
                 }
             ),
             "404": openapi.Response(
-                description="Author not found",
+                description="Not Found",
+                examples={
+                    "application/json":{"message": "author does not exist"}
+                }
             ),
         },
         tags=['Check if Follower'],
@@ -334,6 +386,30 @@ class FollowerViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
+@swagger_auto_schema(
+        operation_description="GET author/<str:author_id>/friends",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {"type": "friends","items":[]}
+                }
+            ),
+            "403": openapi.Response(
+                description="Forbidden",
+                examples={
+                    "application/json":{"message":"not a valid node"}
+                }
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                    "application/json":{"message": "author does not exist"}
+                }
+            ),
+        },
+        tags=['Get Friends'],
+    )
 def get_friends(request, author_id):
     valid = is_valid_node(request)
     if not valid:
