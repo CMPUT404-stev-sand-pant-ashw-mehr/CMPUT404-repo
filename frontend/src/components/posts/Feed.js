@@ -14,6 +14,10 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import Button from "@mui/material/Button";
+import { IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+// import PersonAddIcon from '@mui/icons-material/PersonAdd';
+// import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
 
 import axios from "axios";
 
@@ -56,7 +60,6 @@ export class Feed extends Component {
     axios.get(
       `/author/${auth.user.author}/followers/${foreignAuthorId}`, this.tokenConfig)
       .then((resp) => {
-        console.log("check- ",resp);
         this.setState({
           isFollower:resp.data.detail,
           open: true,
@@ -69,11 +72,32 @@ export class Feed extends Component {
       const foreignAuthorId = this.parseData(this.state.selectedAuthor);
       const authorId = this.props.auth.user.author;
 
-      axios.put(
-        `/author/${foreignAuthorId}/followers/${authorId}`, this.tokenConfig)
-        .then((resp) => {
-          console.log("resp - ", resp);
-        });
+      axios.put(`/author/${foreignAuthorId}/followers/${authorId}`, {}, this.tokenConfig).then((response) => {
+        this.setState({
+          open: false,
+        })
+      })
+
+      // send inbox request
+    }
+  }
+
+  handleAcceptRequest() {
+    console.log("accepting request");
+    // redirect to inbox
+  }
+
+  handleDeleteFollower(){
+    if(this.state.isFollower === true){
+      const foreignAuthorId = this.parseData(this.state.selectedAuthor);
+      const authorId = this.props.auth.user.author;
+
+      axios.delete(`/author/${foreignAuthorId}/followers/${authorId}`, this.tokenConfig, {}).then((resp) => {
+        this.setState({
+          open: false,
+        })
+      })
+      // delete inbox request
     }
   }
 
@@ -82,7 +106,6 @@ export class Feed extends Component {
   }
 
   render() {
-    // console.log("props - ", this.props);
     const { posts, deletePost, getPosts } = this.props;
 
     return (
@@ -90,10 +113,10 @@ export class Feed extends Component {
         <h2>Local Public Feed</h2>
 
         {posts.posts.map((post) => (
-          <div className="card mb-4" key={post.id.split("/").pop()}>
-            <div className="card-body">
-              <div className="small text-muted">
-                <span className="float-end">
+          <div class="card mb-4" key={post.id.split("/").pop()}>
+            <div class="card-body">
+              <div class="small text-muted">
+                <span class="float-end">
                   <FaRegClock />
                   &nbsp;<Moment fromNow>{post.published}</Moment>
                 </span>
@@ -105,16 +128,16 @@ export class Feed extends Component {
                 </Link>
                 <span onClick={() => this.onAuthorClick(post.author)}>@{post.author.displayName}</span>
               </div>
-              <h2 className="card-title h4">{post.title}</h2>
-              <p className="card-text">{post.description}</p>
+              <h2 class="card-title h4">{post.title}</h2>
+              <p class="card-text">{post.description}</p>
               <Link
                 to={`/posts/${post.id.split("/").pop()}`}
-                className="btn btn-outline-primary"
+                class="btn btn-outline-primary"
               >
                 View full post →
               </Link>
               <button
-                className="btn btn-danger float-end"
+                class="btn btn-danger float-end"
                 onClick={deletePost.bind(this, post.id)}
               >
                 <FaTrashAlt />
@@ -123,10 +146,10 @@ export class Feed extends Component {
           </div>
         ))}
         <nav aria-label="Posts pagination">
-          <ul className="pagination">
-            <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
+          <ul class="pagination">
+            <li class={`page-item ${!posts.previous ? "disabled" : ""}`}>
               <a
-                className="page-link"
+                class="page-link"
                 href="#"
                 aria-label="Previous"
                 onClick={(e) => {
@@ -137,14 +160,14 @@ export class Feed extends Component {
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li className="page-item active">
-              <a className="page-link" href="#">
+            <li class="page-item active">
+              <a class="page-link" href="#">
                 {posts.page}
               </a>
             </li>
-            <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
+            <li class={`page-item ${!posts.next ? "disabled" : ""}`}>
               <a
-                className="page-link"
+                class="page-link"
                 href="#"
                 aria-label="Next"
                 onClick={(e) => {
@@ -160,17 +183,43 @@ export class Feed extends Component {
         <Dialog
           open={this.state.open}
           onClose={() => this.handleCloseDialog()}
-        >
-          <DialogTitle>{this.state.selectedAuthor.displayName}</DialogTitle>
-          <DialogContent>{this.state.selectedAuthor.displayName}</DialogContent>
-          <DialogActions>
-            {!this.state.isFollower && <Button onClick={() => this.handleFollow()}>
-              Follow  
-            </Button>}
-            <Button onClick={() => this.handleCloseDialog()}>
-              Close
-            </Button>
-          </DialogActions>
+        >          
+          <div class="d-flex flex-row">
+            <div class="p-3">{this.state.isFollower? "Accept Request?": "Send a Request"}</div>
+            <div class="p-3">
+              <div class="d-flex flex-row-reverse">
+                <IconButton class="p-2" onClick={() => this.handleCloseDialog()}>
+                    <CloseIcon />
+                </IconButton>
+              </div>
+            </div>
+          </div>
+
+          {!this.state.isFollower && <div class="d-flex flex-row justify-content-center">
+            <div class="p-2 text-center">
+              <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
+            </div>
+            <DialogActions>
+              <div class="p-2">
+                  <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i>
+              </div>
+            </DialogActions>
+          </div>}
+
+          {this.state.isFollower && <div class="text-center">
+            <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
+            <div class="d-flex flex-row justify-content-center">
+              <DialogActions>
+                <div class="p-2">
+                  <i class="bi bi-trash fa-lg" onClick={() => this.handleDeleteFollower()}></i>                  
+                </div>
+                <div class="p-2">
+                  <i class="bi bi-envelope-check fa-lg" onClick={() => this.handleAcceptRequest()}></i>
+                </div>
+              </DialogActions>
+            </div>
+            </div>
+          }          
         </Dialog>
       </Fragment>
     );
