@@ -99,7 +99,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         },
         tags=['Get Comments on a Post'],
     )
-
     def get_post_comments(self, request, author_id=None, post_id=None):
         
         # node check
@@ -190,7 +189,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         },
         tags=['Add Comments to a Post'],
     )
-
     # POST to add new comment
     def add_comment_to_post(self, request, author_id=None, post_id=None):
         

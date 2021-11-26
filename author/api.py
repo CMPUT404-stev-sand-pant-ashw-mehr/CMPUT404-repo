@@ -86,7 +86,6 @@ class AuthorViewSet(viewsets.ModelViewSet):
         },
         tags=['Get all Authors'],
     )
-
     # GET all authors
     # NEED CONNECTION
     def list(self, request: HttpRequest):
