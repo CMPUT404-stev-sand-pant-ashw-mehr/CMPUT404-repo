@@ -2,7 +2,7 @@ import React, { Component, Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getPost, createPostComment,} from "../../actions/posts";
+import { getPost, createPostComment } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock } from "react-icons/fa";
 
@@ -16,7 +16,7 @@ export class Post extends Component {
       commentContent: "",
     });
   }
-  
+
   onChange = (e) =>
     this.setState({
       [e.target.name]: e.target.value,
@@ -24,14 +24,13 @@ export class Post extends Component {
 
   onSubmit = (e) => {
     e.preventDefault();
-    console.log("Clicked!")
     const { commentContent } = this.state;
     const comment = {
       type: "comment",
       contentType: "text/markdown",
       comment: commentContent,
     };
-    
+
     this.props.createPostComment(this.props.match.params.id, comment);
     this.resetForm();
     this.forceUpdate();
@@ -118,6 +117,6 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-   getPost, 
-   createPostComment,
-   })(Post);
+  getPost,
+  createPostComment,
+})(Post);
