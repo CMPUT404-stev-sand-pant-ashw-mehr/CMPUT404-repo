@@ -9,17 +9,13 @@ import Moment from "react-moment";
 import { FaRegClock, FaTrashAlt } from "react-icons/fa";
 
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import Button from "@mui/material/Button";
-import { IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-// import PersonAddIcon from '@mui/icons-material/PersonAdd';
-// import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
+import { Redirect } from "react-router-dom";
+
 
 import axios from "axios";
+import { Reddit } from "@mui/icons-material";
 
 export class Feed extends Component {
 
@@ -27,6 +23,7 @@ export class Feed extends Component {
     selectedAuthor: {},
     isFollower: false,
     open: false,
+    redirect: "",
   };
 
   state = this.init_state;
@@ -100,6 +97,15 @@ export class Feed extends Component {
       // delete inbox request
     }
   }
+  
+  redirectToProfile(data) {
+    const id = this.parseData(data);
+    const path = "/profile/"+id;
+    this.setState({
+      redirect: path,
+    })
+   
+  }
 
   handleCloseDialog() {
     this.setState(this.init_state);
@@ -110,6 +116,7 @@ export class Feed extends Component {
 
     return (
       <Fragment>
+        {this.state.redirect!=="" && <Redirect to={this.state.redirect}/>}
         <h2>Local Public Feed</h2>
 
         {posts.posts.map((post) => (
@@ -120,12 +127,12 @@ export class Feed extends Component {
                   <FaRegClock />
                   &nbsp;<Moment fromNow>{post.published}</Moment>
                 </span>
-                <Link
+                {/* <Link
                   to={`/profile/${post.author_id}`}
                   className="text-decoration-none text-secondary"
                 >
                   @{post.author.displayName}
-                </Link>
+                </Link> */}
                 <span onClick={() => this.onAuthorClick(post.author)}>@{post.author.displayName}</span>
               </div>
               <h2 class="card-title h4">{post.title}</h2>
@@ -194,14 +201,34 @@ export class Feed extends Component {
           </div>
 
           {!this.state.isFollower && <div class="d-flex flex-row justify-content-center">
-            <div class="p-2 text-center">
+
+          <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
+            <div class="d-flex flex-row justify-content-center">
+              <DialogActions>
+                <div class="p-2">
+                <i class="bi bi-person-circle" onClick={() => this.redirectToProfile(this.state.selectedAuthor)}></i>
+                  {/* <i class="bi bi-trash fa-lg" onClick={() => this.handleDeleteFollower()}></i>                   */}
+                </div>
+                <div class="p-2">
+                  <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i>
+
+                  {/* <i class="bi bi-envelope-check fa-lg" onClick={() => this.handleAcceptRequest()}></i> */}
+                </div>
+              </DialogActions>
+            </div>
+
+
+
+            {/* <div class="p-2 text-center">
               <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
             </div>
             <DialogActions>
               <div class="p-2">
-                  <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i>
+                <i class="bi bi-person-circle" onClick={() => this.redirectToProfile(this.state.selectedAuthor)}></i>
               </div>
             </DialogActions>
+            <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i> */}
+
           </div>}
 
           {this.state.isFollower && <div class="text-center">
