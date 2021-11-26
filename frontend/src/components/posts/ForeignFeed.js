@@ -23,30 +23,28 @@ export class ForeignFeed extends Component {
       <Fragment>
         <h2>Foreign Feed</h2>
 
-        {posts.posts.map((post) => (
-          <div className="card mb-4" key={post.id.split("/").pop()}>
-            <div className="card-body">
-              <div className="small text-muted">
-                <span className="float-end">
-                  <FaRegClock />
-                  &nbsp;<Moment fromNow>{post.published}</Moment>
+        {posts.posts
+          .sort(function (a, b) {
+            return new Date(a.published) - new Date(b.published);
+          })
+          .map((post) => (
+            <div className="card mb-4" key={post.id.split("/").pop()}>
+              <div className="card-body">
+                <div className="small text-muted">
+                  <span className="float-end">
+                    <FaRegClock />
+                    &nbsp;<Moment fromNow>{post.published}</Moment>
+                  </span>
+                  @{post.author.displayName}
+                </div>
+                <h2 className="card-title h4">{post.title}</h2>
+                <p className="card-text">{post.description}</p>
+                <span className="badge bg-secondary">
+                  {this.renderHost(post.author.host)}
                 </span>
-                @{post.author.displayName}
               </div>
-              <h2 className="card-title h4">{post.title}</h2>
-              <p className="card-text">{post.description}</p>
-              <Link
-                to={`/posts/${post.id.split("/").pop()}`}
-                className="btn btn-outline-primary float-end"
-              >
-                View full post →
-              </Link>
-              <span className="badge bg-secondary">
-                {this.renderHost(post.author.host)}
-              </span>
             </div>
-          </div>
-        ))}
+          ))}
       </Fragment>
     );
   }
