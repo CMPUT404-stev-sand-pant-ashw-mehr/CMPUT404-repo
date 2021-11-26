@@ -13,9 +13,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import { Redirect } from "react-router-dom";
 
-
 import axios from "axios";
-import { Reddit } from "@mui/icons-material";
 
 import axios from "axios";
 
@@ -204,28 +202,12 @@ export class Feed extends Component {
               <DialogActions>
                 <div class="p-2">
                 <i class="bi bi-person-circle" onClick={() => this.redirectToProfile(this.state.selectedAuthor)}></i>
-                  {/* <i class="bi bi-trash fa-lg" onClick={() => this.handleDeleteFollower()}></i>                   */}
                 </div>
                 <div class="p-2">
                   <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i>
-
-                  {/* <i class="bi bi-envelope-check fa-lg" onClick={() => this.handleAcceptRequest()}></i> */}
                 </div>
               </DialogActions>
             </div>
-
-
-
-            {/* <div class="p-2 text-center">
-              <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
-            </div>
-            <DialogActions>
-              <div class="p-2">
-                <i class="bi bi-person-circle" onClick={() => this.redirectToProfile(this.state.selectedAuthor)}></i>
-              </div>
-            </DialogActions>
-            <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i> */}
-
           </div>}
 
           {this.state.isFollower && <div class="text-center">
