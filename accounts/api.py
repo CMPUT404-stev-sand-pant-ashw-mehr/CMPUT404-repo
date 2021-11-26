@@ -12,7 +12,7 @@ from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_n
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
-
+from drf_yasg import openapi
 import uuid
 
 class RegisterAPI(generics.GenericAPIView):
@@ -20,7 +20,6 @@ class RegisterAPI(generics.GenericAPIView):
     User & Author Registration
     """
     serializer_class = RegisterSerializer
-
     def post(self, request):
         # node check
         valid = is_valid_node(request)
@@ -82,6 +81,7 @@ class LoginAPI(generics.GenericAPIView):
             'token': AuthToken.objects.create(user)[1]
         }, status=status.HTTP_200_OK)
 
+
 class ProfileAPI(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
@@ -89,10 +89,21 @@ class ProfileAPI(generics.RetrieveAPIView):
         return self.request.user 
 
 
-
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
+@swagger_auto_schema(
+    operation_description="GET /connection/authors",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"detail": True}
+                }
+            )
+    },
+    tags=['Get all foreign authors'],
+)
 def get_foregin_authors(request):
     if request.method == "GET":
         foreign_authors = get_list_foregin_authors()
@@ -105,6 +116,18 @@ def get_foregin_authors(request):
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
+@swagger_auto_schema(
+    operation_description="GET /connection/posts",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"detail": True}
+                }
+            )
+    },
+    tags=['Get all foreign posts'],
+)
 def get_foregin_posts(request):
     if request.method == "GET":
         foreign_posts = get_list_foregin_posts()
