@@ -9,22 +9,25 @@ This is blogging/social network platform that allows the importing of other sour
 3. Ashwin Mahesh
 4. Mehrshad Sahebsara
 5. Nishtha Pant
+6. Jingyu Xiang
 
 ## Frameworks Used
 
 - Frontend - Redux
 - Backend - Django
-- Database - SQLite3
+- Database - Postgres
 
 ## Project Structure
 
-The prject code is divided into multiple Django applications each associated with an important component of the project.
+The project code is divided into multiple Django applications each associated with an important component of the project.
 
 - accounts
 - author
 - post
 - comment
 - followers
+- inbox
+- likes
 - frontend
 
 ## Installation
@@ -81,7 +84,12 @@ http://localhost:8000/docs/
 ```
 
 ## Basic Auth
+1. Register
+2. Fill out required fields: Username, Displayname, Email, Password
+3. Login
 
+
+## Remote user Login
 1. username: socialdistribution_t03
 2. password: c404t03
 
@@ -102,3 +110,9 @@ http://localhost:8000/docs/
 ##### [Mozilla - Array sort documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 
 ##### [Stackoverflow - Array frontend pagination](https://stackoverflow.com/questions/48405643/reactjs-how-to-always-show-only-certain-number-of-array-items)
+
+##### [Django Authentication](https://docs.djangoproject.com/en/3.2/topics/auth/)
+
+##### [Django Custom Permissions](https://docs.djangoproject.com/en/3.2/topics/auth/customizing/)
+
+
