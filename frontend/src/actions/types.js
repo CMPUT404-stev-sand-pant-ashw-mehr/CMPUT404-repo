@@ -1,4 +1,5 @@
 export const GET_POSTS = "GET_POSTS";
+export const GET_AUTHOR_POSTS = "GET_AUTHOR_POSTS";
 export const GET_FOREIGN_POSTS = "GET_FOREIGN_POSTS";
 export const GET_POST = "GET_POST";
 
