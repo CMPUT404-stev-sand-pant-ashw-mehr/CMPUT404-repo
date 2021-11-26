@@ -32,7 +32,23 @@ The project code is divided into multiple Django applications each associated wi
 
 ## Installation
 
+NOTE: Postgres is required
+
+On Linux:
+
+1. Install postgres using `sudo apt-get install libpq-dev postgresql postgresql-contrib`
+2. Restart psql service with `sudo service postgresql restart`
+2. To set up the database for postgres:
+        -   `sudo su - postgres`
+        -   `psql`
+        -   `CREATE DATABASE [database_name];`
+        -   `CREATE USER [user] WITH PASSWORD '[password]';`
+        -   `GRANT ALL PRIVILEGES ON DATABASE [database_name] TO [user];`
+        -   Quit psql with `\q` then `exit`
+
 NOTE: It is recommended to use a virtual environment.
+
+
 
 1. Clone the repository.
 2. Install required packages.
