@@ -14,10 +14,7 @@ from inbox.models import Inbox
 from author.models import Author
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-<<<<<<< HEAD
-=======
 
->>>>>>> ba5b1f78e3c21f4109911c2ad95af3bd58b93eb4
 
 class InboxViewSet(viewsets.ModelViewSet):
     serializer_class = InboxSerializer
