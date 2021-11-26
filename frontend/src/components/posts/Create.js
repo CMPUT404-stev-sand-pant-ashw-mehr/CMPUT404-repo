@@ -81,7 +81,7 @@ export class Create extends Component {
               type="text"
               name="title"
               onChange={this.onChange}
-              value={title}
+              defaultValue={title}
             />
           </div>
           <div className="form-group">
@@ -91,7 +91,7 @@ export class Create extends Component {
               type="text"
               name="source"
               onChange={this.onChange}
-              value={source}
+              defaultValue={source}
             />
           </div>
           <div className="form-group">
@@ -101,7 +101,7 @@ export class Create extends Component {
               type="text"
               name="origin"
               onChange={this.onChange}
-              value={origin}
+              defaultValue={origin}
             />
           </div>
           <div className="form-group">
@@ -111,7 +111,7 @@ export class Create extends Component {
               type="text"
               name="description"
               onChange={this.onChange}
-              value={description}
+              defaultValue={description}
             />
           </div>
           <div className="form-group">
@@ -121,9 +121,9 @@ export class Create extends Component {
               type="text"
               name="contentType"
               onChange={this.onChange}
-              value={contentType}
+              defaultValue={contentType}
             >
-              <option value="text/plain">text/plain</option>
+              <option defaultValue="text/plain">text/plain</option>
             </select>
           </div>
           <div className="form-group">
@@ -145,9 +145,9 @@ export class Create extends Component {
               type="text"
               name="visibility"
               onChange={this.onChange}
-              value={visibility}
+              defaultValue={visibility}
             >
-              <option value="PUBLIC">PUBLIC</option>
+              <option defaultValue="PUBLIC">PUBLIC</option>
             </select>
           </div>
           <br></br>

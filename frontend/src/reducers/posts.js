@@ -4,11 +4,11 @@ import {
   CREATE_POST,
   CREATE_POST_COMMENT,
   UPDATE_POST,
+  LIKE_POST,
 } from "../actions/types.js";
 
 const initialState = {
   posts: [],
-  count: "",
   next: "",
   previous: "",
   page: 1,
@@ -20,7 +20,6 @@ export default function (state = initialState, action) {
       return {
         ...state,
         posts: action.payload.items,
-        count: action.payload.count,
         next: action.payload.next,
         previous: action.payload.previous,
         page: action.page,
@@ -30,13 +29,16 @@ export default function (state = initialState, action) {
       return {
         ...state,
         posts: [...state.posts, action.payload],
-        count: (state.count += 1),
       };
     case DELETE_POST:
       return {
         ...state,
         posts: state.posts.filter((post) => post.id !== action.payload),
-        count: (state.count -= 1),
+      };
+    case LIKE_POST:
+      return {
+        ...state,
+        posts: [...state.posts, action.payload],
       };
     default:
       return state;
