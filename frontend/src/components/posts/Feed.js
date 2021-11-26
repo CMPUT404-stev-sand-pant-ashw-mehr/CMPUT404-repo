@@ -3,20 +3,28 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
-import { checkFollower, addFollower} from "../../actions/followers";
+import { addFollower } from "../../actions/followers";
 
 import Moment from "react-moment";
-import { FaRegClock, FaTrashAlt } from "react-icons/fa";
+import {
+  FaRegClock,
+  FaTrashAlt,
+  FaWindowClose,
+  FaUserAlt,
+  FaUserPlus,
+  FaRegTrashAlt,
+  FaRegEnvelope,
+} from "react-icons/fa";
 
-import Dialog from '@mui/material/Dialog';
+import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import { Redirect } from "react-router-dom";
-
+import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
+import store from "../../store";
 
 export class Feed extends Component {
-
   init_state = {
     selectedAuthor: {},
     isFollower: false,
@@ -25,13 +33,6 @@ export class Feed extends Component {
   };
 
   state = this.init_state;
-  
-  tokenConfig = {
-    headers:{
-      "Content-Type": "application/json",
-      "Authorization": "Token " + this.props.auth.token,
-    }
-  }
 
   parseData(data) {
     const parseData = data.id.split("/");
@@ -42,36 +43,44 @@ export class Feed extends Component {
     this.props.getPosts();
   }
 
-  onAuthorClick(foreignAuthor){
-
+  onAuthorClick(foreignAuthor) {
     this.setState({
       selectedAuthor: foreignAuthor,
-    })
+    });
 
     const auth = this.props.auth;
 
     const foreignAuthorId = this.parseData(foreignAuthor);
 
-    axios.get(
-      `/author/${auth.user.author}/followers/${foreignAuthorId}`, this.tokenConfig)
+    axios
+      .get(
+        `/author/${auth.user.author}/followers/${foreignAuthorId}`,
+        tokenConfig(store.getState)
+      )
       .then((resp) => {
         this.setState({
-          isFollower:resp.data.detail,
+          isFollower: resp.data.detail,
           open: true,
         });
       });
   }
 
-  handleFollow(){
-    if(this.state.isFollower === false){
+  handleFollow() {
+    if (this.state.isFollower === false) {
       const foreignAuthorId = this.parseData(this.state.selectedAuthor);
       const authorId = this.props.auth.user.author;
 
-      axios.put(`/author/${foreignAuthorId}/followers/${authorId}`, {}, this.tokenConfig).then((response) => {
-        this.setState({
-          open: false,
-        })
-      })
+      axios
+        .put(
+          `/author/${foreignAuthorId}/followers/${authorId}`,
+          {},
+          tokenConfig(store.getState)
+        )
+        .then((response) => {
+          this.setState({
+            open: false,
+          });
+        });
 
       // send inbox request
     }
@@ -82,27 +91,32 @@ export class Feed extends Component {
     // redirect to inbox
   }
 
-  handleDeleteFollower(){
-    if(this.state.isFollower === true){
+  handleDeleteFollower() {
+    if (this.state.isFollower === true) {
       const foreignAuthorId = this.parseData(this.state.selectedAuthor);
       const authorId = this.props.auth.user.author;
 
-      axios.delete(`/author/${foreignAuthorId}/followers/${authorId}`, this.tokenConfig, {}).then((resp) => {
-        this.setState({
-          open: false,
-        })
-      })
+      axios
+        .delete(
+          `/author/${foreignAuthorId}/followers/${authorId}`,
+          tokenConfig(store.getState),
+          {}
+        )
+        .then((resp) => {
+          this.setState({
+            open: false,
+          });
+        });
       // delete inbox request
     }
   }
-  
+
   redirectToProfile(data) {
     const id = this.parseData(data);
-    const path = "/profile/"+id;
+    const path = "/profile/" + id;
     this.setState({
       redirect: path,
-    })
-   
+    });
   }
 
   handleCloseDialog() {
@@ -114,29 +128,31 @@ export class Feed extends Component {
 
     return (
       <Fragment>
-        {this.state.redirect!=="" && <Redirect to={this.state.redirect}/>}
+        {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
         <h2>Local Public Feed</h2>
 
         {posts.posts.map((post) => (
-          <div class="card mb-4" key={post.id.split("/").pop()}>
-            <div class="card-body">
-              <div class="small text-muted">
-                <span class="float-end">
+          <div className="card mb-4" key={post.id.split("/").pop()}>
+            <div className="card-body">
+              <div className="small text-muted">
+                <span className="float-end">
                   <FaRegClock />
                   &nbsp;<Moment fromNow>{post.published}</Moment>
                 </span>
-                <span onClick={() => this.onAuthorClick(post.author)}>@{post.author.displayName}</span>
+                <span onClick={() => this.onAuthorClick(post.author)}>
+                  @{post.author.displayName}
+                </span>
               </div>
-              <h2 class="card-title h4">{post.title}</h2>
-              <p class="card-text">{post.description}</p>
+              <h2 className="card-title h4">{post.title}</h2>
+              <p className="card-text">{post.description}</p>
               <Link
                 to={`/posts/${post.id.split("/").pop()}`}
-                class="btn btn-outline-primary"
+                className="btn btn-outline-primary"
               >
                 View full post →
               </Link>
               <button
-                class="btn btn-danger float-end"
+                className="btn btn-danger float-end"
                 onClick={deletePost.bind(this, post.id)}
               >
                 <FaTrashAlt />
@@ -145,10 +161,10 @@ export class Feed extends Component {
           </div>
         ))}
         <nav aria-label="Posts pagination">
-          <ul class="pagination">
-            <li class={`page-item ${!posts.previous ? "disabled" : ""}`}>
+          <ul className="pagination">
+            <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
               <a
-                class="page-link"
+                className="page-link"
                 href="#"
                 aria-label="Previous"
                 onClick={(e) => {
@@ -159,14 +175,14 @@ export class Feed extends Component {
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li class="page-item active">
-              <a class="page-link" href="#">
+            <li className="page-item active">
+              <a className="page-link" href="#">
                 {posts.page}
               </a>
             </li>
-            <li class={`page-item ${!posts.next ? "disabled" : ""}`}>
+            <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
               <a
-                class="page-link"
+                className="page-link"
                 href="#"
                 aria-label="Next"
                 onClick={(e) => {
@@ -179,48 +195,69 @@ export class Feed extends Component {
             </li>
           </ul>
         </nav>
-        <Dialog
-          open={this.state.open}
-          onClose={() => this.handleCloseDialog()}
-        >          
-          <div class="d-flex flex-row">
-            <div class="p-3">{this.state.isFollower? "Accept Request?": "Send a Request"}</div>
-            <div class="p-3">
-              <div class="d-flex flex-row-reverse">
-                <i class="bi bi-x-lg p-2" onClick={() => this.handleCloseDialog()}></i>
+        <Dialog open={this.state.open} onClose={() => this.handleCloseDialog()}>
+          <div className="d-flex flex-row">
+            <div className="p-3">
+              {this.state.isFollower ? "Accept Request?" : "Send a Request"}
+            </div>
+            <div className="p-3">
+              <div className="d-flex flex-row-reverse">
+                <div onClick={() => this.handleCloseDialog()}>
+                  <FaWindowClose />
+                </div>
               </div>
             </div>
           </div>
 
-          {!this.state.isFollower && <div class="d-flex flex-row justify-content-center">
+          {!this.state.isFollower && (
+            <div className="d-flex flex-row justify-content-center">
+              <DialogContent>
+                @{this.state.selectedAuthor.displayName}
+              </DialogContent>
+              <div className="d-flex flex-row justify-content-center">
+                <DialogActions>
+                  <div className="p-2">
+                    <div
+                      onClick={() =>
+                        this.redirectToProfile(this.state.selectedAuthor)
+                      }
+                    >
+                      <FaUserAlt />
+                    </div>
+                  </div>
+                  <div className="p-2">
+                    <div onClick={() => this.handleFollow()}>
+                      <FaUserPlus />
+                    </div>
+                  </div>
+                </DialogActions>
+              </div>
+            </div>
+          )}
 
-          <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
-            <div class="d-flex flex-row justify-content-center">
-              <DialogActions>
-                <div class="p-2">
-                <i class="bi bi-person-circle" onClick={() => this.redirectToProfile(this.state.selectedAuthor)}></i>
-                </div>
-                <div class="p-2">
-                  <i class="bi bi-person-plus fa-lg" onClick={() => this.handleFollow()}></i>
-                </div>
-              </DialogActions>
+          {this.state.isFollower && (
+            <div className="text-center">
+              <DialogContent>
+                @{this.state.selectedAuthor.displayName}
+              </DialogContent>
+              <div className="d-flex flex-row justify-content-center">
+                <DialogActions>
+                  <div
+                    className="p-2"
+                    onClick={() => this.handleDeleteFollower()}
+                  >
+                    <FaRegTrashAlt />
+                  </div>
+                  <div
+                    className="p-2"
+                    onClick={() => this.handleAcceptRequest()}
+                  >
+                    <FaRegEnvelope />
+                  </div>
+                </DialogActions>
+              </div>
             </div>
-          </div>}
-
-          {this.state.isFollower && <div class="text-center">
-            <DialogContent>@{this.state.selectedAuthor.displayName}</DialogContent>
-            <div class="d-flex flex-row justify-content-center">
-              <DialogActions>
-                <div class="p-2">
-                  <i class="bi bi-trash fa-lg" onClick={() => this.handleDeleteFollower()}></i>                  
-                </div>
-                <div class="p-2">
-                  <i class="bi bi-envelope-check fa-lg" onClick={() => this.handleAcceptRequest()}></i>
-                </div>
-              </DialogActions>
-            </div>
-            </div>
-          }          
+          )}
         </Dialog>
       </Fragment>
     );
@@ -230,7 +267,6 @@ export class Feed extends Component {
     posts: PropTypes.object.isRequired,
     getPosts: PropTypes.func.isRequired,
     deletePost: PropTypes.func.isRequired,
-    checkFollower: PropTypes.func.isRequired,
     addFollower: PropTypes.func.isRequired,
     auth: PropTypes.object.isRequired,
   };
@@ -242,4 +278,6 @@ const mapStateToProps = (state) => ({
   auth: state.auth,
 });
 
-export default connect(mapStateToProps, { getPosts, deletePost, checkFollower, addFollower })(Feed);
+export default connect(mapStateToProps, { getPosts, deletePost, addFollower })(
+  Feed
+);
