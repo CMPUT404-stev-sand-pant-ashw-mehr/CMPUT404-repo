@@ -30,13 +30,15 @@ export class Feed extends Component {
     // check if the selected author is a follower,
     let parseData = author.id.split("/");
     const id = parseData[parseData.length - 1];
-    let isFollower = this.props.checkFollower(id);
+    const isFollower=this.props.checkFollower(id);
+
+    console.log("is follower - ", isFollower);
     
     this.setState({
       selectedAuthor: author,
       open: true,
     });
-    console.log("is follower - ", isFollower);
+    // console.log("is follower - ", isFollower);
   }
 
   handleFollow(){
