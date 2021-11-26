@@ -3,12 +3,51 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
+import { checkFollower, addFollower} from "../../actions/followers";
+
 import Moment from "react-moment";
 import { FaRegClock, FaTrashAlt } from "react-icons/fa";
 
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import Button from "@mui/material/Button";
+
 export class Feed extends Component {
+
+  state = {
+    selectedAuthor: {},
+    open: false,
+  };
+
   componentDidMount() {
     this.props.getPosts();
+  }
+
+  onAuthorClick(author){
+    // check if the selected author is a follower,
+    let parseData = author.id.split("/");
+    const id = parseData[parseData.length - 1];
+    let isFollower = this.props.checkFollower(id);
+    
+    this.setState({
+      selectedAuthor: author,
+      open: true,
+    });
+    console.log("is follower - ", isFollower);
+  }
+
+  handleFollow(){
+    console.log("follow");
+  }
+
+  handleCloseDialog() {
+    this.setState({
+      selectedAuthor: "",
+      open: false,
+    });
   }
 
   render() {
@@ -26,7 +65,7 @@ export class Feed extends Component {
                   <FaRegClock />
                   &nbsp;<Moment fromNow>{post.published}</Moment>
                 </span>
-                @{post.author.displayName}
+                <span onClick={() => this.onAuthorClick(post.author)}>@{post.author.displayName}</span>
               </div>
               <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
@@ -80,6 +119,21 @@ export class Feed extends Component {
             </li>
           </ul>
         </nav>
+        <Dialog
+          open={this.state.open}
+          onClose={() => this.handleCloseDialog()}
+        >
+          <DialogTitle>{this.state.selectedAuthor.displayName}</DialogTitle>
+          <DialogContent>{this.state.selectedAuthor.displayName}</DialogContent>
+          <DialogActions>
+            <Button onClick={() => this.handleFollow()}>
+              Follow  
+            </Button>
+            <Button onClick={() => this.handleCloseDialog()}>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Fragment>
     );
   }
@@ -88,6 +142,8 @@ export class Feed extends Component {
     posts: PropTypes.object.isRequired,
     getPosts: PropTypes.func.isRequired,
     deletePost: PropTypes.func.isRequired,
+    checkFollower: PropTypes.func.isRequired,
+    addFollower: PropTypes.func.isRequired,
   };
 }
 
@@ -95,4 +151,4 @@ const mapStateToProps = (state) => ({
   posts: state.posts,
 });
 
-export default connect(mapStateToProps, { getPosts, deletePost })(Feed);
+export default connect(mapStateToProps, { getPosts, deletePost, checkFollower, addFollower })(Feed);

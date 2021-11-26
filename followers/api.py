@@ -301,13 +301,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
     # GET if the author has the follower with the given id on the server
     # NEED CONNECTION
     def check_follower(self, request, author_id=None, foreign_author_id=None):
-        
+
         # node check
         valid = is_valid_node(request)
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        get_object_or_404(User, pk=author_id) # Check if user exists
+        # get_object_or_404(User, pk=author_id) # Check if user exists
 
         # remove trailing slash
         if foreign_author_id[-1] == '/':
@@ -316,7 +316,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
             return Response({"detail": True}, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": False}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": False}, status=status.HTTP_200_OK)
 
     # validate if the url format is correct
     def validate_url(self, url: str) -> bool:

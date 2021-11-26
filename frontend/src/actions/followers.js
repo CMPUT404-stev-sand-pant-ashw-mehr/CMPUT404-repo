@@ -102,8 +102,8 @@ export const checkFollower = (foreignAuthorId) => (dispatch, getState) => {
     .get(
       `/author/${authorId}/followers/${foreignAuthorId}`,
       tokenConfig(getState)
-    )
-    .then((res) => {
+    ).then((res) => {
+      console.log("response - ", res);
       dispatch({
         type: CHECK_FOLLOWER,
         payload: res.data,
