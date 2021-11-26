@@ -188,9 +188,7 @@ export class Feed extends Component {
             <div class="p-3">{this.state.isFollower? "Accept Request?": "Send a Request"}</div>
             <div class="p-3">
               <div class="d-flex flex-row-reverse">
-                <IconButton class="p-2" onClick={() => this.handleCloseDialog()}>
-                    <CloseIcon />
-                </IconButton>
+                <i class="bi bi-x-lg p-2" onClick={() => this.handleCloseDialog()}></i>
               </div>
             </div>
           </div>
