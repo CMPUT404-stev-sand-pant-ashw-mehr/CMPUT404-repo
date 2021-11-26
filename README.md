@@ -53,9 +53,9 @@ $ sudo service postgresql restart
 
    $ sudo su - postgres
    $ psql
-   $ CREATE DATABASE [database_name];
-   $ CREATE USER [user] WITH PASSWORD '[password]';
-   $ GRANT ALL PRIVILEGES ON DATABASE [database_name] TO [user]
+   $ CREATE DATABASE c404t03db;
+   $ CREATE USER postgres WITH PASSWORD 'c404t03db'
+   $ GRANT ALL PRIVILEGES ON DATABASE c404t03db TO postgres
    $ Quit psql with `\q` then `exit';
 
 ```
