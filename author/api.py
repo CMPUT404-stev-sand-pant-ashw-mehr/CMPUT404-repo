@@ -201,19 +201,21 @@ class AuthorViewSet(viewsets.ModelViewSet):
                     "application/json": {"detail": "Author not found"},
                 }
             ),
-            "400": openapi.Response(
-                description="Author not found",
+            "403": openapi.Response(
+                description="Author or Node not authorized",
                 examples={
-                    "application/json": {"detail": "No POST data is sent"},
-                    "application/json": {
-                        "message": "Record not updated",
-                        "detail": "Error details..."}
+                    "application/json": {"message":"Node not allowed"}
+                }
+            ),
+            "400": openapi.Response(
+                description="Missing POST data",
+                examples={
+                    "application/json": {"detail": "No POST data is sent"}
                 }
             ), 
         },
         tags=['Update Author by Author ID'],
     )
-
     def update(self, request: HttpRequest, author_id=None):
         
         # node check

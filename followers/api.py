@@ -1,4 +1,5 @@
-from rest_framework import response
+from rest_framework import response, serializers
+from rest_framework import permissions
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import viewsets, status
@@ -331,46 +332,87 @@ class FollowerViewSet(viewsets.ModelViewSet):
             return False
 
         
-@api_view(['GET'])
-@authentication_classes([CustomAuthentication])
-@permission_classes([AccessPermission])
-def get_friends(request, author_id):
-    valid = is_valid_node(request)
-    if not valid:
-        return Response({"message":"not a valid node"}, status=status.HTTP_403_FORBIDDEN)
-    
-    try:
-        Author.objects.exclude(is_active=False).filter(id = author_id)
-    except Author.DoesNotExist:
-        return Response({"message": "author does not exist"}, status=status.HTTP_404_NOT_FOUND)
-    
-    follow = Followers.objects.filter(author_id=author_id)
-    serializer = FollowerModelSerializer(follow, many=True)
-    
-    print(serializer.data)
-    followers = []
-    friends = []
-    
-    for author in serializer.data:
-        follower_id = author['follower']
-        try:
-            follower = Author.objects.exclude(is_active=False).get(id=follower_id)
-            serializer = AuthorSerializer(follower)
-            followers.append(serializer.data)
-        except Author.DoesNotExist:
-            return Response({"message": "No such follower!"})
+class FriendViewSet(viewsets.ModelViewSet):
+    serializer_class = AuthorSerializer
+    authentication_classes = (CustomAuthentication,)
+    permission_classes = (AccessPermission,)
+
+    @swagger_auto_schema(
+        operation_description="GET /service/author/< AUTHOR_ID >/friends",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {
+                       "type": "friends",
+                       "items": [
+                           {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                "url":"http://127.0.0.1:5454/author/1d698d25ff008f7538453c120f581471",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Greg Johnson",
+                                "github": "http://github.com/gjohnson",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            },
+                            {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Lara Croft",
+                                "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "github": "http://github.com/laracroft",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            }
+                       ]
+                   }
+                }
+            ),
+            "404": openapi.Response(
+                description="Author not found",
+                examples= {
+                    "application/json":{"message": "author does not exist"}
+                }
+            ),
+            "403": openapi.Response(
+                description="Node invalid",
+                examples= {
+                    "application/json":{"message":"not a valid node"}
+                }
+            )
+        },
+        tags=['Check if Follower'],
+    )
+    def get_friends(request, author_id):
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"not a valid node"}, status=status.HTTP_403_FORBIDDEN)
         
-    for f in followers:
-        follower_id = f['id'].split("/")[-1]
-        if Followers.objects.filter(follower_id=author_id, author_id=follower_id).exists():
-            # check if mutually followed, if ture, friend
-            friends.append(f)
+        try:
+            Author.objects.exclude(is_active=False).filter(id = author_id)
+        except Author.DoesNotExist:
+            return Response({"message": "author does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        
+        follow = Followers.objects.filter(author_id=author_id)
+        serializer = FollowerModelSerializer(follow, many=True)
+        
+        print(serializer.data)
+        followers = []
+        friends = []
+        
+        for author in serializer.data:
+            follower_id = author['follower']
+            try:
+                follower = Author.objects.exclude(is_active=False).get(id=follower_id)
+                serializer = AuthorSerializer(follower)
+                followers.append(serializer.data)
+            except Author.DoesNotExist:
+                return Response({"message": "No such follower!"})
             
-    return Response({"type": "friends","items":friends}, status=status.HTTP_200_OK)
-    
-    
-    
-    
-    
-    
-    
+        for f in followers:
+            follower_id = f['id'].split("/")[-1]
+            if Followers.objects.filter(follower_id=author_id, author_id=follower_id).exists():
+                # check if mutually followed, if ture, friend
+                friends.append(f)
+                
+        return Response({"type": "friends","items":friends}, status=status.HTTP_200_OK)

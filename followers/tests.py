@@ -136,4 +136,4 @@ class FollowerTest(TestCase):
 
         # Test user 5 should not exists
         r = self.client.get('/author/1/followers/http://127.0.0.1:8000/author/5/')
-        self.assertTrue(400 <= r.status_code < 500)
+        self.assertFalse(r.json()["detail"])
