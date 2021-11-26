@@ -299,7 +299,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
     # GET if the author has the follower with the given id on the server
     # NEED CONNECTION
     def check_follower(self, request, author_id=None, foreign_author_id=None):
-        
+
         # node check
         valid = is_valid_node(request)
         if not valid:
