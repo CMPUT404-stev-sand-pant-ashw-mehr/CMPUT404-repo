@@ -85,8 +85,7 @@ export const getForeignPosts = () => (dispatch, getState) => {
     });
 };
 
-export const getPost = (postId) => (dispatch, getState) => {
-  const authorId = getState().auth.user.author;
+export const getPost = (authorId, postId) => (dispatch, getState) => {
   axios
     .get(`/author/${authorId}/posts/${postId}`, tokenConfig(getState))
     .then((res) => {
