@@ -71,7 +71,7 @@ export class Profile extends Component {
               <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
               <Link
-                to={`/posts/${post.id.split("/").pop()}`}
+                to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
                 className="btn btn-outline-primary"
               >
                 View full post →
