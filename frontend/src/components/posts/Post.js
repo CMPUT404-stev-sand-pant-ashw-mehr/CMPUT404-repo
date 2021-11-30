@@ -37,7 +37,10 @@ export class Post extends Component {
   };
 
   componentDidMount() {
-    this.props.getPost(this.props.match.params.id);
+    this.props.getPost(
+      this.props.match.params.authorId,
+      this.props.match.params.postId
+    );
   }
 
   render() {
