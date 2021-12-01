@@ -56,8 +56,8 @@ def get_list_foregin_authors():
 def get_foregin_author_detail(author_id):
     authors = get_list_foregin_authors()
     for author in authors:
-        author["id"] = author["id"].split("/")[-1]
-        if author['id'] == author_id:
+        author["uuid"] = author["id"].split("/")[-1]
+        if author['uuid'] == author_id:
             return (author)
     return "author not found!"
 
@@ -89,16 +89,19 @@ def get_list_foregin_posts():
         posts = posts + j_req_17
     
     for post in posts:
+        post["uuid"] = ""
         if post["id"][-1] == "/":
             post["id"] = post["id"][:-1]
+        post["uuid"] = post["uuid"] = post["id"].split("/")[-1]
     return posts
 
 def get_foregin_public_post_detail(post_id):
     posts = get_list_foregin_posts()
     for post in posts:
+        post["uuid"] = ""
         if post["id"][-1] == "/":
             post["id"] = post["id"][:-1]
-        post["id"] = post["id"].split("/")[-1]
-        if post["id"] == post_id:
+        post["uuid"] = post["id"].split("/")[-1]
+        if post["uuid"] == post_id:
             return post
     return "post not found!"
