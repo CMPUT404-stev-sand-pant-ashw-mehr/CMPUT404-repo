@@ -8,7 +8,7 @@ from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
 from knox.models import AuthToken
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
@@ -133,5 +133,21 @@ def get_foregin_posts(request):
         foreign_posts = get_list_foregin_posts()
         print(foreign_posts)
         return Response({"items": foreign_posts})
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+
+
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def get_foregin_author_detail_view(request, author_id):
+    if request.method == "GET":
+        
+        foreign_author = get_foregin_author_detail(author_id)
+        if foreign_author != "author not found!":
+            return Response({"items": foreign_author}) 
+        else:
+            return Response({"detail": "can't find this author"}) 
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

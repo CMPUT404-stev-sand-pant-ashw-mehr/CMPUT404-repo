@@ -54,9 +54,13 @@ def get_list_foregin_authors():
     
     return authors
 
-def get_foregin_author_detail():
-    #TODO
-    pass
+def get_foregin_author_detail(author_id):
+    authors = get_list_foregin_authors()
+    for author in authors:
+        author["id"] = author["id"].split("/")[-1]
+        if author['id'] == author_id:
+            return (author)
+    return "author not found!"
 
 
 def get_list_foregin_posts():
