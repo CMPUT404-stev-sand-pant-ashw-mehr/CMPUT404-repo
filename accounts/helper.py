@@ -54,6 +54,14 @@ def get_list_foregin_authors():
     
     return authors
 
+def get_foregin_author_detail(author_id):
+    authors = get_list_foregin_authors()
+    for author in authors:
+        author["id"] = author["id"].split("/")[-1]
+        if author['id'] == author_id:
+            return (author)
+    return "author not found!"
+
 
 def get_list_foregin_posts():
     posts = []
@@ -81,7 +89,21 @@ def get_list_foregin_posts():
     else:
         j_req_17 = team_17_req.json()
         posts = posts + j_req_17
-    
-    
-    
     return posts
+
+def get_foregin_public_post_detail(post_id):
+    posts = get_list_foregin_posts()
+    for post in posts:
+        if post["id"][-1] == "/":
+            post["id"] = post["id"][:-1]
+        post["id"] = post["id"].split("/")[-1]
+        if post["id"] == post_id:
+            return post
+    return "post not found!"
+        
+        
+        
+
+def like_foregin_public_post():
+    #TODO
+    pass
