@@ -27,7 +27,6 @@ def is_valid_node(request):
 
 def get_list_foregin_authors():
     authors = []
-    
     # foreign authors from team15
     team_15_req = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
     if team_15_req.status_code == 500:
@@ -65,7 +64,6 @@ def get_foregin_author_detail(author_id):
 
 def get_list_foregin_posts():
     posts = []
-    
     # foreign posts from team15
     team_15_req = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:9000/"})
     if team_15_req.status_code == 500:
@@ -89,6 +87,10 @@ def get_list_foregin_posts():
     else:
         j_req_17 = team_17_req.json()
         posts = posts + j_req_17
+    
+    for post in posts:
+        if post["id"][-1] == "/":
+            post["id"] = post["id"][:-1]
     return posts
 
 def get_foregin_public_post_detail(post_id):
@@ -100,10 +102,3 @@ def get_foregin_public_post_detail(post_id):
         if post["id"] == post_id:
             return post
     return "post not found!"
-        
-        
-        
-
-def like_foregin_public_post():
-    #TODO
-    pass
