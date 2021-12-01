@@ -8,7 +8,7 @@ from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
 from knox.models import AuthToken
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
@@ -104,7 +104,7 @@ class ProfileAPI(generics.RetrieveAPIView):
     },
     tags=['Get all foreign authors'],
 )
-def get_foregin_authors(request):
+def get_foregin_authors_view(request):
     if request.method == "GET":
         foreign_authors = get_list_foregin_authors()
         print(foreign_authors)
@@ -128,7 +128,7 @@ def get_foregin_authors(request):
     },
     tags=['Get all foreign posts'],
 )
-def get_foregin_posts(request):
+def get_foregin_posts_view(request):
     if request.method == "GET":
         foreign_posts = get_list_foregin_posts()
         print(foreign_posts)
@@ -151,3 +151,17 @@ def get_foregin_author_detail_view(request, author_id):
             return Response({"detail": "can't find this author"}) 
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def get_foregin_post_detail_view(request, post_id):
+    if request.method == "GET":
+        post = get_foregin_public_post_detail(post_id)
+        if post != "post not found!":
+            return Response({"items": post}) 
+        else:
+            return Response({"detail": "can't find this post"}) 
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            
