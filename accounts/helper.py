@@ -91,9 +91,18 @@ def get_list_foregin_posts():
         posts = posts + j_req_17
     return posts
 
-def get_foregin_public_post_detail():
-    #TODO
-    pass
+def get_foregin_public_post_detail(post_id):
+    posts = get_list_foregin_posts()
+    for post in posts:
+        if post["id"][-1] == "/":
+            post["id"] = post["id"][:-1]
+        post["id"] = post["id"].split("/")[-1]
+        if post["id"] == post_id:
+            return post
+    return "post not found!"
+        
+        
+        
 
 def like_foregin_public_post():
     #TODO
