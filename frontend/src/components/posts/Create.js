@@ -4,15 +4,51 @@ import PropTypes from "prop-types";
 import { createPost } from "../../actions/posts";
 
 export class Create extends Component {
-  state = {
-    title: "",
-    source: "",
-    origin: "",
-    description: "",
-    contentType: "text/plain",
-    content: "",
-    visibility: "PUBLIC",
-    unlisted: false,
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: "",
+      source: "",
+      origin: "",
+      description: "",
+      contentType: "text/plain",
+      content: "",
+      visibility: "PUBLIC",
+      unlisted: false,
+      imagePreview: null,
+      img: null,
+    };
+
+    this.onImageChange = this.onImageChange.bind(this);
+    this.chooseFile = React.createRef();
+  }
+
+  componentDidMount = () => { 
+    console.log( "props: ", this.props)
+  }
+
+  onImageChange = e => {
+    console.log("here");
+    if (e.target.files && e.target.files[0]) {
+      this.setState({ img: e.target.files[0] }, () => {
+        this.setState({ imagePreview: URL.createObjectURL(this.state.img) });
+      })
+    }
+  };
+
+  getBase64 = (file) => {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    return new Promise(resolve => {
+      reader.onload = e => {
+        resolve(e.target.result);
+      }
+    })
+  };
+
+  showOpenFileDlg = () => {
+    console.log(this.chooseFile.current.click())
+    this.chooseFile.current.click()
   };
 
   resetForm() {
@@ -26,7 +62,7 @@ export class Create extends Component {
       visibility: "",
       unlisted: false,
     });
-  }
+  };
 
   onChange = (e) =>
     this.setState({
@@ -73,7 +109,7 @@ export class Create extends Component {
 
     return (
       <div>
-        <form onSubmit={this.onSubmit}>
+        {/* <form onSubmit={this.onSubmit}> */}
           <div className="form-group">
             <label>Title</label>
             <input
@@ -81,7 +117,7 @@ export class Create extends Component {
               type="text"
               name="title"
               onChange={this.onChange}
-              defaultValue={title}
+              value={title}
             />
           </div>
           <div className="form-group">
@@ -91,7 +127,7 @@ export class Create extends Component {
               type="text"
               name="source"
               onChange={this.onChange}
-              defaultValue={source}
+              value={source}
             />
           </div>
           <div className="form-group">
@@ -101,7 +137,7 @@ export class Create extends Component {
               type="text"
               name="origin"
               onChange={this.onChange}
-              defaultValue={origin}
+              value={origin}
             />
           </div>
           <div className="form-group">
@@ -111,7 +147,7 @@ export class Create extends Component {
               type="text"
               name="description"
               onChange={this.onChange}
-              defaultValue={description}
+              value={description}
             />
           </div>
           <div className="form-group">
@@ -121,22 +157,35 @@ export class Create extends Component {
               type="text"
               name="contentType"
               onChange={this.onChange}
-              defaultValue={contentType}
+              value={contentType}
             >
-              <option defaultValue="text/plain">text/plain</option>
+              <option value="text/plain">text/plain</option>
+              <option value="text/markdown">text/markdown</option>
+              <option value="image">image</option>
             </select>
           </div>
           <div className="form-group">
             <label>Content</label>
-            <textarea
-              className="form-control"
-              id="content"
-              name="content"
-              onChange={this.onChange}
-              rows="4"
-            >
-              {content}
-            </textarea>
+            {
+              contentType === "text/plain" || contentType === "text/markdown"
+              ?
+              <textarea
+                className="form-control"
+                id="content"
+                name="content"
+                onChange={this.onChange}
+                rows="4"
+                value={content}
+              />
+              :
+              <div>
+                <button variant="outlined" color="primary" onClick={this.showOpenFileDlg}>Choose Image</button>
+                <br />
+                <input type="file" ref={this.chooseFile} onChange={this.onImageChange} style={{ display: 'none' }} accept="image/png, image/jpeg" />
+                <img style={{width:'50%'}} src={this.state.imagePreview} alt="Unavailable" />
+              </div>
+            }
+            
           </div>
           <div className="form-group">
             <label>Visibility</label>
@@ -145,18 +194,18 @@ export class Create extends Component {
               type="text"
               name="visibility"
               onChange={this.onChange}
-              defaultValue={visibility}
+              value={visibility}
             >
-              <option defaultValue="PUBLIC">PUBLIC</option>
+              <option value="PUBLIC">PUBLIC</option>
             </select>
           </div>
           <br></br>
           <div className="form-group">
-            <button type="submit" className="btn btn-primary">
+            <button onClick={this.onSubmit} className="btn btn-primary">
               Submit
             </button>
           </div>
-        </form>
+        {/* </form> */}
       </div>
     );
   }
