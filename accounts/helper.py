@@ -81,7 +81,7 @@ def get_list_foregin_posts():
     if team_17_req.status_code in (500, 404, 503, 200):
         pass
     else:
-        j_req_17 = team_17_req.json()['items']
+        j_req_17 = team_17_req.json()
         posts = posts + j_req_17
         
     # foreign posts from team14
