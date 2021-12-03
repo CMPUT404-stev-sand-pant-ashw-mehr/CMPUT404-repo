@@ -85,7 +85,7 @@ export class Profile extends Component {
     return (
       <Fragment>
         <h2>User Details</h2>
-        <div>
+        <div style={{fontStyle:'italic', fontWeight:500}}>
           <p>Welcome, {displayName} !</p>
           <p>Author URL: {url}</p>
           <p>Github: {github}</p>
