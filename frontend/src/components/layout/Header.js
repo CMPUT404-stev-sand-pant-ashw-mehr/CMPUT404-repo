@@ -15,6 +15,12 @@ export class Header extends Component {
         >
           Foreign Posts
         </Link>
+        <Link
+          to="/git"
+          className="me-3 py-2 text-dark text-decoration-none"
+        >
+          Github Activity
+        </Link>
         <Link to="/posts" className="me-3 py-2 text-dark text-decoration-none">
           Feed
         </Link>
