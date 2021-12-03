@@ -181,6 +181,7 @@ def github_view(request, author_id):
         return Response(git_msg, status=status.HTTP_200_OK)
        
 
+# get github activities
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
