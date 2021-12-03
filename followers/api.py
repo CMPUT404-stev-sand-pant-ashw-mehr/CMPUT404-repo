@@ -193,8 +193,11 @@ class FollowerViewSet(viewsets.ModelViewSet):
         except Author.DoesNotExist:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
-        if author.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        # print("author.user - ", author.user)
+        # print("request.user - ", request.user)
+
+        # if author.user != request.user:
+        #     return Response(status=status.HTTP_403_FORBIDDEN)
         
         if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
             return Response({"detail": "409"}, status=status.HTTP_200_OK)
