@@ -13,7 +13,7 @@ from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-import uuid
+import uuid, requests
 
 class RegisterAPI(generics.GenericAPIView):
     """
@@ -164,4 +164,18 @@ def get_foregin_post_detail_view(request, post_id):
             return Response({"detail": "can't find this post"}) 
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    
+@api_view([ 'GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def github_view(request, author_id):
+    # get github activity
+    if request.method == "GET":
+        author = get_object_or_404(Author,id = author_id)
+        username = author.github
+        git_username = username.split(".")[0].split("://")[-1]
+        url = 'https://api.github.com/users/'+ git_username + '/events'
+        git_msg = requests.get(url, headers={'Referer': "https://social-dis.herokuapp.com/"}).json()
+        return Response(git_msg, status=status.HTTP_200_OK)
             
