@@ -316,7 +316,7 @@ class FollowerViewSet(viewsets.ModelViewSet):
             foreign_author_id = foreign_author_id[:-1]
 
         if not Followers.objects.filter(follower=foreign_author_id).exists():
-            return Response({"detail": "follower not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "follower not found"}, status=status.HTTP_200_OK)
         
         Followers.objects.filter(follower=foreign_author_id).delete()
 
