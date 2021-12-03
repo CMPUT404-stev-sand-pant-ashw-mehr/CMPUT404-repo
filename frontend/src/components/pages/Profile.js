@@ -18,12 +18,50 @@ export class Profile extends Component {
       url: "",
       host: "",
       github: "",
+      showEdit: false,
+      newDisplayedName:"",
+      newGitHub:""
     };
+  }
+
+  toggleEdit = () => {
+    const {showEdit} = this.state;
+    this.setState({showEdit: !showEdit, newDisplayedName:"", newGitHub:""});
+  }
+
+  updateProfile = () => {
+    const {newDisplayedName, newGitHub} = this.state;
+    if (!newDisplayedName || !newGitHub) {
+      alert("Check your displayed name and GitHub");
+      return;
+    }
+
+    axios.post(`/author/${this.props.match.params.id}`, 
+    { 
+      displayName: newDisplayedName, 
+      github: newGitHub
+    }, 
+    tokenConfig(store.getState))
+    .then(res => {
+      console.log('success:', res);
+      this.getUserProfile()
+      this.setState({
+        showEdit:false,
+        newDisplayedName:"",
+        newGitHub:""
+      })
+    })
+    .catch(err => {
+      console.log('failed:', err.message);
+    })
   }
 
   componentDidMount() {
     this.props.getAuthorPosts(this.props.match.params.id);
+    this.getUserProfile();
+  }
 
+  getUserProfile = () => {
     var self = this;
     axios
       .get(`/author/${this.props.match.params.id}`, tokenConfig(store.getState))
@@ -42,18 +80,40 @@ export class Profile extends Component {
 
   render() {
     const { posts, deletePost, user, match } = this.props;
-    const { displayName, url, host, github } = this.state;
+    const { displayName, url, host, github, showEdit } = this.state;
 
     return (
       <Fragment>
         <h2>User Details</h2>
         <div>
-          <p>Username: {displayName}</p>
+          <p>Welcome, {displayName} !</p>
           <p>Author URL: {url}</p>
           <p>Github: {github}</p>
           <p>Host: {host}</p>
         </div>
         <br />
+        <button onClick={this.toggleEdit}>{showEdit ? "Cancel":"Edit"}</button>
+        {
+          showEdit ? 
+          <div style={{border:"1px solid #a7a7a7", borderRadius:'5px', margin: 25}}>
+            <div style={{margin:30}}>
+              <label>Display Name:</label>
+              <br/>
+              <input type="text" placeholder="Enter your new displayed name" onChange={(e)=>this.setState({newDisplayedName:e.target.value})}/>
+            </div>
+            <br/>
+            <div style={{margin:30}}>
+              <label>GitHub:</label>
+              <br/>
+              <input type="text" placeholder="Enter your Github" onChange={(e)=> this.setState({newGitHub:e.target.value})} />
+            </div>
+            <br/>
+
+            <button style={{margin: 30}} onClick={this.updateProfile}>Submit Change</button>
+          </div> 
+          : 
+          null
+        }
         <hr />
         <br />
         <h2>Posts by this User</h2>
