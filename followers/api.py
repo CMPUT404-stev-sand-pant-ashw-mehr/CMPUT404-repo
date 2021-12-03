@@ -273,6 +273,12 @@ class FollowerViewSet(viewsets.ModelViewSet):
                     "application/json":{"detail": "follower deleted"}
                 }
             ),
+            "204": openapi.Response(
+                description="No Content",
+                examples={
+                    "application/json":{"detail": "follower is not following author"}
+                }
+            ),
             "403": openapi.Response(
                 description="Forbidden",
                 examples={
@@ -310,10 +316,10 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
 
-        if not Followers.objects.filter(follower=foreign_author_id).exists():
-            return Response({"detail": "follower not found"}, status=status.HTTP_404_NOT_FOUND)
+        if not Followers.objects.filter(author=author, follower=foreign_author_id).exists():
+            return Response({"detail": "follower is not following author"}, status=status.HTTP_204_NO_CONTENT)
         
-        Followers.objects.filter(follower=foreign_author_id).delete()
+        Followers.objects.filter(author=author, follower=foreign_author_id).delete()
 
         return Response({"detail": "follower deleted"}, status=status.HTTP_200_OK)
 
