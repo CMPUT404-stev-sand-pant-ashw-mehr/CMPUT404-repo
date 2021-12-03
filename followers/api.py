@@ -28,13 +28,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
         return super().initialize_request(request, *args, kwargs)
     
     def get_authenticators(self):
-        if self.action in ["list", "check_follower"]:
+        if self.action in ["list", "check_follower", "delete_follower"]:
             return [CustomAuthentication()]
         else:
             return [TokenAuthentication()]
     
     def get_permissions(self):
-        if self.action in ["list", "check_follower"]:
+        if self.action in ["list", "check_follower", "delete_follower"]:
             return [AccessPermission()]
         else:
             return [IsAuthenticated()]
