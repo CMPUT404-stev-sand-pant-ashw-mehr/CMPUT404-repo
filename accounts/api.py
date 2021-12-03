@@ -8,7 +8,7 @@ from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
 from knox.models import AuthToken
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
@@ -148,7 +148,7 @@ def get_foregin_author_detail_view(request, author_id):
         if foreign_author != "author not found!":
             return Response({"items": foreign_author}) 
         else:
-            return Response({"detail": "can't find this author"}) 
+            return Response({"detail": "can't find this author"}, status=status.HTTP_404_NOT_FOUND) 
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
@@ -161,7 +161,19 @@ def get_foregin_post_detail_view(request, post_id):
         if post != "post not found!":
             return Response({"items": post}) 
         else:
-            return Response({"detail": "can't find this post"}) 
+            return Response({"detail": "can't find this post"}, status=status.HTTP_404_NOT_FOUND) 
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-            
+
+@api_view(['POST'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def send_friend_request(request, local_author_id, foreign_author_id):
+    if request.method == "POST":
+        request_response = send_friend_request(local_author_id, foreign_author_id)
+        if type(request_response) == str:
+            return Response({"detail": request_response}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(request_response)
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
