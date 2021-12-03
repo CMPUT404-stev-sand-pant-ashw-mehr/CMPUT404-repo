@@ -199,6 +199,9 @@ export class Create extends Component {
               value={visibility}
             >
               <option value="PUBLIC">PUBLIC</option>
+              <option value="FRIEND">FRIEND</option>
+              <option value="PRIVATE">PRIVATE</option>
+              
             </select>
           </div>
           <br></br>
