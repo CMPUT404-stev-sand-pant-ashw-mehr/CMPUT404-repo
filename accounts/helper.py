@@ -37,7 +37,7 @@ def get_list_foregin_authors():
     
     # foreign authors from team17
     team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/author/', auth=('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), headers={'Referer': "http://127.0.0.1:9000/"})
-    if team_17_req.status_code in (500, 404):
+    if team_17_req.status_code in (500, 404, 503, 200):
         pass
     else:
         j_req_17 = team_17_req.json()['items']
@@ -45,7 +45,7 @@ def get_list_foregin_authors():
         
     # foreign authors from team14
     team_17_req = requests.get('https://linkedspace-staging.herokuapp.com/api/authors/', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:9000/"})
-    if team_17_req.status_code in (500, 404, 503):
+    if team_17_req.status_code in (500, 404, 503, 200):
         pass
     else:
         j_req_17 = team_17_req.json()['items']
@@ -74,7 +74,7 @@ def get_list_foregin_posts():
     
     # foreign posts from team17
     team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/', auth=('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), headers={'Referer': "http://127.0.0.1:9000/"})
-    if team_17_req.status_code in (500, 404, 503):
+    if team_17_req.status_code in (500, 404, 503, 200):
         pass
     else:
         j_req_17 = team_17_req.json()
