@@ -175,12 +175,13 @@ def github_view(request, author_id):
     if request.method == "GET":
         author = get_object_or_404(Author,id = author_id)
         username = author.github
-        git_username = username.split(".")[0].split("://")[-1]
+        git_username = username.split(".")[-1].split("/")[-1]
         url = 'https://api.github.com/users/'+ git_username + '/events'
         git_msg = requests.get(url, headers={'Referer': "https://social-dis.herokuapp.com/"}).json()
         return Response(git_msg, status=status.HTTP_200_OK)
        
 
+# get github activities
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])

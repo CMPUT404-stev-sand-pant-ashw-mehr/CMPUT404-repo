@@ -28,13 +28,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
         return super().initialize_request(request, *args, kwargs)
     
     def get_authenticators(self):
-        if self.action in ["list", "check_follower"]:
+        if self.action in ["list", "check_follower", "delete_follower"]:
             return [CustomAuthentication()]
         else:
             return [TokenAuthentication()]
     
     def get_permissions(self):
-        if self.action in ["list", "check_follower"]:
+        if self.action in ["list", "check_follower", "delete_follower"]:
             return [AccessPermission()]
         else:
             return [IsAuthenticated()]
@@ -273,6 +273,12 @@ class FollowerViewSet(viewsets.ModelViewSet):
                     "application/json":{"detail": "follower deleted"}
                 }
             ),
+            "204": openapi.Response(
+                description="No Content",
+                examples={
+                    "application/json":{"detail": "follower is not following author"}
+                }
+            ),
             "403": openapi.Response(
                 description="Forbidden",
                 examples={
@@ -305,17 +311,15 @@ class FollowerViewSet(viewsets.ModelViewSet):
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
-        if author.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # remove trailing slash
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
 
-        if not Followers.objects.filter(follower=foreign_author_id).exists():
-            return Response({"detail": "follower not found"}, status=status.HTTP_404_NOT_FOUND)
+        if not Followers.objects.filter(author=author, follower=foreign_author_id).exists():
+            return Response({"detail": "follower is not following author"}, status=status.HTTP_204_NO_CONTENT)
         
-        Followers.objects.filter(follower=foreign_author_id).delete()
+        Followers.objects.filter(author=author, follower=foreign_author_id).delete()
 
         return Response({"detail": "follower deleted"}, status=status.HTTP_200_OK)
 
