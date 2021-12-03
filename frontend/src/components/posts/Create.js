@@ -120,28 +120,6 @@ export class Create extends Component {
               value={title}
             />
           </div>
-          {/* <div className="form-group">
-            <label>Source</label>
-            <input
-              disabled
-              className="form-control"
-              type="text"
-              name="source"
-              onChange={this.onChange}
-              value={source}
-            />
-          </div>
-          <div className="form-group">
-            <label>Origin</label>
-            <input
-              disabled
-              className="form-control"
-              type="text"
-              name="origin"
-              onChange={this.onChange}
-              value={origin}
-            />
-          </div> */}
           <div className="form-group">
             <label>Description</label>
             <input
@@ -195,13 +173,11 @@ export class Create extends Component {
               className="form-control"
               type="text"
               name="visibility"
-              onChange={this.onChange}
+              onChange={(e) => {this.setState({visibility: e.target.value})}}
               value={visibility}
             >
               <option value="PUBLIC">PUBLIC</option>
-              <option value="FRIEND">FRIEND</option>
-              <option value="PRIVATE">PRIVATE</option>
-              
+              <option value="FRIENDS">FRIENDS</option>
             </select>
           </div>
           <br></br>
