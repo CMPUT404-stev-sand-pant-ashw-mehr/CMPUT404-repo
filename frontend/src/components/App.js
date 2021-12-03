@@ -16,6 +16,7 @@ import Post from "./posts/Post";
 
 import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
+import GithubActivity from "./pages/GithubActivity";
 
 import Login from "./auth/Login";
 import Register from "./auth/Register";
@@ -57,7 +58,9 @@ class App extends Component {
                     path="/posts/:authorId/:postId"
                     component={Post}
                   />
+                  <AuthRoute exact path="/git" component={GithubActivity} /> {/* Change this path mehr*/}
                   <AuthRoute exact path="/profile/:id" component={Profile} />
+
                   <Route exact path="/" component={Landing} />
                   <Route exact path="/login" component={Login} />
                   <Route exact path="/register" component={Register} />

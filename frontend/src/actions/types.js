@@ -29,3 +29,6 @@ export const GET_FOLLOWERS = "GET_FOLLOWERS";
 export const DELETE_FOLLOWER = "DELETE_FOLLOWER";
 export const ADD_FOLLOWER = "ADD_FOLLOWER";
 export const CHECK_FOLLOWER = "CHECK_FOLLOWER";
+
+
+export const GET_GITHUB = 'GET_GITHUB';
