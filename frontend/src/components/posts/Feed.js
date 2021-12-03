@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
 import { addFollower } from "../../actions/followers";
 import { CREATE_ALERT, LIKE_POST } from "../../actions/types";
+// import ReactMarkDown from "react-markdown";
 
 import Moment from "react-moment";
 import {
