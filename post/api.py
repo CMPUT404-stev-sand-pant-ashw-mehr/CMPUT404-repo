@@ -477,7 +477,7 @@ class PostViewSet(viewsets.ModelViewSet):
             except AttributeError:
                 return Response({"detail": f"'visibility' key must be a string, either 'PUBLIC' or FRIENDS. Request value: {request_keys['visibility']}"}, status=status.HTTP_400_BAD_REQUEST)
             if (visi not in ("PUBLIC", "FRIENDS")):
-                return Response({"detail": "Invalid visibility key"}, status=status.status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Invalid visibility key"}, status=status.HTTP_400_BAD_REQUEST)
             data['visibility'] = visi
 
             unlisted = str(request_keys['unlisted']).strip().lower()
