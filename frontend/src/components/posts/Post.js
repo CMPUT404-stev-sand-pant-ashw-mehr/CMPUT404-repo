@@ -5,11 +5,27 @@ import PropTypes from "prop-types";
 import { getPost, createPostComment } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock } from "react-icons/fa";
+import ReactMarkDown from "react-markdown";
 
 export class Post extends Component {
   state = {
     commentContent: "",
   };
+
+  renderPostContent = () => {
+    
+    const { post } = this.props;
+    switch (post.contentType) {
+    case "text/plain":
+      return <p>{post.content}</p>;
+    case "text/markdown":
+      return <ReactMarkDown>{post.content}</ReactMarkDown>;
+    case "image":
+      return <img style={{width:'80%'}} src={post.content} alt="Unavailable" />
+    default:
+      return <p>{post.content}</p>;
+    }
+  }
 
   resetForm() {
     this.setState({
@@ -45,7 +61,7 @@ export class Post extends Component {
 
   render() {
     const { post, commentContent } = this.props;
-
+    console.log(post);
     return (
       post && (
         <Fragment>
@@ -60,7 +76,7 @@ export class Post extends Component {
             <div className="card-body">
               <h5 className="card-title">{post.title}</h5>
               <p className="card-text">{post.description}</p>
-              <p>{post.content}</p>
+              {this.renderPostContent()}
               <a href="#" className="btn btn-primary">
                 Go somewhere
               </a>

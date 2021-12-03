@@ -8,8 +8,8 @@ export class Create extends Component {
     super(props);
     this.state = {
       title: "",
-      source: "",
-      origin: "",
+      source: "https://social-dis.herokuapp.com/",
+      origin: "https://social-dis.herokuapp.com/",
       description: "",
       contentType: "text/plain",
       content: "",
@@ -17,20 +17,26 @@ export class Create extends Component {
       unlisted: false,
       imagePreview: null,
       img: null,
+      base64: null
     };
 
     this.onImageChange = this.onImageChange.bind(this);
     this.chooseFile = React.createRef();
   }
 
-  componentDidMount = () => { 
-    console.log( "props: ", this.props)
-  }
-
   onImageChange = e => {
-    console.log("here");
+    e.preventDefault();
     if (e.target.files && e.target.files[0]) {
       this.setState({ img: e.target.files[0] }, () => {
+        console.log('img: ', this.state.img);
+        
+        this.getBase64(this.state.img)
+          .then((res) => {
+            this.setState({ content: res })
+          })
+          .catch(err => {
+            console.log('failed', err);
+          })
         this.setState({ imagePreview: URL.createObjectURL(this.state.img) });
       })
     }
@@ -46,10 +52,7 @@ export class Create extends Component {
     })
   };
 
-  showOpenFileDlg = () => {
-    console.log(this.chooseFile.current.click())
-    this.chooseFile.current.click()
-  };
+  showOpenFileDlg = () => this.chooseFile.current.click()
 
   resetForm() {
     this.setState({
@@ -64,12 +67,9 @@ export class Create extends Component {
     });
   };
 
-  onChange = (e) =>
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
+  onChange = (e) => this.setState({ [e.target.name]: e.target.value, });
 
-  onSubmit = (e) => {
+  onSubmit =  (e) => {
     e.preventDefault();
     const {
       title,
@@ -80,6 +80,7 @@ export class Create extends Component {
       content,
       visibility,
     } = this.state;
+    
     const post = {
       type: "POST",
       title,
@@ -109,7 +110,6 @@ export class Create extends Component {
 
     return (
       <div>
-        {/* <form onSubmit={this.onSubmit}> */}
           <div className="form-group">
             <label>Title</label>
             <input
@@ -120,9 +120,10 @@ export class Create extends Component {
               value={title}
             />
           </div>
-          <div className="form-group">
+          {/* <div className="form-group">
             <label>Source</label>
             <input
+              disabled
               className="form-control"
               type="text"
               name="source"
@@ -133,13 +134,14 @@ export class Create extends Component {
           <div className="form-group">
             <label>Origin</label>
             <input
+              disabled
               className="form-control"
               type="text"
               name="origin"
               onChange={this.onChange}
               value={origin}
             />
-          </div>
+          </div> */}
           <div className="form-group">
             <label>Description</label>
             <input
@@ -205,7 +207,6 @@ export class Create extends Component {
               Submit
             </button>
           </div>
-        {/* </form> */}
       </div>
     );
   }
