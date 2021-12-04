@@ -211,13 +211,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
         
-
+        
         try:
             comment_id = uuid.uuid4().hex
             keys = {
                 "id": comment_id,
                 "type": request.data["type"],
-                "author_id": author_id,
+                "author_id": str(request.data["author"]).split("/author/")[-1].split('/')[0],
                 "post_id": post_id,
                 "comment": request.data["comment"],
                 "contentType": request.data["contentType"]
