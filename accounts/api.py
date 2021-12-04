@@ -191,9 +191,9 @@ def github_view(request, author_id):
 def send_friend_request(request, local_author_id, foreign_author_id):
     if request.method == "POST":
         request_response = send_friend_request_helper(local_author_id, foreign_author_id)
-        if type(request_response) != dict:
+        if type(request_response) == str:
             return Response({"detail": request_response}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(request_response)
+            return request_response
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
