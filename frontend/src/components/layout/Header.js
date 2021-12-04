@@ -9,20 +9,20 @@ export class Header extends Component {
     const { isAuthenticated, user } = this.props.auth;
     const authLinks = (
       <Fragment>
+        <Link to="/posts" className="me-3 py-2 text-dark text-decoration-none">
+          Feed
+        </Link>
         <Link
           to="/foreign"
           className="me-3 py-2 text-dark text-decoration-none"
         >
           Foreign Posts
         </Link>
-        <Link 
-          to="/github-activities" 
+        <Link
+          to="/github-activities"
           className="me-3 py-2 text-dark text-decoration-none"
         >
           GitHub Activity
-          </Link>
-        <Link to="/posts" className="me-3 py-2 text-dark text-decoration-none">
-          Feed
         </Link>
         <Link
           to="/posts/create"
