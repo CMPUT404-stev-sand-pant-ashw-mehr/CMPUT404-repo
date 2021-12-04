@@ -210,6 +210,7 @@ export const createPostComment = (authorId, postId, comment) => (dispatch, getSt
     )
     .then((res) => {
       console.log(res)
+      
       dispatch({
         type: CREATE_ALERT,
         payload: {

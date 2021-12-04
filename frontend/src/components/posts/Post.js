@@ -45,6 +45,7 @@ export class Post extends Component {
       type: "comment",
       contentType: "text/markdown",
       comment: commentContent,
+      author: this.props.auth.user.author,
     };
 
     this.props.createPostComment(this.props.match.params.authorId, this.props.match.params.postId, comment);

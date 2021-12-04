@@ -55,11 +55,20 @@ def get_list_foregin_authors():
         j_req_14 = team_14_req.json()['items']
         authors = authors + j_req_14
     
+     # foreign authors from team13
+    team_14_req = requests.get('https://cmput404-team13-socialapp.herokuapp.com/api/authors/', auth=('team03','cmput404'), headers={'Referer': 'https://social-dis.herokuapp.com/'})
+    if not (200 <= team_14_req.status_code < 300):
+        pass
+    else:
+        j_req_14 = team_14_req.json()['items']
+        authors = authors + j_req_14
+    
     return authors
 
 def get_foregin_author_detail(author_id):
     authors = get_list_foregin_authors()
     for author in authors:
+        author["url"] = str(author["url"]).replace("http://", "https://")
         author["uuid"] = author["id"].split("/")[-1]
         if author['uuid'] == author_id:
             return (author)
@@ -110,7 +119,7 @@ def get_foregin_public_post_detail(post_id):
             return post
     return "post not found!"
 
-def send_friend_request(local_author_id, foreign_author_id):
+def send_friend_request_helper(local_author_id, foreign_author_id):
     try:
         author = Author.objects.get(id=local_author_id)
     except:
@@ -133,6 +142,7 @@ def send_friend_request(local_author_id, foreign_author_id):
 
     foreign_authors = get_list_foregin_authors()
     for foreign_author in foreign_authors:
+        foreign_author["url"] = str(foreign_author["url"]).replace("http://", "https://")
         foreign_author["id"] = remove_backslash(foreign_author["id"])
         foreign_author_id = remove_backslash(foreign_author_id)
 
@@ -159,15 +169,16 @@ def send_friend_request(local_author_id, foreign_author_id):
 
 
     frequest_data["summary"] = f"{local_author_name} wants to follow {foreign_author_name}"
-
+    print(frequest_data)
     request_url = remove_backslash(frequest_data["object"]["url"]) + "/inbox/"
-    authorizations = [('connectionsuperuser','404connection'), ('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), ('socialdistribution_t14','c404t14')]
+    authorizations = [('connectionsuperuser','404connection'), ('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), ('socialdistribution_t14','c404t14'), ('team03','cmput404')]
     for auth in authorizations:
         fresponse = requests.post(request_url, data=frequest_data, auth=auth, headers={'Referer': 'https://social-dis.herokuapp.com/'})
-        if fresponse.status_code != 401:
+        print(fresponse.status_code)
+        if 200 <= fresponse.status_code < 300:
             break
     else:
-        return "Unable to authorize"
+         return "Unable to send request: " + fresponse.text
         
     return fresponse
 
