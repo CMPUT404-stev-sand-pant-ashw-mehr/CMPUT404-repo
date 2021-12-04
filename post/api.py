@@ -148,7 +148,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         post_data['comments'] = post_data['id'] + '/comments'
 
-        comment_query = Comment.objects.filter(post=post_id, author=author_id).order_by('-published')
+        comment_query = Comment.objects.filter(post_id=post_id, author_id=author_id).order_by('-published')
         comment_details = Paginator(comment_query.values(), 5) # get first 5 comments
         comment_object_list = comment_details.get_page(1).object_list.values()
 
@@ -163,7 +163,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         post_data["count"] = comment_query.distinct().count()
 
-        if post_data["count"] > 0:
+        if comment_query.distinct().count() > 0:
             post_data["commentsSrc"] = {
                 "type": "comments",
                 "page": 1,
