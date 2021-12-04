@@ -6,10 +6,12 @@ import { getPost, createPostComment } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock } from "react-icons/fa";
 import ReactMarkDown from "react-markdown";
+import axios from "axios";
 
 export class Post extends Component {
   state = {
     commentContent: "",
+    author: null
   };
 
   renderPostContent = () => {
@@ -37,17 +39,33 @@ export class Post extends Component {
     this.setState({
       [e.target.name]: e.target.value,
     });
+  
+  getAuhorDetail = () => {
+    axios.get(`/author/${this.props.auth.user.author}`, {auth:{username:'socialdistribution_t03', password:'c404t03'}})
+    .then((res)=>{
+      // console.log("data: ");
+      // console.log(res.data);
+      this.setState({
+        author: res.data
+      })
+    }).catch((error)=>{
+      console.log("error: ", error);
+    })
+  }
+  
 
   onSubmit = (e) => {
     e.preventDefault();
     const { commentContent } = this.state;
+    console.log("author: ", this.state.author)
     const comment = {
+      author: this.state.author,
       type: "comment",
       contentType: "text/markdown",
       comment: commentContent,
     };
 
-    this.props.createPostComment(this.props.match.params.postId, comment);
+    this.props.createPostComment(this.props.match.params.authorId, this.props.match.params.postId, comment);
     this.resetForm();
     this.forceUpdate();
   };
@@ -55,13 +73,14 @@ export class Post extends Component {
   componentDidMount() {
     this.props.getPost(
       this.props.match.params.authorId,
-      this.props.match.params.postId
+      this.props.match.params.postId,
     );
+    this.getAuhorDetail()
   }
 
   render() {
     const { post, commentContent } = this.props;
-    console.log(post);
+    // console.log(post);
     return (
       post && (
         <Fragment>
@@ -133,6 +152,7 @@ export class Post extends Component {
 
 const mapStateToProps = (state) => ({
   post: state.post.post,
+  auth: state.auth,
 });
 
 export default connect(mapStateToProps, {
