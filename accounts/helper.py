@@ -110,7 +110,7 @@ def get_foregin_public_post_detail(post_id):
             return post
     return "post not found!"
 
-def send_friend_request(local_author_id, foreign_author_id):
+def send_friend_request_helper(local_author_id, foreign_author_id):
     try:
         author = Author.objects.get(id=local_author_id)
     except:
