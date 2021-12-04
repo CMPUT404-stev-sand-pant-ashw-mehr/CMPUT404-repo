@@ -2,9 +2,10 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getAuthorPosts, deletePost } from "../../actions/posts";
+import { getAuthorPosts, deletePost, sendPost } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock, FaTrashAlt } from "react-icons/fa";
+import { FiSend } from "react-icons/fi";
 import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
@@ -12,37 +13,56 @@ import store from "../../store";
 export class Profile extends Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      displayName: "",
-      url: "",
-      host: "",
-      github: "",
-    };
   }
+
+  state = {
+    displayName: "",
+    url: "",
+    host: "",
+    github: "",
+    friends: [],
+    open: false,
+  };
 
   componentDidMount() {
     this.props.getAuthorPosts(this.props.match.params.id);
 
-    var self = this;
     axios
       .get(`/author/${this.props.match.params.id}`, tokenConfig(store.getState))
       .then((res) => {
-        self.setState({
-          displayName: res.data.displayName,
-          url: res.data.url,
-          host: res.data.host,
-          github: res.data.github,
-        });
+        axios.get(`/author/${this.props.match.params.id}/friends`, tokenConfig(store.getState))
+        .then((response)=>{
+          this.setState({
+            displayName: res.data.displayName,
+            url: res.data.url,
+            host: res.data.host,
+            github: res.data.github,
+            friends: response.data.items,
+          });
+        })
       })
       .catch((e) => {
         console.log(e);
       });
+    }
+
+  handleSend(){
+    this.setState({
+      open: true,
+    });
+  }
+
+  handleSelected(){
+    console.log("in selected");
+  }
+
+  handleNotSelected(){
+    console.log("in not selected");
   }
 
   render() {
-    const { posts, deletePost, user, match } = this.props;
-    const { displayName, url, host, github } = this.state;
+    const { posts, deletePost, sendPost, user, match } = this.props;
+    const { displayName, url, host, github, friends } = this.state;
 
     return (
       <Fragment>
@@ -76,12 +96,17 @@ export class Profile extends Component {
               >
                 View full post →
               </Link>
-              <button
-                className="btn btn-danger float-end"
-                onClick={deletePost.bind(this, post.id)}
-              >
-                <FaTrashAlt />
-              </button>
+              <div className="p-2">
+                <button type="button" className="btn btn-primary float-end" onClick={()=>this.handleSend()} data-bs-toggle="modal" data-bs-target="#sendPost">
+                  <FiSend />
+                </button>
+                <button
+                  className="btn btn-danger float-end"
+                  onClick={deletePost.bind(this, post.id)}
+                >
+                  <FaTrashAlt />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -120,6 +145,39 @@ export class Profile extends Component {
             </li>
           </ul>
         </nav>
+
+        <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLabel">Send To:</h5>
+                {/* <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> */}
+              </div>
+              <div className="modal-body">
+                  {this.state.open && this.state.friends.map((friend)=>{
+                      return <div className="card">
+                          <div className="card-body">
+                            <div className="form-check">
+                              <input className="form-check-input" type="checkbox" value={friend.displayName} id={friend.id}/>
+                              <label className="form-check-label" for={friend.id}>
+                                @{friend.displayName}
+                              </label>
+                              {/* {checkedValue} */}
+
+                              {/* onClick={true? ()=>{this.handleSelected()}: ()=>{this.handleNotSelected()} */}
+                            </div>
+                          </div>
+                        </div>
+                    })}
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" className="btn btn-primary">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </Fragment>
     );
   }
@@ -128,14 +186,16 @@ export class Profile extends Component {
     posts: PropTypes.object.isRequired,
     getAuthorPosts: PropTypes.func.isRequired,
     deletePost: PropTypes.func.isRequired,
+    sendPost: PropTypes.func.isRequired,
   };
 }
 
 const mapStateToProps = (state) => ({
   posts: state.authorposts,
+  friends: state.friends,
   user: state.auth,
 });
 
-export default connect(mapStateToProps, { getAuthorPosts, deletePost })(
+export default connect(mapStateToProps, { getAuthorPosts, deletePost, sendPost })(
   Profile
 );

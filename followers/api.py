@@ -437,7 +437,7 @@ class FriendViewSet(viewsets.ModelViewSet):
         },
         tags=['Check if Follower'],
     )
-    def get_friends(request, author_id):
+    def get_friends(self, request, author_id):
         valid = is_valid_node(request)
         if not valid:
             return Response({"message":"not a valid node"}, status=status.HTTP_403_FORBIDDEN)
