@@ -137,6 +137,7 @@ def send_friend_request_helper(local_author_id, foreign_author_id):
     }
     author_data = AuthorSerializer(author).data
     author_data["avatar"] = author_data["profileImage"]
+    author_data["message"] = "success"
     local_author_name = author_data["displayName"]
 
     frequest_data["actor"] = author_data
