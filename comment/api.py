@@ -247,6 +247,8 @@ class CommentViewSet(viewsets.ModelViewSet):
                     setattr(author, key, value)
                 except:
                     pass
+
+            author.is_active = True
             author.save()
 
         try:
