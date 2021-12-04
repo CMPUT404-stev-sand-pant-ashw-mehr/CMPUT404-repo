@@ -218,8 +218,8 @@ export const createPost = (post) => (dispatch, getState) => {
     });
 };
 
-export const createPostComment = (postId, comment) => (dispatch, getState) => {
-  const authorId = getState().auth.user.author;
+export const createPostComment = (authorId, postId, comment) => (dispatch, getState) => {
+  // const authorId = getState().auth.user.author;
   axios
     .post(
       `/author/${authorId}/posts/${postId}/comments`,
