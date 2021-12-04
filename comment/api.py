@@ -266,7 +266,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             
             keys["author"] = AuthorSerializer(author).data
             keys.pop("id")
-            keys.pop("post_id")
+            keys.pop("post")
             return Response({
                 "id": request.build_absolute_uri() + '/' + comment_id,
                 "published": comment.published,
