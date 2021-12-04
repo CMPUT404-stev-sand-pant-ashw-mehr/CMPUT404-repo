@@ -8,7 +8,7 @@ from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
 from knox.models import AuthToken
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
@@ -190,8 +190,8 @@ def github_view(request, author_id):
 @permission_classes([AccessPermission])
 def send_friend_request(request, local_author_id, foreign_author_id):
     if request.method == "POST":
-        request_response = send_friend_request(local_author_id, foreign_author_id)
-        if type(request_response) == str:
+        request_response = send_friend_request_helper(local_author_id, foreign_author_id)
+        if type(request_response) != dict:
             return Response({"detail": request_response}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(request_response)
