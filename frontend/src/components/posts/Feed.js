@@ -143,6 +143,7 @@ export class Feed extends Component {
   }
   checkLikedPost(likes) {
     const { user } = this.props;
+    console.log('likes:',likes);
     for (const like of likes) {
       if (like.author.id.split("/").pop() == user.user.author) {
         return true;
@@ -201,10 +202,11 @@ export class Feed extends Component {
         {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
         <h2>Local Public Feed</h2>
 
-        {posts.posts.filter(post => post.visibility === "PUBLIC").map((post) => (
-          <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
+        {posts.posts.filter(post => post.visibility === "PUBLIC").map((post, index) => (
+          <div className="card mb-4 flex-row" key={index}>
             <div className="card-header mx-auto justify-content-center">
               <h2 className="text-primary mb-4">
+                {/* need fix  */}
                 {this.checkLikedPost(post.likes) ? (
                   <FaThumbsUp />
                 ) : (

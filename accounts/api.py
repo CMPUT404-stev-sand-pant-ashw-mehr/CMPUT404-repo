@@ -26,7 +26,11 @@ class RegisterAPI(generics.GenericAPIView):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        host = 'http://' + str(request.get_host())
+        if request.is_secure():
+            host = 'https://' + str(request.get_host())
+        else:
+            host = 'http://' + str(request.get_host())
+
         user_serializer = self.get_serializer(data = request.data)
         user_serializer.is_valid(raise_exception=True)
         # create user
@@ -41,7 +45,7 @@ class RegisterAPI(generics.GenericAPIView):
             "url": host + '/author/' + str(author_uuid),
             "displayName": request.data["displayName"],
             "github": request.data["github"],
-            "is_active": True
+            "is_active": False  # Not approved when created
         }
 
         Author.objects.create(**author_schema)

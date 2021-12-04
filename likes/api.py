@@ -1,4 +1,3 @@
-from rest_framework.generics import get_object_or_404
 from author.models import Author
 from comment.models import Comment
 from likes.models import Like
@@ -14,8 +13,7 @@ from accounts.helper import is_valid_node
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-import uuid
-import ast
+import json
 
 class PostLikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
@@ -75,6 +73,11 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
+        try:
+            Author.objects.exclude(is_active=False).get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+
         query_set = Like.objects.filter(post=Post.objects.get(id=post_id))
         response = LikeSerializer(query_set, many=True).data
         
@@ -125,13 +128,22 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         tags=['Like Post'],
     )
     def add_post_like(self, request, author_id, post_id):
-        author_inst = Author.objects.get(user = request.user)
-        
         # node check
         valid = is_valid_node(request)
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
+        try:
+            Author.objects.exclude(is_active=False).get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        result, obj = add_author_to_database(request=request)
+        if not result:
+            return Response(obj, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            author_inst = obj
+
         try:
             query_set = Post.objects.get(id=post_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
         except Exception as e:
@@ -206,6 +218,11 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
+        try:
+            Author.objects.exclude(is_active=False).get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+            
         query_set = Like.objects.filter(comment=Comment.objects.get(id=comment_id))
         response = LikeSerializer(query_set, many=True).data
         
@@ -263,7 +280,21 @@ class CommentLikeViewSet(viewsets.ModelViewSet):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        author_inst = Author.objects.get(user = request.user)
+        try:
+            Author.objects.exclude(is_active=False).get(id=author_id)
+        except:
+            return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            Post.objects.get(id=post_id)
+        except:
+            return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        result, obj = add_author_to_database(request=request)
+        if not result:
+            return Response(obj, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            author_inst = obj
         
         try:
             query_set = Comment.objects.get(id=comment_id).like_set.create(author=author_inst, object=request.build_absolute_uri().strip("/likes"))
@@ -359,3 +390,42 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
         }
         
         return Response(response, status=status.HTTP_200_OK)
+
+
+def add_author_to_database(request):
+    try:
+        author_json = request.POST["author"]
+        if type(author_json) == dict:
+            author_dict = author_json
+        else:
+            author_dict = json.loads(author_json)
+    except KeyError:
+        try:
+            author = Author.objects.get(user = request.user)
+            return True, author
+        except:
+            return False, {"detail": "JSON author missing"}
+    except json.JSONDecodeError as e:
+        return False, {"detail": f"Invalid author JSON: {e.msg}"}
+
+    author_validation = AuthorSerializer(data=author_dict)
+    if not author_validation.is_valid():
+        return False, author_validation.error_messages
+    else:
+        author, created = Author.objects.get_or_create(id = author_dict["id"])
+        author_dict.pop("id")
+
+        if not created:
+            author_dict.pop("url")
+            author_dict.pop("host")
+
+        for key, value in author_dict.items():
+            try:
+                setattr(author, key, value)
+            except:
+                pass
+
+        author.is_active = True
+        author.save()
+        return True, author
+    
