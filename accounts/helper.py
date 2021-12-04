@@ -68,6 +68,7 @@ def get_list_foregin_authors():
 def get_foregin_author_detail(author_id):
     authors = get_list_foregin_authors()
     for author in authors:
+        author["url"] = str(author["url"]).replace("http://", "https://")
         author["uuid"] = author["id"].split("/")[-1]
         if author['uuid'] == author_id:
             return (author)
@@ -141,6 +142,7 @@ def send_friend_request_helper(local_author_id, foreign_author_id):
 
     foreign_authors = get_list_foregin_authors()
     for foreign_author in foreign_authors:
+        foreign_author["url"] = str(foreign_author["url"]).replace("http://", "https://")
         foreign_author["id"] = remove_backslash(foreign_author["id"])
         foreign_author_id = remove_backslash(foreign_author_id)
 
