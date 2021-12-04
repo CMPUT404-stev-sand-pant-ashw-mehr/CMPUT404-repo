@@ -217,7 +217,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             keys = {
                 "id": comment_id,
                 "type": request.data["type"],
-                "author_id": author_id,
+                "author_id": request.data["author"],
                 "post_id": post_id,
                 "comment": request.data["comment"],
                 "contentType": request.data["contentType"]

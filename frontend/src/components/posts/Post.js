@@ -47,12 +47,14 @@ export class Post extends Component {
       comment: commentContent,
     };
 
-    this.props.createPostComment(this.props.match.params.postId, comment);
+    this.props.createPostComment(this.props.match.params.authorId, this.props.match.params.postId, comment);
     this.resetForm();
     this.forceUpdate();
   };
 
   componentDidMount() {
+    console.log("DISPLAY NAME:: ")
+    console.log(this.props.auth.user.author.displayName)
     this.props.getPost(
       this.props.match.params.authorId,
       this.props.match.params.postId
@@ -133,6 +135,7 @@ export class Post extends Component {
 
 const mapStateToProps = (state) => ({
   post: state.post.post,
+  auth: state.auth
 });
 
 export default connect(mapStateToProps, {

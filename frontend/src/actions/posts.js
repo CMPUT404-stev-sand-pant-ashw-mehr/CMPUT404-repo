@@ -198,8 +198,10 @@ export const createPost = (post) => (dispatch, getState) => {
     });
 };
 
-export const createPostComment = (postId, comment) => (dispatch, getState) => {
-  const authorId = getState().auth.user.author;
+export const createPostComment = (authorId, postId, comment) => (dispatch, getState) => {
+  //getState().auth.user.author;
+  console.log("GET STATE: ")
+  console.log(getState)
   axios
     .post(
       `/author/${authorId}/posts/${postId}/comments`,
@@ -207,12 +209,15 @@ export const createPostComment = (postId, comment) => (dispatch, getState) => {
       tokenConfig(getState)
     )
     .then((res) => {
+      console.log(res)
       dispatch({
         type: CREATE_ALERT,
         payload: {
           msg: { success: "Comment has been added!" },
           status: res.status,
+          
         },
+        
       });
       dispatch({
         type: CREATE_POST_COMMENT,
