@@ -235,8 +235,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         if not author_validation.is_valid():
             return Response(author_validation.error_messages, status=status.HTTP_400_BAD_REQUEST)
         else:
-            author, _ = Author.objects.get_or_create(author_dict["id"])
+            author, created = Author.objects.get_or_create(author_dict["id"])
             author_dict.pop("id")
+
+            if not created:
+                author_dict.pop("url")
+                author_dict.pop("host")
+
             for key, value in author_dict.items():
                 try:
                     setattr(author, key, value)
@@ -256,7 +261,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             }
             comment = Comment.objects.create(**keys)
             comment.save()
-            keys["author"] = author_validation.data
+            
+            keys["author"] = AuthorSerializer(author).data
             keys.pop("id")
             keys.pop("post_id")
             return Response({

@@ -55,6 +55,7 @@ class CommentTest(TestCase):
     def test_comment(self):
         self.testUser1.pop("user")
         self.testUser1["displayName"] = "NewName"
+        self.testUser1["host"] = "http://127.2.2.1:8000/" # Shouldn't change
         test_comment = {
             "type": "comment",
             "comment": "This is a test comment",
@@ -64,7 +65,6 @@ class CommentTest(TestCase):
 
         r = self.client.post(f'/author/1/posts/{self.post_id}/comments', data=test_comment)
         self.assertTrue(200 <= r.status_code < 300)
-        print(r.json())
         r = self.client.post(f'/author/1/posts/{self.post_id}/comments', data=test_comment)
         self.assertTrue(200 <= r.status_code < 300)
         r = self.client.get(f'/author/1/posts/{self.post_id}/comments')
