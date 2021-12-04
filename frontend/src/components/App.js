@@ -16,6 +16,8 @@ import Post from "./posts/Post";
 
 import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
+import Inbox from "./pages/Inbox";
+import GitHub from "./pages/GitHub";
 
 import Login from "./auth/Login";
 import Register from "./auth/Register";
@@ -48,7 +50,7 @@ class App extends Component {
               <div className="col-lg-6 mx-auto pt-4">
                 <Alert />
                 <Switch>
-                  <AuthRoute exact path="/inbox" component={Create} />
+                  <AuthRoute exact path="/inbox" component={Inbox} />
                   <AuthRoute exact path="/posts" component={Feed} />
                   <AuthRoute exact path="/foreign" component={ForeignFeed} />
                   <AuthRoute exact path="/posts/create" component={Create} />
@@ -57,6 +59,7 @@ class App extends Component {
                     path="/posts/:authorId/:postId"
                     component={Post}
                   />
+                  <AuthRoute exact path="/github-activities" component={GitHub} />
                   <AuthRoute exact path="/profile/:id" component={Profile} />
                   <Route exact path="/" component={Landing} />
                   <Route exact path="/login" component={Login} />

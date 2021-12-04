@@ -175,9 +175,13 @@ def github_view(request, author_id):
     if request.method == "GET":
         author = get_object_or_404(Author,id = author_id)
         username = author.github
-        git_username = username.split(".")[0].split("://")[-1]
+        if username == None:
+            return Response({"detail": "github not provided!"}, status=status.HTTP_404_NOT_FOUND)
+        git_username = username.split(".")[-1].split("/")[-1]
         url = 'https://api.github.com/users/'+ git_username + '/events'
         git_msg = requests.get(url, headers={'Referer': "https://social-dis.herokuapp.com/"}).json()
+        if type(git_msg) != list:
+            return Response({"detail": "github not found!"}, status=status.HTTP_404_NOT_FOUND)
         return Response(git_msg, status=status.HTTP_200_OK)
        
 

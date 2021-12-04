@@ -7,6 +7,7 @@ import {
   GET_POST,
   DELETE_POST,
   CREATE_POST,
+  SEND_POST,
   GET_ALERTS,
   CREATE_ALERT,
   CREATE_POST_COMMENT,
@@ -135,6 +136,38 @@ export const deletePost = (id) => (dispatch, getState) => {
       });
     });
 };
+
+
+export const sendPost = (postId, foreignAuthorId) => (dispatch, getState) => {
+  const authorId = getState().auth.user.author;
+  const urlId = id.split("/").pop();
+  // axios
+  //   .delete(`/author/${authorId}/posts/${urlId}`, tokenConfig(getState))
+  //   .then((res) => {
+  //     dispatch({
+  //       type: CREATE_ALERT,
+  //       payload: {
+  //         msg: { success: "Post has been deleted!" },
+  //         status: res.status,
+  //       },
+  //     });
+      dispatch({
+        type: SEND_POST,
+        payload: {"foregin author":foreignAuthorId},
+      });
+  //   })
+  //   .catch((err) => {
+  //     const alert = {
+  //       msg: err.response.data,
+  //       status: err.response.status,
+  //     };
+  //     dispatch({
+  //       type: GET_ALERTS,
+  //       payload: alert,
+  //     });
+  //   });
+};
+
 
 export const createPost = (post) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;
