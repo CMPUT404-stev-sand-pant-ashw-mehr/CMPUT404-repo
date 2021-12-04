@@ -394,13 +394,17 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
 
 def add_author_to_database(request):
     try:
-        author_json = request.data["author"]
+        author_json = request.POST["author"]
         if type(author_json) == dict:
             author_dict = author_json
         else:
             author_dict = json.loads(author_json)
     except KeyError:
-        return False, {"detail": "JSON author missing"}
+        try:
+            author = Author.objects.get(user = request.user)
+            return True, author
+        except:
+            return False, {"detail": "JSON author missing"}
     except json.JSONDecodeError as e:
         return False, {"detail": f"Invalid author JSON: {e.msg}"}
 
