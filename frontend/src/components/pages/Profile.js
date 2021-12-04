@@ -37,6 +37,12 @@ export class Profile extends Component {
     this.getUserProfile();
   }
 
+  
+  parseData(data) {
+    const parseData = data.id.split("/");
+    return parseData[parseData.length - 1];
+  }
+
   getUserProfile = () => {
     var self = this;
     axios
@@ -60,24 +66,39 @@ export class Profile extends Component {
 
   handleSend(){
     console.log(this.state.selectedFriends);
-    Object.keys(this.state.selectedFriends).map((friend)=>{
-      axios.post(`/author/${friend.id}/inbox`,
+    console.log(this.state.selectedPost);
+    Object.keys(this.state.selectedFriends).map((friendId)=>{
+      let id = this.parseData(this.state.selectedFriends[friendId]);
+      
+      axios.post(`/author/${id}/inbox`,
             {
-              "type": "post",      
-              "summary":`${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
-              "actor":resp.data, //author,
-              "object":this.state.selectedAuthor  //foreignAuthor
+              "type":"post",
+              "title":this.state.selectedPost.title ,
+              "id":this.state.selectedPost.id,
+              "source":this.state.selectedPost.source,
+              "origin":this.state.selectedPost.origin,
+              "description":this.state.selectedPost.description,
+              "contentType":this.state.selectedPost.contentType,
+              "content":this.state.selectedPost.content,
+              "published":this.state.selectedPost.published,
+              "author":this.state.selectedPost.author,
+              "categories":this.state.selectedPost.categories,
+              "visibility":this.state.selectedPost.visibility,
+              "unlisted":this.state.selectedPost.unlisted,
             },
             tokenConfig(store.getState)
             )
             .then((resp) => {
                 console.log("Sent to Inbox");
+                this.setState({
+                  open: false,
+                })
           });
     })
   }
 
   handleSendPost(post){
-    console.log("selected - ", this.state.selected);
+    // console.log("selected - ", this.state.selectedFriends);
     this.setState({
       open: true,
       selectedPost: post,
@@ -210,7 +231,7 @@ export class Profile extends Component {
           </ul>
         </nav>
 
-        <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        {this.state.open && <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
@@ -223,7 +244,6 @@ export class Profile extends Component {
                               <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend)}/>
                               <label className="form-check-label" for={friend.id}>
                                 @{friend.displayName}
-                                hello
                               </label>
                             </div>
                           </div>
@@ -252,7 +272,7 @@ export class Profile extends Component {
               </div>
             </div>
           </div>
-        </div>
+        </div>}
       </Fragment>
     );
   }

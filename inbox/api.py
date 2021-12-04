@@ -163,6 +163,7 @@ class InboxViewSet(viewsets.ModelViewSet):
     )
     #POST to add new item to the inbox of an author
     def post_inbox(self, request, author_id=None):
+        print("in post inbox")
         result, obj = self.check_author_exists(author_id)
         if not result:
             return obj
