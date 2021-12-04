@@ -114,14 +114,14 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         try:
             author = Author.objects.exclude(is_active=False).exclude(user__isnull=True).get(id=author_id)
-            Post.objects.get(id=post_id, author_id=author_id)
+            this_post = Post.objects.get(id=post_id, author_id=author_id)
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
 
         page = request.GET.get('page', 'None')
         size = request.GET.get('size', 'None')
 
-        query = Comment.objects.filter(author=author_id)
+        query = Comment.objects.filter(post=this_post)
 
         if(page == "None" or size == "None"):
             comment_query = query.values()
@@ -235,7 +235,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         if not author_validation.is_valid():
             return Response(author_validation.error_messages, status=status.HTTP_400_BAD_REQUEST)
         else:
-            author, created = Author.objects.get_or_create(author_dict["id"])
+            author, created = Author.objects.get_or_create(id = author_dict["id"])
             author_dict.pop("id")
 
             if not created:
