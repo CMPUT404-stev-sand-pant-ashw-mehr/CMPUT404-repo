@@ -84,9 +84,24 @@ export class Feed extends Component {
           this.setState({
             open: false,
           });
+          axios.get(`/author/${authorId}`,
+            tokenConfig(store.getState)
+          )
+          .then((resp) => {
+            axios.post(`/author/${foreignAuthorId}/inbox`,
+            {
+              "type": "follow",      
+              "summary":`${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
+              "actor":resp.data, //author,
+              "object":this.state.selectedAuthor  //foreignAuthor
+            },
+            tokenConfig(store.getState)
+            )
+            .then((resp) => {
+                console.log("Sent to Inbox");
+            });
+          })          
         });
-
-      // send inbox request
     }
   }
 

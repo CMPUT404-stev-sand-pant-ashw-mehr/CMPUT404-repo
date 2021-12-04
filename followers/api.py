@@ -193,8 +193,11 @@ class FollowerViewSet(viewsets.ModelViewSet):
         except Author.DoesNotExist:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
         
-        if author.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        # print("author.user - ", author.user)
+        # print("request.user - ", request.user)
+
+        # if author.user != request.user:
+        #     return Response(status=status.HTTP_403_FORBIDDEN)
         
         if Followers.objects.filter(author=author_id, follower=foreign_author_id).exists():
             return Response({"detail": "409"}, status=status.HTTP_200_OK)
@@ -316,8 +319,8 @@ class FollowerViewSet(viewsets.ModelViewSet):
         if foreign_author_id[-1] == '/':
             foreign_author_id = foreign_author_id[:-1]
 
-        if not Followers.objects.filter(author=author, follower=foreign_author_id).exists():
-            return Response({"detail": "follower is not following author"}, status=status.HTTP_204_NO_CONTENT)
+        if not Followers.objects.filter(follower=foreign_author_id).exists():
+            return Response({"detail": "follower not found"}, status=status.HTTP_200_OK)
         
         Followers.objects.filter(author=author, follower=foreign_author_id).delete()
 
@@ -438,7 +441,7 @@ class FriendViewSet(viewsets.ModelViewSet):
         },
         tags=['Check if Follower'],
     )
-    def get_friends(request, author_id):
+    def get_friends(self, request, author_id):
         valid = is_valid_node(request)
         if not valid:
             return Response({"message":"not a valid node"}, status=status.HTTP_403_FORBIDDEN)
