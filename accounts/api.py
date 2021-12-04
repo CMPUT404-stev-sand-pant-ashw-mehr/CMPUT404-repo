@@ -194,6 +194,6 @@ def send_friend_request(request, local_author_id, foreign_author_id):
         if type(request_response) == str:
             return Response({"detail": request_response}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return request_response
+            return Response({"message": request_response.text}, status=request_response.status_code)
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
