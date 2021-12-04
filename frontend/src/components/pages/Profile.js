@@ -9,6 +9,7 @@ import { FiSend } from "react-icons/fi";
 import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
+// import Checkbox from "@material-ui/core/Checkbox";
 
 export class Profile extends Component {
   constructor(props) {
@@ -23,8 +24,12 @@ export class Profile extends Component {
     showEdit: false,
     newDisplayedName:"",
     newGitHub:"",
+
     friends: [],
     open: false,
+    selectedFriends: {},
+    selectedPost:{}
+
   };
 
   componentDidMount() {
@@ -54,17 +59,47 @@ export class Profile extends Component {
     }
 
   handleSend(){
+    console.log(this.state.selectedFriends);
+    Object.keys(this.state.selectedFriends).map((friend)=>{
+      axios.post(`/author/${friend.id}/inbox`,
+            {
+              "type": "post",      
+              "summary":`${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
+              "actor":resp.data, //author,
+              "object":this.state.selectedAuthor  //foreignAuthor
+            },
+            tokenConfig(store.getState)
+            )
+            .then((resp) => {
+                console.log("Sent to Inbox");
+          });
+    })
+  }
+
+  handleSendPost(post){
+    console.log("selected - ", this.state.selected);
     this.setState({
       open: true,
+      selectedPost: post,
     });
   }
 
-  handleSelected(){
-    console.log("in selected");
-  }
-
-  handleNotSelected(){
-    console.log("in not selected");
+  handleSelection(friend){
+    let selectedFriendsIds = Object.keys(this.state.selectedFriends);
+    if(selectedFriendsIds.includes(friend.id)){
+      let selections = this.state.selectedFriends;
+      delete selections[friend.id];
+      this.setState({
+        selected: selections,
+      });
+    }else{
+      let selections = this.state.selectedFriends;
+      selections[friend.id] = friend;
+      // selections.push(friendId);
+      this.setState({
+      selected: selections,
+    });
+    }
   }
 
   render() {
@@ -126,7 +161,7 @@ export class Profile extends Component {
                 View full post →
               </Link>
               <div className="p-2">
-                <button type="button" className="btn btn-primary float-end" onClick={()=>this.handleSend()} data-bs-toggle="modal" data-bs-target="#sendPost">
+                <button type="button" className="btn btn-primary float-end" onClick={()=>this.handleSendPost(post)} data-bs-toggle="modal" data-bs-target="#sendPost">
                   <FiSend />
                 </button>
                 <button
@@ -180,29 +215,40 @@ export class Profile extends Component {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" id="exampleModalLabel">Send To:</h5>
-                {/* <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> */}
               </div>
               <div className="modal-body">
-                  {this.state.open && this.state.friends.map((friend)=>{
-                      return <div className="card">
+              {friends.map((friend,i) => <div className="card">
                           <div className="card-body">
                             <div className="form-check">
-                              <input className="form-check-input" type="checkbox" value={friend.displayName} id={friend.id}/>
+                              <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend)}/>
                               <label className="form-check-label" for={friend.id}>
                                 @{friend.displayName}
+                                hello
                               </label>
-                              {/* {checkedValue} */}
-
-                              {/* onClick={true? ()=>{this.handleSelected()}: ()=>{this.handleNotSelected()} */}
                             </div>
                           </div>
-                        </div>
-                    })}
+                      </div>)}
+
+                {/* {friends.map((friend,i) => <li key={i}>{friend.displayName}</li>)} */}
+              {/* {this.state.requests.length>0 && this.state.requests.map((request) => ( */}
+                  {/* {friends.map((friend)=>{
+                      <div className="card">
+                          <div className="card-body">
+                            <div className="form-check">
+                              <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend.id)}/>
+                              <label className="form-check-label" for={friend.id}>
+                                @{friend.displayName}
+                                hello
+                              </label>
+                            </div>
+                          </div>
+                      </div>
+                    })} */}
               </div>
 
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" className="btn btn-primary">Send</button>
+                <button type="button" className="btn btn-primary" onClick={()=>this.handleSend()}>Send</button>
               </div>
             </div>
           </div>

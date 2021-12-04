@@ -20,16 +20,23 @@ export class Inbox extends Component {
         tokenConfig(store.getState)
       )
       .then((resp) => {
-        let reqs = [];
+        let reqs = [], psts=[], lks=[];
           const items = resp.data.items;
-          console.log("items - ", items);
           items.map((item)=>{
             if(item.type==="follow"){
                 reqs.push(item);
             }
+            else if(item.type==="post"){
+              psts.push(item);
+            }
+            else if(item.type==="like"){
+              lks.push(item);
+            }
           });
           this.setState({
-            requests: reqs
+            requests: reqs,
+            posts: psts,
+            likes: lks,
         });
       })
 
