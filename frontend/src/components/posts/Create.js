@@ -4,16 +4,55 @@ import PropTypes from "prop-types";
 import { createPost } from "../../actions/posts";
 
 export class Create extends Component {
-  state = {
-    title: "",
-    source: "",
-    origin: "",
-    description: "",
-    contentType: "text/plain",
-    content: "",
-    visibility: "PUBLIC",
-    unlisted: false,
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: "",
+      source: "https://social-dis.herokuapp.com/",
+      origin: "https://social-dis.herokuapp.com/",
+      description: "",
+      contentType: "text/plain",
+      content: "",
+      visibility: "PUBLIC",
+      unlisted: false,
+      imagePreview: null,
+      img: null,
+      base64: null
+    };
+
+    this.onImageChange = this.onImageChange.bind(this);
+    this.chooseFile = React.createRef();
+  }
+
+  onImageChange = e => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      this.setState({ img: e.target.files[0] }, () => {
+        console.log('img: ', this.state.img);
+        
+        this.getBase64(this.state.img)
+          .then((res) => {
+            this.setState({ content: res })
+          })
+          .catch(err => {
+            console.log('failed', err);
+          })
+        this.setState({ imagePreview: URL.createObjectURL(this.state.img) });
+      })
+    }
   };
+
+  getBase64 = (file) => {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    return new Promise(resolve => {
+      reader.onload = e => {
+        resolve(e.target.result);
+      }
+    })
+  };
+
+  showOpenFileDlg = () => this.chooseFile.current.click()
 
   resetForm() {
     this.setState({
@@ -26,14 +65,11 @@ export class Create extends Component {
       visibility: "",
       unlisted: false,
     });
-  }
+  };
 
-  onChange = (e) =>
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
+  onChange = (e) => this.setState({ [e.target.name]: e.target.value, });
 
-  onSubmit = (e) => {
+  onSubmit =  (e) => {
     e.preventDefault();
     const {
       title,
@@ -44,6 +80,7 @@ export class Create extends Component {
       content,
       visibility,
     } = this.state;
+    
     const post = {
       type: "POST",
       title,
@@ -73,7 +110,6 @@ export class Create extends Component {
 
     return (
       <div>
-        <form onSubmit={this.onSubmit}>
           <div className="form-group">
             <label>Title</label>
             <input
@@ -81,27 +117,7 @@ export class Create extends Component {
               type="text"
               name="title"
               onChange={this.onChange}
-              defaultValue={title}
-            />
-          </div>
-          <div className="form-group">
-            <label>Source</label>
-            <input
-              className="form-control"
-              type="text"
-              name="source"
-              onChange={this.onChange}
-              defaultValue={source}
-            />
-          </div>
-          <div className="form-group">
-            <label>Origin</label>
-            <input
-              className="form-control"
-              type="text"
-              name="origin"
-              onChange={this.onChange}
-              defaultValue={origin}
+              value={title}
             />
           </div>
           <div className="form-group">
@@ -111,7 +127,7 @@ export class Create extends Component {
               type="text"
               name="description"
               onChange={this.onChange}
-              defaultValue={description}
+              value={description}
             />
           </div>
           <div className="form-group">
@@ -121,22 +137,35 @@ export class Create extends Component {
               type="text"
               name="contentType"
               onChange={this.onChange}
-              defaultValue={contentType}
+              value={contentType}
             >
-              <option defaultValue="text/plain">text/plain</option>
+              <option value="text/plain">text/plain</option>
+              <option value="text/markdown">text/markdown</option>
+              <option value="image">image</option>
             </select>
           </div>
           <div className="form-group">
             <label>Content</label>
-            <textarea
-              className="form-control"
-              id="content"
-              name="content"
-              onChange={this.onChange}
-              rows="4"
-            >
-              {content}
-            </textarea>
+            {
+              contentType === "text/plain" || contentType === "text/markdown"
+              ?
+              <textarea
+                className="form-control"
+                id="content"
+                name="content"
+                onChange={this.onChange}
+                rows="4"
+                value={content}
+              />
+              :
+              <div>
+                <button variant="outlined" color="primary" onClick={this.showOpenFileDlg}>Choose Image</button>
+                <br />
+                <input type="file" ref={this.chooseFile} onChange={this.onImageChange} style={{ display: 'none' }} accept="image/png, image/jpeg" />
+                <img style={{width:'50%'}} src={this.state.imagePreview} alt="Unavailable" />
+              </div>
+            }
+            
           </div>
           <div className="form-group">
             <label>Visibility</label>
@@ -144,19 +173,19 @@ export class Create extends Component {
               className="form-control"
               type="text"
               name="visibility"
-              onChange={this.onChange}
-              defaultValue={visibility}
+              onChange={(e) => {this.setState({visibility: e.target.value})}}
+              value={visibility}
             >
-              <option defaultValue="PUBLIC">PUBLIC</option>
+              <option value="PUBLIC">PUBLIC</option>
+              <option value="FRIENDS">FRIENDS</option>
             </select>
           </div>
           <br></br>
           <div className="form-group">
-            <button type="submit" className="btn btn-primary">
+            <button onClick={this.onSubmit} className="btn btn-primary">
               Submit
             </button>
           </div>
-        </form>
       </div>
     );
   }

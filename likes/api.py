@@ -287,7 +287,7 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
 
     @swagger_auto_schema(
-        operation_description="GET /service/author/< AUTHOR_ID >liked",
+        operation_description="GET /service/author/< AUTHOR_ID >/liked",
         responses={
             "200": openapi.Response(
                 description="OK",

@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { getPosts, deletePost } from "../../actions/posts";
 import { addFollower } from "../../actions/followers";
 import { CREATE_ALERT, LIKE_POST } from "../../actions/types";
+// import ReactMarkDown from "react-markdown";
 
 import Moment from "react-moment";
 import {
@@ -200,7 +201,7 @@ export class Feed extends Component {
         {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
         <h2>Local Public Feed</h2>
 
-        {posts.posts.map((post) => (
+        {posts.posts.filter(post => post.visibility === "PUBLIC").map((post) => (
           <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
             <div className="card-header mx-auto justify-content-center">
               <h2 className="text-primary mb-4">
