@@ -6,7 +6,7 @@ from author.serializer import AuthorSerializer
 from comment.models import Comment
 from post.models import Post, Categories
 from likes.models import Like
-from rest_framework import viewsets, status, serializers
+from rest_framework import viewsets, status
 from .serializers import PostSerializer
 from likes.serializers import LikeSerializer
 from rest_framework.response import Response 
