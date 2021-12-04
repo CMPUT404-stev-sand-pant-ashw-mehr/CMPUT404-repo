@@ -164,10 +164,10 @@ def send_friend_request_helper(local_author_id, foreign_author_id):
     authorizations = [('connectionsuperuser','404connection'), ('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), ('socialdistribution_t14','c404t14')]
     for auth in authorizations:
         fresponse = requests.post(request_url, data=frequest_data, auth=auth, headers={'Referer': 'https://social-dis.herokuapp.com/'})
-        if fresponse.status_code != 401:
+        if 200 <= fresponse.status_code < 300:
             break
     else:
-        return "Unable to authorize"
+        return "Unable to send request: " + fresponse.text
         
     return fresponse
 
