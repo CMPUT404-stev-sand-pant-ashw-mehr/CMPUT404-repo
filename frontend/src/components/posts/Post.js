@@ -16,14 +16,14 @@ export class Post extends Component {
     
     const { post } = this.props;
     switch (post.contentType) {
-    case "text/plain":
-      return <p>{post.content}</p>;
-    case "text/markdown":
-      return <ReactMarkDown>{post.content}</ReactMarkDown>;
-    case "image":
-      return <img style={{width:'80%'}} src={post.content} alt="Unavailable" />
-    default:
-      return <p>{post.content}</p>;
+      case "text/plain":
+        return <p>{post.content}</p>;
+      case "text/markdown":
+        return <ReactMarkDown>{post.content}</ReactMarkDown>;
+      case "image":
+        return <img style={{width:'80%'}} src={post.content} alt="Unavailable" />
+      default:
+        return <p>{post.content}</p>;
     }
   }
 
@@ -47,7 +47,7 @@ export class Post extends Component {
       comment: commentContent,
     };
 
-    this.props.createPostComment(this.props.match.params.id, comment);
+    this.props.createPostComment(this.props.match.params.postId, comment);
     this.resetForm();
     this.forceUpdate();
   };
