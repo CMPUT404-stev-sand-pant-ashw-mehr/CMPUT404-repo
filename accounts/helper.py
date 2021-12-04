@@ -55,6 +55,14 @@ def get_list_foregin_authors():
         j_req_14 = team_14_req.json()['items']
         authors = authors + j_req_14
     
+     # foreign authors from team13
+    team_14_req = requests.get('https://cmput404-team13-socialapp.herokuapp.com/api/authors/', auth=('team03','cmput404'), headers={'Referer': 'https://social-dis.herokuapp.com/'})
+    if not (200 <= team_14_req.status_code < 300):
+        pass
+    else:
+        j_req_14 = team_14_req.json()['items']
+        authors = authors + j_req_14
+    
     return authors
 
 def get_foregin_author_detail(author_id):
@@ -159,9 +167,9 @@ def send_friend_request_helper(local_author_id, foreign_author_id):
 
 
     frequest_data["summary"] = f"{local_author_name} wants to follow {foreign_author_name}"
-
+    print(frequest_data)
     request_url = remove_backslash(frequest_data["object"]["url"]) + "/inbox/"
-    authorizations = [('connectionsuperuser','404connection'), ('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), ('socialdistribution_t14','c404t14')]
+    authorizations = [('connectionsuperuser','404connection'), ('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), ('socialdistribution_t14','c404t14'), ('team03','cmput404')]
     for auth in authorizations:
         fresponse = requests.post(request_url, data=frequest_data, auth=auth, headers={'Referer': 'https://social-dis.herokuapp.com/'})
         if 200 <= fresponse.status_code < 300:
