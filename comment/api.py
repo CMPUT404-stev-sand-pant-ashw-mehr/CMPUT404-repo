@@ -216,7 +216,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            Post.objects.get(id=post_id, author=author_id)
+            post = Post.objects.get(id=post_id, author=author_id)
         except:
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -257,7 +257,7 @@ class CommentViewSet(viewsets.ModelViewSet):
                 "id": comment_id,
                 "type": request.data["type"],
                 "author": author,
-                "post_id": post_id,
+                "post": post,
                 "comment": request.data["comment"],
                 "contentType": request.data["contentType"]
             }
