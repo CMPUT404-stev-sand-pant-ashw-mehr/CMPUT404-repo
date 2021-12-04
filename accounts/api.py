@@ -30,7 +30,7 @@ class RegisterAPI(generics.GenericAPIView):
             host = 'https://' + str(request.get_host())
         else:
             host = 'http://' + str(request.get_host())
-            
+
         user_serializer = self.get_serializer(data = request.data)
         user_serializer.is_valid(raise_exception=True)
         # create user
@@ -45,7 +45,7 @@ class RegisterAPI(generics.GenericAPIView):
             "url": host + '/author/' + str(author_uuid),
             "displayName": request.data["displayName"],
             "github": request.data["github"],
-            "is_active": True
+            "is_active": False  # Not approved when created
         }
 
         Author.objects.create(**author_schema)
