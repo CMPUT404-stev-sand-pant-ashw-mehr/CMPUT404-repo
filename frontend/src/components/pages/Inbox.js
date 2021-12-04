@@ -24,7 +24,6 @@ export class Inbox extends Component {
       .then((resp) => {
         let reqs = [];
         const items = resp.data.items;
-        console.log("items - ", items);
         items.map((item) => {
           if (item.type === "follow") {
             reqs.push(item);

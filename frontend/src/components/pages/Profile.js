@@ -49,7 +49,6 @@ export class Profile extends Component {
         tokenConfig(store.getState)
       )
       .then((res) => {
-        console.log("success:", res);
         this.getUserProfile();
         this.setState({
           showEdit: false,

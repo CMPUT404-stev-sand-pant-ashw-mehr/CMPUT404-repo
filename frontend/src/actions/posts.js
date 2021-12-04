@@ -4,6 +4,7 @@ import {
   GET_POSTS,
   GET_AUTHOR_POSTS,
   GET_FOREIGN_POSTS,
+  GET_FOREIGN_POST,
   GET_POST,
   DELETE_POST,
   CREATE_POST,
@@ -107,6 +108,27 @@ export const getPost = (authorId, postId) => (dispatch, getState) => {
     });
 };
 
+export const getForeignPost = (postId) => (dispatch, getState) => {
+  axios
+    .get(`/connection/post-detail/${postId}`, tokenConfig(getState))
+    .then((res) => {
+      dispatch({
+        type: GET_FOREIGN_POST,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      const alert = {
+        msg: err.response,
+        status: err.response,
+      };
+      dispatch({
+        type: GET_ALERTS,
+        payload: alert,
+      });
+    });
+};
+
 export const deletePost = (id) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;
   const urlId = id.split("/").pop();
@@ -137,7 +159,6 @@ export const deletePost = (id) => (dispatch, getState) => {
     });
 };
 
-
 export const sendPost = (postId, foreignAuthorId) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;
   const urlId = id.split("/").pop();
@@ -151,10 +172,10 @@ export const sendPost = (postId, foreignAuthorId) => (dispatch, getState) => {
   //         status: res.status,
   //       },
   //     });
-      dispatch({
-        type: SEND_POST,
-        payload: {"foregin author":foreignAuthorId},
-      });
+  dispatch({
+    type: SEND_POST,
+    payload: { "foregin author": foreignAuthorId },
+  });
   //   })
   //   .catch((err) => {
   //     const alert = {
@@ -167,7 +188,6 @@ export const sendPost = (postId, foreignAuthorId) => (dispatch, getState) => {
   //     });
   //   });
 };
-
 
 export const createPost = (post) => (dispatch, getState) => {
   const authorId = getState().auth.user.author;

@@ -13,6 +13,7 @@ import Feed from "./posts/Feed";
 import ForeignFeed from "./posts/ForeignFeed";
 import Create from "./posts/Create";
 import Post from "./posts/Post";
+import ForeignPost from "./posts/ForeignPost";
 
 import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
@@ -59,7 +60,16 @@ class App extends Component {
                     path="/posts/:authorId/:postId"
                     component={Post}
                   />
-                  <AuthRoute exact path="/github-activities" component={GitHub} />
+                  <AuthRoute
+                    exact
+                    path="/foreign/posts/:postId"
+                    component={ForeignPost}
+                  />
+                  <AuthRoute
+                    exact
+                    path="/github-activities"
+                    component={GitHub}
+                  />
                   <AuthRoute exact path="/profile/:id" component={Profile} />
                   <Route exact path="/" component={Landing} />
                   <Route exact path="/login" component={Login} />

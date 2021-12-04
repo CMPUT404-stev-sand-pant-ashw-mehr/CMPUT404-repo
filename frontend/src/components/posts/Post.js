@@ -13,7 +13,6 @@ export class Post extends Component {
   };
 
   renderPostContent = () => {
-    
     const { post } = this.props;
     switch (post.contentType) {
       case "text/plain":
@@ -21,11 +20,13 @@ export class Post extends Component {
       case "text/markdown":
         return <ReactMarkDown>{post.content}</ReactMarkDown>;
       case "image":
-        return <img style={{width:'80%'}} src={post.content} alt="Unavailable" />
+        return (
+          <img style={{ width: "80%" }} src={post.content} alt="Unavailable" />
+        );
       default:
         return <p>{post.content}</p>;
     }
-  }
+  };
 
   resetForm() {
     this.setState({
@@ -61,7 +62,6 @@ export class Post extends Component {
 
   render() {
     const { post, commentContent } = this.props;
-    console.log(post);
     return (
       post && (
         <Fragment>

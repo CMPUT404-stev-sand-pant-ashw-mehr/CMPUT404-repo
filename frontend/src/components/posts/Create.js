@@ -28,8 +28,6 @@ export class Create extends Component {
     e.preventDefault();
     if (e.target.files && e.target.files[0]) {
       this.setState({ img: e.target.files[0] }, () => {
-        console.log("img: ", this.state.img);
-
         this.getBase64(this.state.img)
           .then((res) => {
             this.setState({ content: res });

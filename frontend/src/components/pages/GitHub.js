@@ -14,14 +14,12 @@ class GitHub extends Component {
   };
 
   componentDidMount = () => {
-    console.log("GitHub:", this.props);
     this.setState({ isLoading: true, loadingText: "Loading ..." });
     axios
       .get(`/author/${this.props.auth.user.author}/github`, {
         auth: { username: "socialdistribution_t03", password: "c404t03" },
       })
       .then((res) => {
-        console.log(res.data);
         this.setState({
           activities: res.data,
           isLoading: false,

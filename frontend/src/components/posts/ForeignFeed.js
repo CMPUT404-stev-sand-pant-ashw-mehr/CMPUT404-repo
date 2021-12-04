@@ -67,7 +67,13 @@ export class ForeignFeed extends Component {
               </div>
               <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
-              <span className="badge bg-secondary">
+              <Link
+                to={`/foreign/posts/${post.id.split("/").pop()}`}
+                className="btn btn-outline-primary"
+              >
+                View full post →
+              </Link>
+              <span className="badge bg-secondary float-end">
                 {this.renderHost(post.author.host)}
               </span>
             </div>
