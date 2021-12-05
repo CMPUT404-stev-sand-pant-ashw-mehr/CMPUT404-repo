@@ -9,7 +9,7 @@ from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper, like_foreign_posts
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
@@ -208,5 +208,18 @@ def send_friend_request(request, local_author_id, foreign_author_id):
             return Response({"detail": request_response}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"message": request_response.text}, status=request_response.status_code)
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+@api_view(['POST'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def like_foregin_post(request, post_id, author_id):
+    author = Author.objects.get(id=author_id)
+    if request.method == "POST":
+        res = like_foreign_posts(post_id, author)
+        if res.text ==  '{"succ":false}':
+            return Response({"detail": f"{author.displayName} has already liked a foreign post"}, status=status.HTTP_200_OK)
+        return Response({"detail": f"{author.displayName} liked a foreign post"}, status=status.HTTP_200_OK)
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
