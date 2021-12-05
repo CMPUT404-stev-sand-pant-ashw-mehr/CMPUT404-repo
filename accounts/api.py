@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status, validators
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response 
@@ -88,6 +89,8 @@ class LoginAPI(generics.GenericAPIView):
 
 class ProfileAPI(generics.RetrieveAPIView):
     serializer_class = UserSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
     
     def get_queryset(self):
         return self.request.user
