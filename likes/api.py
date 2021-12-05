@@ -4,8 +4,6 @@ from likes.models import Like
 from post.models import Post
 from rest_framework import viewsets, status
 from rest_framework.response import Response 
-from knox.auth import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 from .serializers import LikeSerializer
 from author.serializer import AuthorSerializer
 from accounts.permissions import CustomAuthentication, AccessPermission
@@ -365,7 +363,8 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
 
 def add_author_to_database(request):
     try:
-        author_json = request.POST["author"]
+        request_data = json.load(request.body.decode('utf-8'))
+        author_json = request_data["author"]
         if type(author_json) == dict:
             author_dict = author_json
         else:
