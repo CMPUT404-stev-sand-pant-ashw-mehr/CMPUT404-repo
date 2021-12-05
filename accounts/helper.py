@@ -53,7 +53,7 @@ def get_list_foregin_authors():
         j_req_14 = team_14_req.json()['items']
         authors = authors + j_req_14
     
-     # foreign authors from team13
+    # foreign authors from team13
     team_14_req = requests.get('https://cmput404-team13-socialapp.herokuapp.com/api/authors/', auth=('team03','cmput404'), headers={'Referer': 'https://social-dis.herokuapp.com/'})
     if not (200 <= team_14_req.status_code < 300):
         pass
@@ -85,10 +85,10 @@ def get_list_foregin_posts():
     
     # foreign posts from team17
     team_17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/', auth=('4cbe2def-feaa-4bb7-bce5-09490ebfd71a','123456'), headers={'Referer': 'https://social-dis.herokuapp.com/'})
-    if team_17_req.status_code in (500, 404, 503, 200):
+    if team_17_req.status_code in (500, 404, 503):
         pass
     else:
-        j_req_17 = team_17_req.json()
+        j_req_17 = team_17_req.json()['items']
         posts = posts + j_req_17
         
     # foreign posts from team14
