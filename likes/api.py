@@ -16,23 +16,9 @@ from drf_yasg import openapi
 import json
 
 class PostLikeViewSet(viewsets.ModelViewSet):
+    authentication_classes = (CustomAuthentication,)
+    permission_classes = (AccessPermission,)
     serializer_class = LikeSerializer
-    
-    def initialize_request(self, request, *args, **kwargs):
-     self.action = self.action_map.get(request.method.lower())
-     return super().initialize_request(request, *args, kwargs)
-    
-    def get_authenticators(self):
-        if self.action in ["get_post_likes"]:
-            return [CustomAuthentication()]
-        else:
-            return [TokenAuthentication()]
-    
-    def get_permissions(self):
-        if self.action in ["get_post_likes"]:
-            return [AccessPermission()]
-        else:
-            return [IsAuthenticated()]
         
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/post/< POST_ID >/likes",
@@ -160,24 +146,9 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
         
 class CommentLikeViewSet(viewsets.ModelViewSet):
+    authentication_classes = (CustomAuthentication,)
+    permission_classes = (AccessPermission,)
     serializer_class = LikeSerializer
-    
-    def initialize_request(self, request, *args, **kwargs):
-        self.action = self.action_map.get(request.method.lower())
-        return super().initialize_request(request, *args, kwargs)
-    
-    def get_authenticators(self):
-        if self.action in ["get_comment_likes"]:
-            return [CustomAuthentication()]
-        else:
-            return [TokenAuthentication()]
-    
-    def get_permissions(self):
-        if self.action in ["get_comment_likes"]:
-            return [AccessPermission()]
-        else:
-            return [IsAuthenticated()]
-    
     
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/post/< POST_ID >/comments/{ COMMENT_ID }/likes",
