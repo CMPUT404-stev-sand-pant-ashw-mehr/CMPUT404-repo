@@ -20,6 +20,10 @@ export class ForeignPost extends Component {
       case "text/markdown":
         return <ReactMarkDown>{post.content}</ReactMarkDown>;
       case "image":
+      case "image/png;base64":
+      case "image/jpeg;base64":
+      case "image/png":
+      case "image/jpeg":
         return (
           <img style={{ width: "80%" }} src={post.content} alt="Unavailable" />
         );
