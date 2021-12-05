@@ -13,48 +13,48 @@ export class Header extends Component {
           to="/posts"
           exact={true}
           activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark nav-link"
+          className="me-3 py-2 text-dark text-decoration-none"
         >
           Feed
         </NavLink>
         <NavLink
           to="/foreign"
           activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark nav-link"
+          className="me-3 py-2 text-dark text-decoration-none"
         >
           Foreign Posts
         </NavLink>
         <NavLink
           to="/authors"
           activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark nav-link"
+          className="me-3 py-2 text-dark text-decoration-none"
         >
           Authors
         </NavLink>
         <NavLink
           to="/github-activities"
           activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark nav-link"
+          className="me-3 py-2 text-dark text-decoration-none"
         >
           GitHub Activity
         </NavLink>
         <NavLink
           to="/posts/create"
           activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark nav-link"
+          className="me-3 py-2 text-dark text-decoration-none"
         >
           Create Post
         </NavLink>
         <NavLink
           to="/inbox"
           activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark nav-link"
+          className="me-3 py-2 text-dark text-decoration-none"
         >
           Inbox
         </NavLink>
         <a
           activeClassName="text-decoration-underline"
-          className="nav-NavLink me-3 py-2 dropdown-toggle text-dark nav-link"
+          className="nav-NavLink me-3 py-2 dropdown-toggle text-dark text-decoration-none"
           href="#"
           id="navbarDarkDropdownMenuNavLink"
           role="button"
