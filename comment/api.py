@@ -29,13 +29,13 @@ class CommentViewSet(viewsets.ModelViewSet):
      return super().initialize_request(request, *args, kwargs)
     
     def get_authenticators(self):
-        if self.action in ["get_post_comments", ]:
+        if self.action in ["get_post_comments", "add_comment_to_post"]:
             return [CustomAuthentication()]
         else:
             return [TokenAuthentication()]
     
     def get_permissions(self):
-        if self.action in ["get_post_comments",]:
+        if self.action in ["get_post_comments", "add_comment_to_post"]:
             return [AccessPermission()]
         else:
             return [IsAuthenticated()]

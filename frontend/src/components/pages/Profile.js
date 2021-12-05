@@ -9,6 +9,7 @@ import { FiSend } from "react-icons/fi";
 import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
+// import Checkbox from "@material-ui/core/Checkbox";
 
 export class Profile extends Component {
   constructor(props) {
@@ -23,8 +24,12 @@ export class Profile extends Component {
     showEdit: false,
     newDisplayedName:"",
     newGitHub:"",
+
     friends: [],
     open: false,
+    selectedFriends: {},
+    selectedPost:{}
+
   };
 
   toggleEdit = () => {
@@ -64,6 +69,12 @@ export class Profile extends Component {
     this.getUserProfile();
   }
 
+  
+  parseData(data) {
+    const parseData = data.id.split("/");
+    return parseData[parseData.length - 1];
+  }
+
   getUserProfile = () => {
     var self = this;
     axios
@@ -86,17 +97,57 @@ export class Profile extends Component {
     }
 
   handleSend(){
+    Object.keys(this.state.selectedFriends).map((friendId)=>{
+      let id = this.parseData(this.state.selectedFriends[friendId]);
+      
+      axios.post(`/author/${id}/inbox`,
+            {
+              "type":"post",
+              "title":this.state.selectedPost.title ,
+              "id":this.state.selectedPost.id,
+              "source":this.state.selectedPost.source,
+              "origin":this.state.selectedPost.origin,
+              "description":this.state.selectedPost.description,
+              "contentType":this.state.selectedPost.contentType,
+              "content":this.state.selectedPost.content,
+              "published":this.state.selectedPost.published,
+              "author":this.state.selectedPost.author,
+              "categories":this.state.selectedPost.categories,
+              "visibility":this.state.selectedPost.visibility,
+              "unlisted":this.state.selectedPost.unlisted,
+            },
+            tokenConfig(store.getState)
+            )
+            .then((resp) => {
+                this.setState({
+                  open: false,
+                })
+          });
+    })
+  }
+
+  handleSendPost(post){
     this.setState({
       open: true,
+      selectedPost: post,
     });
   }
 
-  handleSelected(){
-    console.log("in selected");
-  }
-
-  handleNotSelected(){
-    console.log("in not selected");
+  handleSelection(friend){
+    let selectedFriendsIds = Object.keys(this.state.selectedFriends);
+    if(selectedFriendsIds.includes(friend.id)){
+      let selections = this.state.selectedFriends;
+      delete selections[friend.id];
+      this.setState({
+        selected: selections,
+      });
+    }else{
+      let selections = this.state.selectedFriends;
+      selections[friend.id] = friend;
+      this.setState({
+      selected: selections,
+    });
+    }
   }
 
   render() {
@@ -137,7 +188,7 @@ export class Profile extends Component {
         }
         <hr />
         <br />
-        <h2>Posts by this User</h2>
+        <h2>Your Posts</h2>
 
         {posts.posts.map((post) => (
           <div className="card mb-4" key={post.id.split("/").pop()}>
@@ -158,7 +209,7 @@ export class Profile extends Component {
                 View full post →
               </Link>
               <div className="p-2">
-                <button type="button" className="btn btn-primary float-end" onClick={()=>this.handleSend()} data-bs-toggle="modal" data-bs-target="#sendPost">
+                <button type="button" className="btn btn-primary float-end" onClick={()=>this.handleSendPost(post)} data-bs-toggle="modal" data-bs-target="#sendPost">
                   <FiSend />
                 </button>
                 <button
@@ -207,38 +258,32 @@ export class Profile extends Component {
           </ul>
         </nav>
 
-        <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        {this.state.open && <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" id="exampleModalLabel">Send To:</h5>
-                {/* <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> */}
               </div>
               <div className="modal-body">
-                  {this.state.open && this.state.friends.map((friend)=>{
-                      return <div className="card">
-                          <div className="card-body">
-                            <div className="form-check">
-                              <input className="form-check-input" type="checkbox" value={friend.displayName} id={friend.id}/>
-                              <label className="form-check-label" for={friend.id}>
-                                @{friend.displayName}
-                              </label>
-                              {/* {checkedValue} */}
-
-                              {/* onClick={true? ()=>{this.handleSelected()}: ()=>{this.handleNotSelected()} */}
-                            </div>
-                          </div>
+              {friends.map((friend,i) => <div className="card">
+                      <div className="card-body">
+                        <div className="form-check">
+                          <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend)}/>
+                          <label className="form-check-label" for={friend.id}>
+                            @{friend.displayName}
+                          </label>
                         </div>
-                    })}
+                      </div>
+                  </div>)}
               </div>
 
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" className="btn btn-primary">Send</button>
+                <button type="button" className="btn btn-primary" onClick={()=>this.handleSend()}>Send</button>
               </div>
             </div>
           </div>
-        </div>
+        </div>}
       </Fragment>
     );
   }

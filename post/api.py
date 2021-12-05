@@ -127,7 +127,7 @@ class PostViewSet(viewsets.ModelViewSet):
             
         try:
             # get post with author.
-            post_query = Post.objects.get(id=post_id, author=author_id, visibility="PUBLIC")
+            post_query = Post.objects.get(id=post_id, author=author_id)
 
             # get author. Exclude foreign author
             author_query = Author.objects.exclude(is_active=False).exclude(user__isnull=True).get(id=author_id)
@@ -251,7 +251,7 @@ class PostViewSet(viewsets.ModelViewSet):
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        posts_query = Post.objects.filter(author=author, visibility="PUBLIC", unlisted=False)
+        posts_query = Post.objects.filter(author=author, unlisted=False)
         
         return Response(self.get_post_from_query(posts_query=posts_query, request=request), status=status.HTTP_200_OK)
 
