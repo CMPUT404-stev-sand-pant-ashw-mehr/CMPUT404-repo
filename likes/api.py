@@ -363,7 +363,7 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
 
 def add_author_to_database(request):
     try:
-        request_data = json.load(request.body.decode('utf-8'))
+        request_data = json.loads(request.body.decode('utf-8'))
         author_json = request_data["author"]
         if type(author_json) == dict:
             author_dict = author_json
