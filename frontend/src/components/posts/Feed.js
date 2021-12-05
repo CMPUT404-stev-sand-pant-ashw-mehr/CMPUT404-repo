@@ -144,7 +144,6 @@ export class Feed extends Component {
   }
   checkLikedPost(likes) {
     const { user } = this.props;
-    console.log("likes:", likes);
     for (const like of likes) {
       if (like.author.id.split("/").pop() == user.user.author) {
         return true;

@@ -19,6 +19,7 @@ import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
 import Inbox from "./pages/Inbox";
 import GitHub from "./pages/GitHub";
+import AuthorSearch from "./pages/AuthorSearch";
 
 import Login from "./auth/Login";
 import Register from "./auth/Register";
@@ -54,6 +55,7 @@ class App extends Component {
                   <AuthRoute exact path="/inbox" component={Inbox} />
                   <AuthRoute exact path="/posts" component={Feed} />
                   <AuthRoute exact path="/foreign" component={ForeignFeed} />
+                  <AuthRoute exact path="/authors" component={AuthorSearch} />
                   <AuthRoute exact path="/posts/create" component={Create} />
                   <AuthRoute
                     exact

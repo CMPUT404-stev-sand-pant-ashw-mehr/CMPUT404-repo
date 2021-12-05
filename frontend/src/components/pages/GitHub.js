@@ -63,9 +63,8 @@ class GitHub extends Component {
           activities
             .map((activity, index) => (
               <div
+                className="card"
                 style={{
-                  border: "1px solid #a5a5a5",
-                  borderRadius: "5px",
                   marginTop: 10,
                   marginBottom: 10,
                   padding: 10,
