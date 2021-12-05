@@ -221,7 +221,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
         
         try:
-            author_json = request.data["author"]
+            request_data = json.loads(request.body.decode('utf-8'))
+            author_json = request_data["author"]
             if type(author_json) == dict:
                 author_dict = author_json
             else:
