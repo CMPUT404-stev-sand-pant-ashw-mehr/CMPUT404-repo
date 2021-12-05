@@ -1,15 +1,14 @@
 from rest_framework import generics, permissions, status, validators
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response 
 from knox.models import AuthToken
+from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
-from knox.models import AuthToken
 from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
