@@ -65,8 +65,6 @@ export class Profile extends Component {
     }
 
   handleSend(){
-    console.log(this.state.selectedFriends);
-    console.log(this.state.selectedPost);
     Object.keys(this.state.selectedFriends).map((friendId)=>{
       let id = this.parseData(this.state.selectedFriends[friendId]);
       
@@ -89,7 +87,6 @@ export class Profile extends Component {
             tokenConfig(store.getState)
             )
             .then((resp) => {
-                console.log("Sent to Inbox");
                 this.setState({
                   open: false,
                 })
@@ -98,7 +95,6 @@ export class Profile extends Component {
   }
 
   handleSendPost(post){
-    // console.log("selected - ", this.state.selectedFriends);
     this.setState({
       open: true,
       selectedPost: post,
@@ -116,7 +112,6 @@ export class Profile extends Component {
     }else{
       let selections = this.state.selectedFriends;
       selections[friend.id] = friend;
-      // selections.push(friendId);
       this.setState({
       selected: selections,
     });
@@ -161,7 +156,7 @@ export class Profile extends Component {
         }
         <hr />
         <br />
-        <h2>Posts by this User</h2>
+        <h2>Your Posts</h2>
 
         {posts.posts.map((post) => (
           <div className="card mb-4" key={post.id.split("/").pop()}>
@@ -239,31 +234,15 @@ export class Profile extends Component {
               </div>
               <div className="modal-body">
               {friends.map((friend,i) => <div className="card">
-                          <div className="card-body">
-                            <div className="form-check">
-                              <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend)}/>
-                              <label className="form-check-label" for={friend.id}>
-                                @{friend.displayName}
-                              </label>
-                            </div>
-                          </div>
-                      </div>)}
-
-                {/* {friends.map((friend,i) => <li key={i}>{friend.displayName}</li>)} */}
-              {/* {this.state.requests.length>0 && this.state.requests.map((request) => ( */}
-                  {/* {friends.map((friend)=>{
-                      <div className="card">
-                          <div className="card-body">
-                            <div className="form-check">
-                              <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend.id)}/>
-                              <label className="form-check-label" for={friend.id}>
-                                @{friend.displayName}
-                                hello
-                              </label>
-                            </div>
-                          </div>
+                      <div className="card-body">
+                        <div className="form-check">
+                          <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend)}/>
+                          <label className="form-check-label" for={friend.id}>
+                            @{friend.displayName}
+                          </label>
+                        </div>
                       </div>
-                    })} */}
+                  </div>)}
               </div>
 
               <div className="modal-footer">
