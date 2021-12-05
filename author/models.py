@@ -35,4 +35,4 @@ class Author(models.Model):
         return self.host + f"api/author/{self.id}/"
     
     def __str__(self):
-        return self.user.username
+        return str(self.user)
