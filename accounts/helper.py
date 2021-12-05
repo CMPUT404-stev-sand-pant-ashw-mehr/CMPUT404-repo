@@ -119,7 +119,6 @@ def get_foregin_public_post_detail(post_id):
     return "post not found!"
 
 def like_foreign_posts(post_id, author):
-    
     data = {
         "type": "Author",
         "id": author.url,
@@ -136,9 +135,27 @@ def like_foreign_posts(post_id, author):
                              },
                              headers={'Referer': 'https://social-dis.herokuapp.com/'})
     return like_req
-    
-    
 
+def comment_foreign_posts(post_id, author, content):
+    data = {
+        "type": "Author",
+        "id": author.url,
+        "displayName": author.displayName,
+        "host": author.url,
+        "url": author.url,
+        "github": author.github,
+        "profileImage": author.profileImage
+    }
+    like_req = requests.post(f'https://cmput404f21t17.herokuapp.com/service/post/{post_id}/comments/', 
+                             auth=('a08b0c4d-8af0-4fed-a1ad-f64505c5aa4b','123456'),
+                             json = {
+                                 "author": data,
+                                 "text": content
+                             },
+                             headers={'Referer': 'https://social-dis.herokuapp.com/'})
+    return like_req
+    
+    
 def send_friend_request_helper(local_author_id, foreign_author_id):
     try:
         author = Author.objects.get(id=local_author_id)
