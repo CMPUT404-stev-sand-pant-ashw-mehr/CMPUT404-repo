@@ -20,7 +20,6 @@ class AuthorSearch extends Component {
         auth: { username: "socialdistribution_t03", password: "c404t03" },
       })
       .then((res) => {
-        console.log(res.data.items);
         this.setState({
           authors: res.data.items,
           isLoading: false,
