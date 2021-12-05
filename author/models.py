@@ -33,3 +33,6 @@ class Author(models.Model):
     # using this to get full path for author
     def get_full_path(self):
         return self.host + f"api/author/{self.id}/"
+    
+    def __str__(self):
+        return self.user.username
