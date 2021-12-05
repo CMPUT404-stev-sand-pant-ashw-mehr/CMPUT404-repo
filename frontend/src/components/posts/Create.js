@@ -2,6 +2,10 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { createPost } from "../../actions/posts";
+import axios from "axios";
+import { tokenConfig } from "../../actions/auth";
+import store from "../../store";
+import { Redirect } from "react-router-dom";
 
 export class Create extends Component {
   constructor(props) {
@@ -18,6 +22,7 @@ export class Create extends Component {
       imagePreview: null,
       img: null,
       base64: null,
+      redirect: "",
     };
 
     this.onImageChange = this.onImageChange.bind(this);
@@ -91,8 +96,18 @@ export class Create extends Component {
       unlisted: false,
       categories: ["web"],
     };
-    this.props.createPost(post);
-    this.resetForm();
+    axios
+      .post(
+        `/author/${this.props.auth.user.author}/posts/`,
+        post,
+        tokenConfig(store.getState)
+      )
+      .then((res) => {
+        this.resetForm();
+        this.setState({
+          redirect: "/posts",
+        });
+      });
   };
 
   render() {
@@ -106,8 +121,12 @@ export class Create extends Component {
       visibility,
     } = this.state;
 
+    const { createPost } = this.props;
+
     return (
       <div>
+        {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
+
         <div className="form-group">
           <label>Title</label>
           <input
@@ -122,61 +141,36 @@ export class Create extends Component {
           <label>Description</label>
           <input
             className="form-control"
-            type="text"
-            name="description"
+            id="content"
+            name="content"
             onChange={this.onChange}
-            value={description}
+            rows="4"
+            value={content}
           />
-        </div>
-        <div className="form-group">
-          <label>Content Type</label>
-          <select
-            className="form-control"
-            type="text"
-            name="contentType"
-            onChange={this.onChange}
-            value={contentType}
-          >
-            <option value="text/plain">text/plain</option>
-            <option value="text/markdown">text/markdown</option>
-            <option value="image">image</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Content</label>
-          {contentType === "text/plain" || contentType === "text/markdown" ? (
-            <textarea
-              className="form-control"
-              id="content"
-              name="content"
-              onChange={this.onChange}
-              rows="4"
-              value={content}
-            />
           ) : (
-            <div>
-              <button
-                className="btn btn-outline-primary"
-                variant="outlined"
-                color="primary"
-                onClick={this.showOpenFileDlg}
-              >
-                Choose Image
-              </button>
-              <br />
-              <input
-                type="file"
-                ref={this.chooseFile}
-                onChange={this.onImageChange}
-                style={{ display: "none" }}
-                accept="image/png, image/jpeg"
-              />
-              <img
-                style={{ width: "50%" }}
-                src={this.state.imagePreview}
-                alt="Unavailable"
-              />
-            </div>
+          <div>
+            <button
+              className="btn btn-outline-primary"
+              variant="outlined"
+              color="primary"
+              onClick={this.showOpenFileDlg}
+            >
+              Choose Image
+            </button>
+            <br />
+            <input
+              type="file"
+              ref={this.chooseFile}
+              onChange={this.onImageChange}
+              style={{ display: "none" }}
+              accept="image/png, image/jpeg"
+            />
+            <img
+              style={{ width: "50%" }}
+              src={this.state.imagePreview}
+              alt="Unavailable"
+            />
+          </div>
           )}
         </div>
         <div className="form-group">
@@ -205,8 +199,13 @@ export class Create extends Component {
   }
 
   static propTypes = {
+    auth: PropTypes.object.isRequired,
     createPost: PropTypes.func.isRequired,
   };
 }
 
-export default connect(null, { createPost })(Create);
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+});
+
+export default connect(mapStateToProps, { createPost })(Create);
