@@ -103,28 +103,25 @@ export class Profile extends Component {
   handleSend() {
     Object.keys(this.state.selectedFriends).map((friendId) => {
       let id = this.parseData(this.state.selectedFriends[friendId]);
+      let postObj = {
+        type: "post",
+        title: this.state.selectedPost.title,
+        id: this.state.selectedPost.id,
+        source: this.state.selectedPost.source,
+        origin: this.state.selectedPost.origin,
+        description: this.state.selectedPost.description,
+        contentType: this.state.selectedPost.contentType,
+        content: this.state.selectedPost.content,
+        published: this.state.selectedPost.published,
+        author: this.state.selectedPost.author,
+        categories: this.state.selectedPost.categories,
+        visibility: this.state.selectedPost.visibility,
+        unlisted: this.state.selectedPost.unlisted,
+      };
 
       axios
-        .post(
-          `/author/${id}/inbox`,
-          {
-            type: "post",
-            title: this.state.selectedPost.title,
-            id: this.state.selectedPost.id,
-            source: this.state.selectedPost.source,
-            origin: this.state.selectedPost.origin,
-            description: this.state.selectedPost.description,
-            contentType: this.state.selectedPost.contentType,
-            content: this.state.selectedPost.content,
-            published: this.state.selectedPost.published,
-            author: this.state.selectedPost.author,
-            categories: this.state.selectedPost.categories,
-            visibility: this.state.selectedPost.visibility,
-            unlisted: this.state.selectedPost.unlisted,
-          },
-          tokenConfig(store.getState)
-        )
-        .then((resp) => {
+        .post(`/author/${id}/inbox`, postObj, tokenConfig(store.getState))
+        .then((res) => {
           this.setState({
             open: false,
           });
@@ -238,23 +235,22 @@ export class Profile extends Component {
               >
                 View full post →
               </Link>
-              <div className="p-2">
-                <button
-                  type="button"
-                  className="btn btn-primary float-end"
-                  onClick={() => this.handleSendPost(post)}
-                  data-bs-toggle="modal"
-                  data-bs-target="#sendPost"
-                >
-                  <FiSend />
-                </button>
-                <button
-                  className="btn btn-danger float-end"
-                  onClick={deletePost.bind(this, post.id)}
-                >
-                  <FaTrashAlt />
-                </button>
-              </div>
+              <button
+                style={{ marginLeft: 20 }}
+                type="button"
+                className="btn btn-primary float-end"
+                onClick={() => this.handleSendPost(post)}
+                data-bs-toggle="modal"
+                data-bs-target="#sendPost"
+              >
+                <FiSend />
+              </button>
+              <button
+                className="btn btn-danger float-end"
+                onClick={deletePost.bind(this, post.id)}
+              >
+                <FaTrashAlt />
+              </button>
             </div>
           </div>
         ))}

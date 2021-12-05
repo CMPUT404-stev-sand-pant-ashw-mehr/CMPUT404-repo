@@ -162,21 +162,20 @@ export class Feed extends Component {
         tokenConfig(store.getState)
       )
       .then((res) => {
+        let likeObj = {
+          type: "Like",
+          author: user.author,
+          object: post.id,
+          "@context": "https://www.w3.org/ns/activitystreams",
+          summary: `${user.user.username} Likes your post`,
+        };
+        axios.post(
+          `/author/${post.author_id}/inbox`,
+          likeObj,
+          tokenConfig(store.getState)
+        );
         const likes = post.likes;
-        post.likes = [
-          ...likes,
-          {
-            type: "Like",
-            author: {
-              id: user.user.author,
-              type: "author",
-              displayName: user.user.displayName,
-            },
-            object: post.id,
-            "@context": "https://www.w3.org/ns/activitystreams",
-            summary: `${user.user.displayName} Likes your post`,
-          },
-        ];
+        post.likes = [...likes, likeObj];
         store.dispatch({
           type: LIKE_POST,
           payload: post,
@@ -239,7 +238,7 @@ export class Feed extends Component {
                   to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
                   className="btn btn-outline-primary"
                 >
-                  View full post →
+                  View post →
                 </Link>
                 {post.author_id == user.user.author ? (
                   <button

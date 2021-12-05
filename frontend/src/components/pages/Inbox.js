@@ -53,7 +53,7 @@ export class Inbox extends Component {
             reqs.push(item);
           } else if (item.type === "post") {
             psts.push(item);
-          } else if (item.type === "like") {
+          } else if (item.type === "Like") {
             lks.push(item);
           }
         });
@@ -76,58 +76,6 @@ export class Inbox extends Component {
   parseData(data) {
     const parseData = data.id.split("/");
     return parseData[parseData.length - 1];
-  }
-
-  checkLikedPost(likes) {
-    const { user } = this.props;
-    for (const like of likes) {
-      if (like.author.id.split("/").pop() == user.user.author) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  likePost(post) {
-    const { user } = this.props;
-
-    axios
-      .post(
-        `/author/${post.author_id}/post/${post.id.split("/").pop()}/likes`,
-        null,
-        tokenConfig(store.getState)
-      )
-      .then((res) => {
-        const likes = post.likes;
-        post.likes = [
-          ...likes,
-          {
-            type: "Like",
-            author: {
-              id: user.user.author,
-              type: "author",
-              displayName: user.user.displayName,
-            },
-            object: post.id,
-            "@context": "https://www.w3.org/ns/activitystreams",
-            summary: `${user.user.displayName} Likes your post`,
-          },
-        ];
-        store.dispatch({
-          type: LIKE_POST,
-          payload: post,
-        });
-        store.dispatch({
-          type: CREATE_ALERT,
-          payload: {
-            msg: { success: "Post has been liked!" },
-            status: res.status,
-          },
-        });
-      })
-      .catch((e) => {
-        console.log(e);
-      });
   }
 
   handleSend() {
@@ -297,10 +245,36 @@ export class Inbox extends Component {
 
         <div className="card mt-5">
           <div className="card-header">
-            <h2>Friend Posts</h2>
+            <h4>Likes</h4>
+          </div>
+          <div className="card=body">
+            {this.state.likes.map((like) => (
+              <div className="card m-3 p-3">
+                {like.summary} (Post ID: {like.object.split("/")[6].substr(27)})
+                <span className="float-end">
+                  <Link
+                    to={`/posts/${like.object.split("/")[4]}/${
+                      like.object.split("/")[6]
+                    }`}
+                    className="btn btn-outline-primary"
+                  >
+                    View post →
+                  </Link>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card mt-5">
+          <div className="card-header">
+            <h4>Friend Posts</h4>
           </div>
           {this.state.posts.map((post) => (
-            <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
+            <div
+              className="card mb-4 flex-row m-3"
+              key={post.id.split("/").pop()}
+            >
               <div className="card-header mx-auto justify-content-center"></div>
               <div className="card-body">
                 <div className="small text-muted">
