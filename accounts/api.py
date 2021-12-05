@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response 
 from knox.models import AuthToken
+from rest_framework.permissions import IsAuthenticated
 from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
@@ -90,8 +91,8 @@ class LoginAPI(generics.GenericAPIView):
 class ProfileAPI(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
-    
+    permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
         return self.request.user
 
