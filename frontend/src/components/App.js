@@ -39,7 +39,7 @@ const options = {
 
 class App extends Component {
   componentDidMount() {
-    store.dispatch(loadUser());
+    if (localStorage.getItem("token") != null) store.dispatch(loadUser());
   }
 
   render() {

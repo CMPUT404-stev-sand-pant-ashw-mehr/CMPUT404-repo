@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { logout } from "../../actions/auth";
@@ -90,12 +90,12 @@ export class Header extends Component {
 
     const guestNavLinks = (
       <Fragment>
-        <NavLink to="/login" className="btn btn-outline-primary me-2">
+        <Link to="/login" className="btn btn-outline-primary me-2">
           Login
-        </NavLink>
-        <NavLink to="/register" className="btn btn-primary">
+        </Link>
+        <Link to="/register" className="btn btn-primary">
           Register
-        </NavLink>
+        </Link>
       </Fragment>
     );
 
