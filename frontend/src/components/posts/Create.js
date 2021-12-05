@@ -141,36 +141,61 @@ export class Create extends Component {
           <label>Description</label>
           <input
             className="form-control"
-            id="content"
-            name="content"
+            type="text"
+            name="description"
             onChange={this.onChange}
-            rows="4"
-            value={content}
+            value={description}
           />
+        </div>
+        <div className="form-group">
+          <label>Content Type</label>
+          <select
+            className="form-control"
+            type="text"
+            name="contentType"
+            onChange={this.onChange}
+            value={contentType}
+          >
+            <option value="text/plain">text/plain</option>
+            <option value="text/markdown">text/markdown</option>
+            <option value="image">image</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Content</label>
+          {contentType === "text/plain" || contentType === "text/markdown" ? (
+            <textarea
+              className="form-control"
+              id="content"
+              name="content"
+              onChange={this.onChange}
+              rows="4"
+              value={content}
+            />
           ) : (
-          <div>
-            <button
-              className="btn btn-outline-primary"
-              variant="outlined"
-              color="primary"
-              onClick={this.showOpenFileDlg}
-            >
-              Choose Image
-            </button>
-            <br />
-            <input
-              type="file"
-              ref={this.chooseFile}
-              onChange={this.onImageChange}
-              style={{ display: "none" }}
-              accept="image/png, image/jpeg"
-            />
-            <img
-              style={{ width: "50%" }}
-              src={this.state.imagePreview}
-              alt="Unavailable"
-            />
-          </div>
+            <div>
+              <button
+                className="btn btn-outline-primary"
+                variant="outlined"
+                color="primary"
+                onClick={this.showOpenFileDlg}
+              >
+                Choose Image
+              </button>
+              <br />
+              <input
+                type="file"
+                ref={this.chooseFile}
+                onChange={this.onImageChange}
+                style={{ display: "none" }}
+                accept="image/png, image/jpeg"
+              />
+              <img
+                style={{ width: "50%" }}
+                src={this.state.imagePreview}
+                alt="Unavailable"
+              />
+            </div>
           )}
         </div>
         <div className="form-group">
