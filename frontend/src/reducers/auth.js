@@ -31,6 +31,11 @@ export default function (state = initialState, action) {
         author: action.payload.author,
       };
     case REGISTER_SUCCESS:
+      return {
+        ...state,
+        ...action.payload,
+        isAuthenticated: false,
+      };
     case LOGIN_SUCCESS:
       return {
         ...state,
