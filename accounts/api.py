@@ -88,10 +88,13 @@ class LoginAPI(generics.GenericAPIView):
 
 class ProfileAPI(generics.RetrieveAPIView):
     serializer_class = UserSerializer
+    
+    def get_queryset(self):
+        return self.request.user
 
     def list(self, request):
         return Response({
-            'user': UserSerializer(request.user).data,
+            'user': UserSerializer(self.get_queryset()).data,
             'author': AuthorSerializer(User.objects.select_related('author').get(username=request.user.username)).data
         }, status=status.HTTP_200_OK)
 
