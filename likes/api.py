@@ -369,14 +369,14 @@ def add_author_to_database(request):
             author_dict = author_json
         else:
             author_dict = json.loads(author_json)
-    except KeyError:
+    except json.JSONDecodeError as e:
+        return False, {"detail": f"Invalid author JSON: {e.msg}"}
+    except:
         try:
             author = Author.objects.get(user = request.user)
             return True, author
         except:
             return False, {"detail": "JSON author missing"}
-    except json.JSONDecodeError as e:
-        return False, {"detail": f"Invalid author JSON: {e.msg}"}
 
     author_validation = AuthorSerializer(data=author_dict)
     if not author_validation.is_valid():
