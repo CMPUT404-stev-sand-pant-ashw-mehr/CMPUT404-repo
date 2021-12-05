@@ -22,54 +22,54 @@ export class Profile extends Component {
     host: "",
     github: "",
     showEdit: false,
-    newDisplayedName:"",
-    newGitHub:"",
+    newDisplayedName: "",
+    newGitHub: "",
 
     friends: [],
     open: false,
     selectedFriends: {},
-    selectedPost:{}
-
+    selectedPost: {},
   };
 
   toggleEdit = () => {
-    const {showEdit} = this.state;
-    this.setState({showEdit: !showEdit, newDisplayedName:"", newGitHub:""});
-  }
+    const { showEdit } = this.state;
+    this.setState({ showEdit: !showEdit, newDisplayedName: "", newGitHub: "" });
+  };
 
   updateProfile = () => {
-    const {newDisplayedName, newGitHub} = this.state;
+    const { newDisplayedName, newGitHub } = this.state;
     if (!newDisplayedName || !newGitHub) {
       alert("Check your displayed name and GitHub");
       return;
     }
 
-    axios.post(`/author/${this.props.match.params.id}`, 
-    { 
-      displayName: newDisplayedName, 
-      github: newGitHub
-    }, 
-    tokenConfig(store.getState))
-    .then(res => {
-      console.log('success:', res);
-      this.getUserProfile()
-      this.setState({
-        showEdit:false,
-        newDisplayedName:"",
-        newGitHub:""
+    axios
+      .post(
+        `/author/${this.props.match.params.id}`,
+        {
+          displayName: newDisplayedName,
+          github: newGitHub,
+        },
+        tokenConfig(store.getState)
+      )
+      .then((res) => {
+        this.getUserProfile();
+        this.setState({
+          showEdit: false,
+          newDisplayedName: "",
+          newGitHub: "",
+        });
       })
-    })
-    .catch(err => {
-      console.log('failed:', err.message);
-    })
-  }
+      .catch((err) => {
+        console.log("failed:", err.message);
+      });
+  };
 
   componentDidMount() {
     this.props.getAuthorPosts(this.props.match.params.id);
     this.getUserProfile();
   }
 
-  
   parseData(data) {
     const parseData = data.id.split("/");
     return parseData[parseData.length - 1];
@@ -80,73 +80,76 @@ export class Profile extends Component {
     axios
       .get(`/author/${this.props.match.params.id}`, tokenConfig(store.getState))
       .then((res) => {
-        axios.get(`/author/${this.props.match.params.id}/friends`, tokenConfig(store.getState))
-        .then((response)=>{
-          this.setState({
-            displayName: res.data.displayName,
-            url: res.data.url,
-            host: res.data.host,
-            github: res.data.github,
-            friends: response.data.items,
+        axios
+          .get(
+            `/author/${this.props.match.params.id}/friends`,
+            tokenConfig(store.getState)
+          )
+          .then((response) => {
+            this.setState({
+              displayName: res.data.displayName,
+              url: res.data.url,
+              host: res.data.host,
+              github: res.data.github,
+              friends: response.data.items,
+            });
           });
-        })
       })
       .catch((e) => {
         console.log(e);
       });
-    }
+  };
 
-  handleSend(){
-    Object.keys(this.state.selectedFriends).map((friendId)=>{
+  handleSend() {
+    Object.keys(this.state.selectedFriends).map((friendId) => {
       let id = this.parseData(this.state.selectedFriends[friendId]);
-      
-      axios.post(`/author/${id}/inbox`,
-            {
-              "type":"post",
-              "title":this.state.selectedPost.title ,
-              "id":this.state.selectedPost.id,
-              "source":this.state.selectedPost.source,
-              "origin":this.state.selectedPost.origin,
-              "description":this.state.selectedPost.description,
-              "contentType":this.state.selectedPost.contentType,
-              "content":this.state.selectedPost.content,
-              "published":this.state.selectedPost.published,
-              "author":this.state.selectedPost.author,
-              "categories":this.state.selectedPost.categories,
-              "visibility":this.state.selectedPost.visibility,
-              "unlisted":this.state.selectedPost.unlisted,
-            },
-            tokenConfig(store.getState)
-            )
-            .then((resp) => {
-                this.setState({
-                  open: false,
-                })
+      let postObj = {
+        type: "post",
+        title: this.state.selectedPost.title,
+        id: this.state.selectedPost.id,
+        source: this.state.selectedPost.source,
+        origin: this.state.selectedPost.origin,
+        description: this.state.selectedPost.description,
+        contentType: this.state.selectedPost.contentType,
+        content: this.state.selectedPost.content,
+        published: this.state.selectedPost.published,
+        author: this.state.selectedPost.author,
+        categories: this.state.selectedPost.categories,
+        visibility: this.state.selectedPost.visibility,
+        unlisted: this.state.selectedPost.unlisted,
+      };
+
+      axios
+        .post(`/author/${id}/inbox`, postObj, tokenConfig(store.getState))
+        .then((res) => {
+          this.setState({
+            open: false,
           });
-    })
+        });
+    });
   }
 
-  handleSendPost(post){
+  handleSendPost(post) {
     this.setState({
       open: true,
       selectedPost: post,
     });
   }
 
-  handleSelection(friend){
+  handleSelection(friend) {
     let selectedFriendsIds = Object.keys(this.state.selectedFriends);
-    if(selectedFriendsIds.includes(friend.id)){
+    if (selectedFriendsIds.includes(friend.id)) {
       let selections = this.state.selectedFriends;
       delete selections[friend.id];
       this.setState({
         selected: selections,
       });
-    }else{
+    } else {
       let selections = this.state.selectedFriends;
       selections[friend.id] = friend;
       this.setState({
-      selected: selections,
-    });
+        selected: selections,
+      });
     }
   }
 
@@ -157,35 +160,59 @@ export class Profile extends Component {
     return (
       <Fragment>
         <h2>User Details</h2>
-        <div style={{fontStyle:'italic', fontWeight:500}}>
+        <div style={{ fontStyle: "italic", fontWeight: 500 }}>
           <p>Welcome, {displayName} !</p>
           <p>Author URL: {url}</p>
           <p>Github: {github}</p>
           <p>Host: {host}</p>
         </div>
         <br />
-        <button onClick={this.toggleEdit}>{showEdit ? "Cancel":"Edit"}</button>
-        {
-          showEdit ? 
-          <div style={{border:"1px solid #a7a7a7", borderRadius:'5px', margin: 25}}>
-            <div style={{margin:30}}>
+        <button className="btn btn-outline-primary" onClick={this.toggleEdit}>
+          {showEdit ? "Cancel" : "Edit"}
+        </button>
+        {showEdit ? (
+          <div
+            className="card"
+            style={{
+              borderRadius: "5px",
+              marginTop: "30px",
+              padding: "20px",
+            }}
+          >
+            <div>
               <label>Display Name:</label>
-              <br/>
-              <input type="text" placeholder="Enter your new displayed name" onChange={(e)=>this.setState({newDisplayedName:e.target.value})}/>
+              <br />
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter your new display name"
+                onChange={(e) =>
+                  this.setState({ newDisplayedName: e.target.value })
+                }
+              />
             </div>
-            <br/>
-            <div style={{margin:30}}>
+            <br />
+            <div>
               <label>GitHub:</label>
-              <br/>
-              <input type="text" placeholder="Enter your Github" onChange={(e)=> this.setState({newGitHub:e.target.value})} />
+              <br />
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter your Github"
+                onChange={(e) => this.setState({ newGitHub: e.target.value })}
+              />
             </div>
-            <br/>
+            <br />
 
-            <button style={{margin: 30}} onClick={this.updateProfile}>Submit Change</button>
-          </div> 
-          : 
-          null
-        }
+            <button
+              style={{ margin: 30 }}
+              onClick={this.updateProfile}
+              className="btn btn-primary"
+            >
+              Submit Change
+            </button>
+          </div>
+        ) : null}
         <hr />
         <br />
         <h2>Your Posts</h2>
@@ -208,17 +235,22 @@ export class Profile extends Component {
               >
                 View full post →
               </Link>
-              <div className="p-2">
-                <button type="button" className="btn btn-primary float-end" onClick={()=>this.handleSendPost(post)} data-bs-toggle="modal" data-bs-target="#sendPost">
-                  <FiSend />
-                </button>
-                <button
-                  className="btn btn-danger float-end"
-                  onClick={deletePost.bind(this, post.id)}
-                >
-                  <FaTrashAlt />
-                </button>
-              </div>
+              <button
+                style={{ marginLeft: 20 }}
+                type="button"
+                className="btn btn-primary float-end"
+                onClick={() => this.handleSendPost(post)}
+                data-bs-toggle="modal"
+                data-bs-target="#sendPost"
+              >
+                <FiSend />
+              </button>
+              <button
+                className="btn btn-danger float-end"
+                onClick={deletePost.bind(this, post.id)}
+              >
+                <FaTrashAlt />
+              </button>
             </div>
           </div>
         ))}
@@ -258,32 +290,63 @@ export class Profile extends Component {
           </ul>
         </nav>
 
-        {this.state.open && <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="exampleModalLabel">Send To:</h5>
-              </div>
-              <div className="modal-body">
-              {friends.map((friend,i) => <div className="card">
+        {this.state.open && (
+          <div
+            className="modal fade"
+            id="sendPost"
+            tabIndex="-1"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+          >
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="exampleModalLabel">
+                    Send To:
+                  </h5>
+                </div>
+                <div className="modal-body">
+                  {friends.map((friend, i) => (
+                    <div className="card">
                       <div className="card-body">
                         <div className="form-check">
-                          <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend)}/>
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            name="friends"
+                            value={friend.displayName}
+                            id={friend.id}
+                            onClick={() => this.handleSelection(friend)}
+                          />
                           <label className="form-check-label" for={friend.id}>
                             @{friend.displayName}
                           </label>
                         </div>
                       </div>
-                  </div>)}
-              </div>
+                    </div>
+                  ))}
+                </div>
 
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" className="btn btn-primary" onClick={()=>this.handleSend()}>Send</button>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => this.handleSend()}
+                  >
+                    Send
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>}
+        )}
       </Fragment>
     );
   }
@@ -302,6 +365,8 @@ const mapStateToProps = (state) => ({
   user: state.auth,
 });
 
-export default connect(mapStateToProps, { getAuthorPosts, deletePost, sendPost })(
-  Profile
-);
+export default connect(mapStateToProps, {
+  getAuthorPosts,
+  deletePost,
+  sendPost,
+})(Profile);

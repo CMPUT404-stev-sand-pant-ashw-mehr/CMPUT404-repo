@@ -105,6 +105,17 @@ export const register =
           type: REGISTER_SUCCESS,
           payload: res.data,
         });
+        dispatch({
+          type: CREATE_ALERT,
+          payload: {
+            msg: {
+              success:
+                "Success! Please wait to login until you are superadmin approved.",
+            },
+            status: res.status,
+          },
+        });
+        window.location.href = "#/login";
       })
       .catch((err) => {
         dispatch({
