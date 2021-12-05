@@ -30,11 +30,11 @@ export class Post extends Component {
     }
   }
 
-  resetForm() {
-    this.setState({
-      commentContent: "",
-    });
-  }
+  // resetForm() {
+  //   this.setState({
+  //     commentContent: "",
+  //   });
+  // }
 
   onChange = (e) =>
     this.setState({
@@ -67,8 +67,8 @@ export class Post extends Component {
     };
 
     this.props.createPostComment(this.props.match.params.authorId, this.props.match.params.postId, comment);
-    this.resetForm();
-    this.forceUpdate();
+    // this.forceUpdate();
+    this.setState({commentContent:""});
   };
 
   componentDidMount() {
@@ -138,7 +138,7 @@ export class Post extends Component {
                     type="text"
                     name="commentContent"
                     onChange={this.onChange}
-                    value={commentContent}
+                    value={this.state.commentContent}
                   />
                 </p>
                 <button type="submit" className="btn btn-primary">
