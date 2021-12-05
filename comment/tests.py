@@ -1,3 +1,4 @@
+import json
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -52,9 +53,13 @@ class CommentTest(TestCase):
         self.post_id = r.json()['id']
     
     def test_comment(self):
+        self.testUser1.pop("user")
+        self.testUser1["displayName"] = "NewName"
+        self.testUser1["host"] = "http://127.2.2.1:8000/" # Shouldn't change
         test_comment = {
             "type": "comment",
             "comment": "This is a test comment",
+            "author": json.dumps(self.testUser1),
             "contentType": "text/plain"
         }
 

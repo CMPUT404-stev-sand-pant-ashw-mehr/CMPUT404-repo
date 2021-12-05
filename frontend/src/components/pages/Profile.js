@@ -32,6 +32,38 @@ export class Profile extends Component {
 
   };
 
+  toggleEdit = () => {
+    const {showEdit} = this.state;
+    this.setState({showEdit: !showEdit, newDisplayedName:"", newGitHub:""});
+  }
+
+  updateProfile = () => {
+    const {newDisplayedName, newGitHub} = this.state;
+    if (!newDisplayedName || !newGitHub) {
+      alert("Check your displayed name and GitHub");
+      return;
+    }
+
+    axios.post(`/author/${this.props.match.params.id}`, 
+    { 
+      displayName: newDisplayedName, 
+      github: newGitHub
+    }, 
+    tokenConfig(store.getState))
+    .then(res => {
+      console.log('success:', res);
+      this.getUserProfile()
+      this.setState({
+        showEdit:false,
+        newDisplayedName:"",
+        newGitHub:""
+      })
+    })
+    .catch(err => {
+      console.log('failed:', err.message);
+    })
+  }
+
   componentDidMount() {
     this.props.getAuthorPosts(this.props.match.params.id);
     this.getUserProfile();

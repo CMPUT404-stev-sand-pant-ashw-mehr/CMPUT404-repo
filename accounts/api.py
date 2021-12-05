@@ -8,7 +8,7 @@ from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
 from knox.models import AuthToken
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
@@ -26,7 +26,11 @@ class RegisterAPI(generics.GenericAPIView):
         if not valid:
             return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
         
-        host = 'http://' + str(request.get_host())
+        if request.is_secure():
+            host = 'https://' + str(request.get_host())
+        else:
+            host = 'http://' + str(request.get_host())
+
         user_serializer = self.get_serializer(data = request.data)
         user_serializer.is_valid(raise_exception=True)
         # create user
@@ -41,7 +45,7 @@ class RegisterAPI(generics.GenericAPIView):
             "url": host + '/author/' + str(author_uuid),
             "displayName": request.data["displayName"],
             "github": request.data["github"],
-            "is_active": True
+            "is_active": False  # Not approved when created
         }
 
         Author.objects.create(**author_schema)
@@ -175,22 +179,25 @@ def github_view(request, author_id):
     if request.method == "GET":
         author = get_object_or_404(Author,id = author_id)
         username = author.github
+        if username == None:
+            return Response({"detail": "github not provided!"}, status=status.HTTP_404_NOT_FOUND)
         git_username = username.split(".")[-1].split("/")[-1]
         url = 'https://api.github.com/users/'+ git_username + '/events'
         git_msg = requests.get(url, headers={'Referer': "https://social-dis.herokuapp.com/"}).json()
+        if type(git_msg) != list:
+            return Response({"detail": "github not found!"}, status=status.HTTP_404_NOT_FOUND)
         return Response(git_msg, status=status.HTTP_200_OK)
        
 
-# get github activities
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
 def send_friend_request(request, local_author_id, foreign_author_id):
     if request.method == "POST":
-        request_response = send_friend_request(local_author_id, foreign_author_id)
+        request_response = send_friend_request_helper(local_author_id, foreign_author_id)
         if type(request_response) == str:
             return Response({"detail": request_response}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(request_response)
+            return Response({"message": request_response.text}, status=request_response.status_code)
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
