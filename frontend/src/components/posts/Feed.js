@@ -84,23 +84,24 @@ export class Feed extends Component {
           this.setState({
             open: false,
           });
-          axios.get(`/author/${authorId}`,
-            tokenConfig(store.getState)
-          )
-          .then((resp) => {
-            axios.post(`/author/${foreignAuthorId}/inbox`,
-            {
-              "type": "follow",      
-              "summary":`${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
-              "actor":resp.data, //author,
-              "object":this.state.selectedAuthor  //foreignAuthor
-            },
-            tokenConfig(store.getState)
-            )
+          axios
+            .get(`/author/${authorId}`, tokenConfig(store.getState))
             .then((resp) => {
-                console.log("Sent to Inbox");
+              axios
+                .post(
+                  `/author/${foreignAuthorId}/inbox`,
+                  {
+                    type: "follow",
+                    summary: `${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
+                    actor: resp.data, //author,
+                    object: this.state.selectedAuthor, //foreignAuthor
+                  },
+                  tokenConfig(store.getState)
+                )
+                .then((resp) => {
+                  console.log("Sent to Inbox");
+                });
             });
-          })          
         });
     }
   }
@@ -143,7 +144,6 @@ export class Feed extends Component {
   }
   checkLikedPost(likes) {
     const { user } = this.props;
-    console.log('likes:',likes);
     for (const like of likes) {
       if (like.author.id.split("/").pop() == user.user.author) {
         return true;
@@ -161,33 +161,35 @@ export class Feed extends Component {
         null,
         tokenConfig(store.getState)
       )
-      .then((res) => {
-        const likes = post.likes;
-        post.likes = [
-          ...likes,
-          {
-            type: "Like",
-            author: {
-              id: user.user.author,
-              type: "author",
-              displayName: user.user.displayName,
-            },
-            object: post.id,
-            "@context": "https://www.w3.org/ns/activitystreams",
-            summary: `${user.user.displayName} Likes your post`,
-          },
-        ];
-        store.dispatch({
-          type: LIKE_POST,
-          payload: post,
-        });
-        store.dispatch({
-          type: CREATE_ALERT,
-          payload: {
-            msg: { success: "Post has been liked!" },
-            status: res.status,
-          },
-        });
+      .then((resp) => {
+        let likeObj = {
+          type: "Like",
+          author: user.author,
+          object: post.id,
+          "@context": "https://www.w3.org/ns/activitystreams",
+          summary: `${user.user.username} Likes your post`,
+        };
+        axios
+          .post(
+            `/author/${post.author_id}/inbox`,
+            likeObj,
+            tokenConfig(store.getState)
+          )
+          .then((res) => {
+            const likes = post.likes;
+            post.likes = [...likes, likeObj];
+            store.dispatch({
+              type: LIKE_POST,
+              payload: post,
+            });
+            store.dispatch({
+              type: CREATE_ALERT,
+              payload: {
+                msg: { success: "Post has been liked!" },
+                status: res.status,
+              },
+            });
+          });
       })
       .catch((e) => {
         console.log(e);
@@ -202,57 +204,58 @@ export class Feed extends Component {
         {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
         <h2>Local Public Feed</h2>
 
-        {posts.posts.filter(post => post.visibility === "PUBLIC").map((post, index) => (
-          <div className="card mb-4 flex-row" key={index}>
-            <div className="card-header mx-auto justify-content-center">
-              <h2 className="text-primary mb-4">
-                {/* need fix  */}
-                {this.checkLikedPost(post.likes) ? (
-                  <FaThumbsUp />
-                ) : (
-                  <div
-                    onClick={() => {
-                      this.likePost(post);
-                    }}
-                  >
-                    <FaRegThumbsUp />
-                  </div>
-                )}
-              </h2>
+        {posts.posts
+          .filter((post) => post.visibility === "PUBLIC")
+          .map((post) => (
+            <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
+              <div className="card-header mx-auto justify-content-center">
+                <h2 className="text-primary mb-4">
+                  {this.checkLikedPost(post.likes) ? (
+                    <FaThumbsUp />
+                  ) : (
+                    <div
+                      onClick={() => {
+                        this.likePost(post);
+                      }}
+                    >
+                      <FaRegThumbsUp />
+                    </div>
+                  )}
+                </h2>
 
-              <h2 className="text-secondary mt-4">{post.likes.length}</h2>
-            </div>
-            <div className="card-body">
-              <div className="small text-muted">
-                <span className="float-end">
-                  <FaRegClock />
-                  &nbsp;<Moment fromNow>{post.published}</Moment>
-                </span>
-                <span onClick={() => this.onAuthorClick(post.author)}>
-                  @{post.author.displayName}
-                </span>
+                <h2 className="text-secondary mt-4">{post.likes.length}</h2>
               </div>
-              <h2 className="card-title h4">{post.title}</h2>
-              <p className="card-text">{post.description}</p>
-              <Link
-                to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
-                className="btn btn-outline-primary"
-              >
-                View full post →
-              </Link>
-              {post.author_id == user.user.author ? (
-                <button
-                  className="btn btn-danger float-end"
-                  onClick={deletePost.bind(this, post.id)}
+              <div className="card-body">
+                <div className="small text-muted">
+                  <span className="float-end">
+                    <FaRegClock />
+                    &nbsp;<Moment fromNow>{post.published}</Moment>
+                  </span>
+                  <span onClick={() => this.onAuthorClick(post.author)}>
+                    @{post.author.displayName}
+                  </span>
+                </div>
+                <h2 className="card-title h4">{post.title}</h2>
+                <p className="card-text">{post.description}</p>
+                <Link
+                  to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
+                  className="btn btn-outline-primary"
                 >
-                  <FaTrashAlt />
-                </button>
-              ) : (
-                ""
-              )}
+                  View post →
+                </Link>
+                {post.author_id == user.user.author ? (
+                  <button
+                    className="btn btn-danger float-end"
+                    onClick={deletePost.bind(this, post.id)}
+                  >
+                    <FaTrashAlt />
+                  </button>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
         <nav aria-label="Posts pagination">
           <ul className="pagination">
             <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>

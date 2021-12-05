@@ -36,9 +36,15 @@ export default function (state = initialState, action) {
         posts: state.posts.filter((post) => post.id !== action.payload),
       };
     case LIKE_POST:
+      let newPosts = state.posts;
+      let replacePost = state.posts.find(
+        (post) => post.id === action.payload.id
+      );
+      Object.assign(replacePost, action.payload);
+
       return {
         ...state,
-        posts: [...state.posts, action.payload],
+        posts: newPosts,
       };
     default:
       return state;
