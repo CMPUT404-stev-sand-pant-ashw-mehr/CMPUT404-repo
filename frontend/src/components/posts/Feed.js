@@ -161,7 +161,7 @@ export class Feed extends Component {
         null,
         tokenConfig(store.getState)
       )
-      .then((res) => {
+      .then((resp) => {
         let likeObj = {
           type: "Like",
           author: user.author,
@@ -169,24 +169,27 @@ export class Feed extends Component {
           "@context": "https://www.w3.org/ns/activitystreams",
           summary: `${user.user.username} Likes your post`,
         };
-        axios.post(
-          `/author/${post.author_id}/inbox`,
-          likeObj,
-          tokenConfig(store.getState)
-        );
-        const likes = post.likes;
-        post.likes = [...likes, likeObj];
-        store.dispatch({
-          type: LIKE_POST,
-          payload: post,
-        });
-        store.dispatch({
-          type: CREATE_ALERT,
-          payload: {
-            msg: { success: "Post has been liked!" },
-            status: res.status,
-          },
-        });
+        axios
+          .post(
+            `/author/${post.author_id}/inbox`,
+            likeObj,
+            tokenConfig(store.getState)
+          )
+          .then((res) => {
+            const likes = post.likes;
+            post.likes = [...likes, likeObj];
+            store.dispatch({
+              type: LIKE_POST,
+              payload: post,
+            });
+            store.dispatch({
+              type: CREATE_ALERT,
+              payload: {
+                msg: { success: "Post has been liked!" },
+                status: res.status,
+              },
+            });
+          });
       })
       .catch((e) => {
         console.log(e);
