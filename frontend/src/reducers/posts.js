@@ -36,9 +36,16 @@ export default function (state = initialState, action) {
         posts: state.posts.filter((post) => post.id !== action.payload),
       };
     case LIKE_POST:
+      const index = state.posts.findIndex(
+        (post) => post.id === action.payload.id
+      );
+      const updatedPosts = update(state.posts, {
+        $splice: [[index, 1, action.payload]],
+      });
+
       return {
         ...state,
-        posts: [...state.posts, action.payload],
+        posts: updatedPosts,
       };
     default:
       return state;
