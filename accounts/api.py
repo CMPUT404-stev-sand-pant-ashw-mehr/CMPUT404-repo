@@ -92,7 +92,7 @@ class ProfileAPI(generics.RetrieveAPIView):
     def get_queryset(self):
         return self.request.user
 
-    def list(self, request):
+    def list(self, request, pk=None):
         return Response({
             'user': UserSerializer(self.get_queryset()).data,
             'author': AuthorSerializer(User.objects.select_related('author').get(username=request.user.username)).data
