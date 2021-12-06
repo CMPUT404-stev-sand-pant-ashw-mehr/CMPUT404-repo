@@ -14,22 +14,7 @@ export class Header extends Component {
           activeClassName="text-decoration-underline"
           className="me-3 py-2 text-dark text-decoration-none"
         >
-          Full Feed
-        </NavLink>
-        <NavLink
-          to="/posts"
-          exact={true}
-          activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark text-decoration-none"
-        >
           Feed
-        </NavLink>
-        <NavLink
-          to="/foreign"
-          activeClassName="text-decoration-underline"
-          className="me-3 py-2 text-dark text-decoration-none"
-        >
-          Foreign Posts
         </NavLink>
         <NavLink
           to="/authors"
@@ -112,7 +97,7 @@ export class Header extends Component {
           <header>
             <div className="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
               <NavLink
-                to={isAuthenticated ? "/posts" : "/"}
+                to={isAuthenticated ? "/feed" : "/"}
                 className="d-flex align-items-center text-dark text-decoration-none"
               >
                 <svg
