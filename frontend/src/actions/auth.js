@@ -100,10 +100,18 @@ export const register =
         },
       })
       .then((res) => {
-        localStorage.setItem("token", res.data.token);
+        // localStorage.setItem("token", res.data.token);
         dispatch({
           type: REGISTER_SUCCESS,
           payload: res.data,
+        });
+        dispatch({
+          type: CREATE_ALERT,
+          payload: {
+            msg: "Activate request sent to server admin.",
+            status: 200,
+
+          },
         });
       })
       .catch((err) => {
