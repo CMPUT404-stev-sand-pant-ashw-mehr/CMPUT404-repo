@@ -1,12 +1,16 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
+import store from "../../store";
 
 class AuthorSearch extends Component {
   state = {
     authors: [],
     isLoading: false,
     loadingText: "",
+    followers: [],
+    following: [],
 
     page: 1,
     offset: 0,
@@ -14,17 +18,38 @@ class AuthorSearch extends Component {
   };
 
   componentDidMount = () => {
+    const { auth } = this.props;
     this.setState({ isLoading: true, loadingText: "Loading ..." });
     axios
-      .get(`/authors`, {
-        auth: { username: "socialdistribution_t03", password: "c404t03" },
-      })
+      .get(`/authors`, tokenConfig(store.getState))
       .then((res) => {
         this.setState({
           authors: res.data.items,
-          isLoading: false,
-          loadingText: "",
         });
+
+        axios
+          .get(
+            `/author/${auth.user.author}/followings`,
+            tokenConfig(store.getState)
+          )
+          .then((resp) => {
+            this.setState({
+              following: resp.data,
+            });
+
+            axios
+              .get(
+                `/author/${auth.user.author}/followers`,
+                tokenConfig(store.getState)
+              )
+              .then((respo) => {
+                this.setState({
+                  followers: respo.data,
+                  isLoading: false,
+                  loadingText: "",
+                });
+              });
+          });
       })
       .catch((err) => {
         console.log(err);
@@ -34,6 +59,21 @@ class AuthorSearch extends Component {
         });
       });
   };
+
+  isFollower(foreignAuthor) {
+    const { auth } = this.props.auth;
+
+    const foreignAuthorId = foreignAuthor.id.split("/").pop();
+
+    axios
+      .get(
+        `/author/${auth.user.author}/followers/${foreignAuthorId}`,
+        tokenConfig(store.getState)
+      )
+      .then((resp) => {
+        console.log(resp.data.detail);
+      });
+  }
 
   showPreviousAuthors() {
     this.setState({
