@@ -26,18 +26,12 @@ export class Profile extends Component {
     newGitHub: "",
 
     friends: [],
-<<<<<<< HEAD
     openSendPost: false,
     openShowFriends: false,
     selectedFriendsSend: {},
     selectedFriendsShow: {},
     selectedPost:{},
     currentUser: this.props.match.params.id,
-=======
-    open: false,
-    selectedFriends: {},
-    selectedPost: {},
->>>>>>> Development
   };
 
   toggleEdit = () => {
@@ -109,7 +103,6 @@ export class Profile extends Component {
       });
   };
 
-<<<<<<< HEAD
   handleSend(){
     Object.keys(this.state.selectedFriendsSend).map((friendId)=>{
       let id = this.parseData(this.state.selectedFriendsSend[friendId]);
@@ -136,38 +129,10 @@ export class Profile extends Component {
                 this.setState({
                   openSendPost: false,
                 })
-=======
-  handleSend() {
-    Object.keys(this.state.selectedFriends).map((friendId) => {
-      let id = this.parseData(this.state.selectedFriends[friendId]);
-      let postObj = {
-        type: "post",
-        title: this.state.selectedPost.title,
-        id: this.state.selectedPost.id,
-        source: this.state.selectedPost.source,
-        origin: this.state.selectedPost.origin,
-        description: this.state.selectedPost.description,
-        contentType: this.state.selectedPost.contentType,
-        content: this.state.selectedPost.content,
-        published: this.state.selectedPost.published,
-        author: this.state.selectedPost.author,
-        categories: this.state.selectedPost.categories,
-        visibility: this.state.selectedPost.visibility,
-        unlisted: this.state.selectedPost.unlisted,
-      };
-
-      axios
-        .post(`/author/${id}/inbox`, postObj, tokenConfig(store.getState))
-        .then((res) => {
-          this.setState({
-            open: false,
->>>>>>> Development
           });
-        });
     });
   }
 
-<<<<<<< HEAD
   handleClose(){
     // console.log(this.state.selectedFriendsShow);
     this.setState({
@@ -179,16 +144,12 @@ export class Profile extends Component {
   }
 
   handleSendPost(post){
-=======
-  handleSendPost(post) {
->>>>>>> Development
     this.setState({
       openSendPost: true,
       selectedPost: post,
     });
   }
 
-<<<<<<< HEAD
   handleSelection(friend, mode){
     let selectedIds = [], selectedObjs = [];
     if(mode==="send"){
@@ -224,22 +185,6 @@ export class Profile extends Component {
           selectedFriendsShow: selectedObjs,
         });
       }
-=======
-  handleSelection(friend) {
-    let selectedFriendsIds = Object.keys(this.state.selectedFriends);
-    if (selectedFriendsIds.includes(friend.id)) {
-      let selections = this.state.selectedFriends;
-      delete selections[friend.id];
-      this.setState({
-        selected: selections,
-      });
-    } else {
-      let selections = this.state.selectedFriends;
-      selections[friend.id] = friend;
-      this.setState({
-        selected: selections,
-      });
->>>>>>> Development
     }
   }
 
@@ -270,7 +215,6 @@ export class Profile extends Component {
 
     return (
       <Fragment>
-<<<<<<< HEAD
         <div className="card mb-4">
           <div className="card-body">
             <h2 className="card-title h3">
@@ -294,29 +238,6 @@ export class Profile extends Component {
           showEdit ? 
           <div style={{border:"1px solid #a7a7a7", borderRadius:'5px', margin: 25}}>
             <div style={{margin:30}}>
-=======
-        <h2>User Details</h2>
-        <div style={{ fontStyle: "italic", fontWeight: 500 }}>
-          <p>Welcome, {displayName} !</p>
-          <p>Author URL: {url}</p>
-          <p>Github: {github}</p>
-          <p>Host: {host}</p>
-        </div>
-        <br />
-        <button className="btn btn-outline-primary" onClick={this.toggleEdit}>
-          {showEdit ? "Cancel" : "Edit"}
-        </button>
-        {showEdit ? (
-          <div
-            className="card"
-            style={{
-              borderRadius: "5px",
-              marginTop: "30px",
-              padding: "20px",
-            }}
-          >
-            <div>
->>>>>>> Development
               <label>Display Name:</label>
               <br />
               <input
@@ -339,26 +260,12 @@ export class Profile extends Component {
                 onChange={(e) => this.setState({ newGitHub: e.target.value })}
               />
             </div>
-<<<<<<< HEAD
             <br/>
             <button style={{margin: 30}} onClick={this.updateProfile}>Submit Change</button>
           </div> 
           : 
           null
         }
-=======
-            <br />
-
-            <button
-              style={{ margin: 30 }}
-              onClick={this.updateProfile}
-              className="btn btn-primary"
-            >
-              Submit Change
-            </button>
-          </div>
-        ) : null}
->>>>>>> Development
         <hr />
         <br />
 
@@ -442,7 +349,6 @@ export class Profile extends Component {
           </ul>
         </nav>
 
-<<<<<<< HEAD
         {this.state.openSendPost && <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div className="modal-dialog">
             <div className="modal-content">
@@ -454,46 +360,15 @@ export class Profile extends Component {
                       <div className="card-body">
                         <div className="form-check">
                           <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend, "send")}/>
-=======
-        {this.state.open && (
-          <div
-            className="modal fade"
-            id="sendPost"
-            tabIndex="-1"
-            aria-labelledby="exampleModalLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="exampleModalLabel">
-                    Send To:
-                  </h5>
-                </div>
-                <div className="modal-body">
-                  {friends.map((friend, i) => (
-                    <div className="card">
-                      <div className="card-body">
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="friends"
-                            value={friend.displayName}
-                            id={friend.id}
-                            onClick={() => this.handleSelection(friend)}
-                          />
->>>>>>> Development
                           <label className="form-check-label" for={friend.id}>
                             @{friend.displayName}
                           </label>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
 
-<<<<<<< HEAD
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={()=>this.handleClose()} data-bs-dismiss="modal">Close</button>
                 <button type="button" className="btn btn-primary" onClick={()=>this.handleSend()}>Send</button>
@@ -528,28 +403,6 @@ export class Profile extends Component {
             </div>
           </div>
         </div>}
-=======
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => this.handleSend()}
-                  >
-                    Send
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
->>>>>>> Development
       </Fragment>
     );
   }

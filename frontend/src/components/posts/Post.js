@@ -88,17 +88,6 @@ export class Post extends Component {
   }
 
   getComments = () => {
-<<<<<<< HEAD
-    axios.get(this.props.post.comments, {auth:{username:'socialdistribution_t03',password:'c404t03'}}, {"currentUser":this.props.auth.user.author})
-    .then(res => {
-      console.log(res.data.comments);
-      this.setState({ comments: res.data.comments })
-    })
-    .catch(err => {
-      console.log(err.message);
-    });
-  }
-=======
     axios
       .get(this.props.post.comments, {
         auth: { username: "socialdistribution_t03", password: "c404t03" },
@@ -110,7 +99,6 @@ export class Post extends Component {
         console.log(err.message);
       });
   };
->>>>>>> Development
 
   toggleComment = () => {
     const { showComments } = this.state;
