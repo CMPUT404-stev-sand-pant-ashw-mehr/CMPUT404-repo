@@ -103,6 +103,31 @@ NOTE: It is recommended to use a virtual environment.
    http://localhost:8000/
    ```
 
+# AJAX Usages
+
+We used Ajax whenever we needed to fetch/send data to our Django server.
+Below is a list of our front-end React code where we used Ajax:
+[Registration](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/auth.js#L97)
+[Login](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/auth.js#L60)
+[Logout](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/auth.js#L136)
+[Creating a Post](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/posts.js#L192)
+[Deleting a post](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/posts.js#L132)
+[Adding a comment to a post](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/posts.js#L221)
+[Liking a post](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/posts.js#L255)
+[Load Local Posts](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/posts.js#L21)
+[Load posts from foreign servers](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/posts.js#L69)
+[Load Author Posts for Profiel](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/ed5cc623ab9eda552b61e523d3a062f50863ac81/frontend/src/actions/posts.js#L45)
+[Load Github Activity](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/999fd5dccb5f130615ff59cb30e19d3a20dcdf9e/frontend/src/components/pages/GitHub.js#L19)
+[Load list of Authors](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/999fd5dccb5f130615ff59cb30e19d3a20dcdf9e/frontend/src/components/pages/AuthorSearch.js#L34)
+[Load list of possible follows](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/999fd5dccb5f130615ff59cb30e19d3a20dcdf9e/frontend/src/components/pages/AuthorSearch.js#L72)
+[Handle following an Author](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/999fd5dccb5f130615ff59cb30e19d3a20dcdf9e/frontend/src/components/pages/AuthorSearch.js#L90)
+[Send Friend Request](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/999fd5dccb5f130615ff59cb30e19d3a20dcdf9e/frontend/src/components/pages/Inbox.js#L86)
+[Accepting a Friend Request](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/25547598ee98a3546eaca3c2d50fe3c56ed2352b/frontend/src/components/pages/Inbox.js#L137)
+[Rejecting a Friend Request](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/25547598ee98a3546eaca3c2d50fe3c56ed2352b/frontend/src/components/pages/Inbox.js#L163)
+[Check for Friend Requests](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/999fd5dccb5f130615ff59cb30e19d3a20dcdf9e/frontend/src/components/pages/Inbox.js#L40)
+[Clearing Friend Request](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/25547598ee98a3546eaca3c2d50fe3c56ed2352b/frontend/src/components/pages/Inbox.js#L172)
+[Friends List](https://github.com/CMPUT404-stev-sand-pant-ashw-mehr/CMPUT404-stev-sand-pant-ashw-mehr-repo/blob/999fd5dccb5f130615ff59cb30e19d3a20dcdf9e/frontend/src/components/pages/Inbox.js#L29)
+
 ## API Documentaion
 
 ##### Package Used: [drf-yasg ](https://drf-yasg.readthedocs.io/en/stable/)
