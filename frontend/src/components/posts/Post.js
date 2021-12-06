@@ -48,8 +48,6 @@ export class Post extends Component {
         auth: { username: "socialdistribution_t03", password: "c404t03" },
       })
       .then((res) => {
-        // console.log("data: ");
-        // console.log(res.data);
         this.setState({
           author: res.data,
         });
@@ -62,7 +60,6 @@ export class Post extends Component {
   onSubmit = (e) => {
     e.preventDefault();
     const { commentContent } = this.state;
-    console.log("author: ", this.state.author);
     const comment = {
       author: this.state.author,
       type: "comment",
@@ -80,6 +77,9 @@ export class Post extends Component {
   };
 
   componentDidMount() {
+    this.setState({
+      currentUser: this.props.auth.user.author
+    })
     this.props.getPost(
       this.props.match.params.authorId,
       this.props.match.params.postId
@@ -91,11 +91,14 @@ export class Post extends Component {
     axios
       .get(
         this.props.post.comments,
-        { auth: { username: "socialdistribution_t03", password: "c404t03" } },
-        { currentUser: this.props.auth.user.author }
+        { 
+          auth: { username: "socialdistribution_t03", password: "c404t03" },
+          params:{ 
+            user: this.state.currentUser
+          }
+        },
       )
       .then((res) => {
-        console.log(res.data.comments);
         this.setState({ comments: res.data.comments });
       })
       .catch((err) => {

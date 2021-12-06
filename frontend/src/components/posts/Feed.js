@@ -72,7 +72,6 @@ export class Feed extends Component {
           tokenConfig(store.getState)
         )
         .then((resp) => {
-          console.log(resp);
           this.setState({
             isFriend: this.state.isFollower && resp.data.detail,
             open: true,

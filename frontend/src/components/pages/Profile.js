@@ -134,7 +134,6 @@ export class Profile extends Component {
   }
 
   handleClose(){
-    // console.log(this.state.selectedFriendsShow);
     this.setState({
       openSendPost: false,
       openShowFriends: false,
