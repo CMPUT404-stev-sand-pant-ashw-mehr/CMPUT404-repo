@@ -20,6 +20,7 @@ from accounts.helper import is_valid_node
 
 import uuid
 import json
+from urllib.parse import urlparse
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -251,7 +252,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         if not author_validation.is_valid():
             return Response(author_validation.error_messages, status=status.HTTP_400_BAD_REQUEST)
         else:
-            author, created = Author.objects.get_or_create(id = author_dict["id"])
+            if urlparse(author_dict["host"]).hostname == "social-dis.herokuapp.com":
+                author_path = urlparse(author_dict["id"]).path
+                if author_path[-1] == '/':
+                    author_path = author_path[:-1]
+                author_id = author_path.split("/author/")[-1]
+            else:
+                author_id = author_dict["id"]
+
+            author, created = Author.objects.get_or_create(id = author_id)
             author_dict.pop("id")
 
             if not created:
