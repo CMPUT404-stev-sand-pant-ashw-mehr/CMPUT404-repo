@@ -9,6 +9,7 @@ import { FiSend } from "react-icons/fi";
 import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
+import { BsPeople } from "react-icons/bs";
 
 export class Profile extends Component {
   constructor(props) {
