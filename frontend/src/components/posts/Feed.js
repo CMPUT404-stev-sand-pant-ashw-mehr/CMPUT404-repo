@@ -221,112 +221,118 @@ export class Feed extends Component {
       <Fragment>
         {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
         <h2>Local Public Feed</h2>
+        {!posts.posts.length && <h5 className="mt-3">Loading...</h5>}
+        {posts.posts.length > 1 &&
+          posts.posts
+            .filter((post) => post.visibility === "PUBLIC")
+            .map((post) => (
+              <div
+                className="card mb-4 flex-row"
+                key={post.id.split("/").pop()}
+              >
+                <div className="card-header mx-auto justify-content-center">
+                  <h2 className="text-primary mb-4">
+                    {this.checkLikedPost(post.likes) ? (
+                      <FaThumbsUp />
+                    ) : (
+                      <div
+                        onClick={() => {
+                          this.likePost(post);
+                        }}
+                      >
+                        <FaRegThumbsUp />
+                      </div>
+                    )}
+                  </h2>
 
-        {posts.posts
-          .filter((post) => post.visibility === "PUBLIC")
-          .map((post) => (
-            <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
-              <div className="card-header mx-auto justify-content-center">
-                <h2 className="text-primary mb-4">
-                  {this.checkLikedPost(post.likes) ? (
-                    <FaThumbsUp />
-                  ) : (
+                  <h2 className="text-secondary mt-4">
                     <div
                       onClick={() => {
-                        this.likePost(post);
+                        this.openLikeList(post);
                       }}
                     >
-                      <FaRegThumbsUp />
+                      {post.likes.length}
                     </div>
-                  )}
-                </h2>
-
-                <h2 className="text-secondary mt-4">
-                  <div
-                    onClick={() => {
-                      this.openLikeList(post);
-                    }}
-                  >
-                    {post.likes.length}
-                  </div>
-                </h2>
-              </div>
-              <div className="card-body">
-                <div className="small text-muted">
-                  <span className="float-end">
-                    <FaRegClock />
-                    &nbsp;<Moment fromNow>{post.published}</Moment>
-                  </span>
-                  <span onClick={() => this.onAuthorClick(post.author)}>
-                    @{post.author.displayName}
-                  </span>
+                  </h2>
                 </div>
-                <h2 className="card-title h4">{post.title}</h2>
-                <p className="card-text">
-                  {post.contentType.includes("image") ? (
-                    <img
-                      className="img img-fluid"
-                      src={post.content}
-                      alt="Unavailable"
-                    />
-                  ) : (
-                    post.description
-                  )}
-                </p>
-                <Link
-                  to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
-                  className="btn btn-outline-primary"
-                >
-                  View post →
-                </Link>
-                {post.author_id == user.user.author ? (
-                  <button
-                    className="btn btn-danger float-end"
-                    onClick={deletePost.bind(this, post.id)}
+                <div className="card-body">
+                  <div className="small text-muted">
+                    <span className="float-end">
+                      <FaRegClock />
+                      &nbsp;<Moment fromNow>{post.published}</Moment>
+                    </span>
+                    <span onClick={() => this.onAuthorClick(post.author)}>
+                      @{post.author.displayName}
+                    </span>
+                  </div>
+                  <h2 className="card-title h4">{post.title}</h2>
+                  <p className="card-text">
+                    {post.contentType.includes("image") ? (
+                      <img
+                        className="img img-fluid"
+                        src={post.content}
+                        alt="Unavailable"
+                      />
+                    ) : (
+                      post.description
+                    )}
+                  </p>
+                  <Link
+                    to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
+                    className="btn btn-outline-primary"
                   >
-                    <FaTrashAlt />
-                  </button>
-                ) : (
-                  ""
-                )}
+                    View post →
+                  </Link>
+                  {post.author_id == user.user.author ? (
+                    <button
+                      className="btn btn-danger float-end"
+                      onClick={deletePost.bind(this, post.id)}
+                    >
+                      <FaTrashAlt />
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        <nav aria-label="Posts pagination">
-          <ul className="pagination">
-            <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
-              <a
-                className="page-link"
-                href="#"
-                aria-label="Previous"
-                onClick={(e) => {
-                  e.preventDefault();
-                  getPosts(posts.previous);
-                }}
-              >
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            <li className="page-item active">
-              <a className="page-link" href="#">
-                {posts.page}
-              </a>
-            </li>
-            <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
-              <a
-                className="page-link"
-                href="#"
-                aria-label="Next"
-                onClick={(e) => {
-                  e.preventDefault();
-                  getPosts(posts.next);
-                }}
-              >
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+            ))}
+        {posts.posts.length > 1 && (
+          <nav aria-label="Posts pagination">
+            <ul className="pagination">
+              <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  href="#"
+                  aria-label="Previous"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    getPosts(posts.previous);
+                  }}
+                >
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              <li className="page-item active">
+                <a className="page-link" href="#">
+                  {posts.page}
+                </a>
+              </li>
+              <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  href="#"
+                  aria-label="Next"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    getPosts(posts.next);
+                  }}
+                >
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        )}
         <Dialog open={this.state.open} onClose={() => this.handleCloseDialog()}>
           <div className="d-flex flex-row">
             <div className="p-3">
