@@ -27,11 +27,13 @@ import { Redirect } from "react-router-dom";
 import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
+import { ThemeConsumer } from "styled-components";
 
 export class Feed extends Component {
   init_state = {
     selectedAuthor: {},
     isFollower: false,
+    youFollow: false,
     isFriend: false,
     open: false,
     redirect: "",
@@ -45,81 +47,76 @@ export class Feed extends Component {
   }
 
   componentDidMount() {
+    this.setState({
+      currentUser: this.props.auth.user
+    });
     this.props.getPosts();
   }
 
   onAuthorClick(foreignAuthor) {
-    this.setState({
-      selectedAuthor: foreignAuthor,
-    });
+    let authorId = this.state.currentUser.author;
+    let foreignAuthorId = this.parseData(foreignAuthor);
 
-    const auth = this.props.auth;
+    if(authorId!==foreignAuthorId){
+      this.setState({
+        selectedAuthor: foreignAuthor,
+      });
 
-    const foreignAuthorId = this.parseData(foreignAuthor);
+      const auth = this.props.auth;
+      const foreignAuthorId = this.parseData(foreignAuthor);
 
-    axios
-      .get(
-        `/author/${auth.user.author}/followers/${foreignAuthorId}`,
-        tokenConfig(store.getState)
-      )
-      .then((resp) => {
-        this.setState({
-          isFollower: resp.data.detail,
-        });
-        axios
+      axios
         .get(
-          `/author/${foreignAuthorId}/followers/${auth.user.author}`,
+          `/author/${auth.user.author}/followers/${foreignAuthorId}`,
           tokenConfig(store.getState)
         )
         .then((resp) => {
           this.setState({
-            isFriend: this.state.isFollower && resp.data.detail,
-            open: true,
+            isFollower: resp.data.detail,
+          });
+          axios
+          .get(
+            `/author/${foreignAuthorId}/followers/${auth.user.author}`,
+            tokenConfig(store.getState)
+          )
+          .then((resp) => {
+            this.setState({
+              youFollow: resp.data.detail,
+              open: true,
+            });
           });
         });
-      });
+    }
+    else {
+      this.setState(this.init_state);
+    }
   }
 
   handleFollow() {
-    if (this.state.isFollower === false) {
       const foreignAuthorId = this.parseData(this.state.selectedAuthor);
       const authorId = this.props.auth.user.author;
 
       axios
-        .put(
-          `/author/${foreignAuthorId}/followers/${authorId}`,
-          {},
-          tokenConfig(store.getState)
-        )
-        .then((response) => {
-          this.setState({
-            open: false,
-          });
+        .get(`/author/${authorId}`, tokenConfig(store.getState))
+        .then((resp) => {
           axios
-            .get(`/author/${authorId}`, tokenConfig(store.getState))
+            .post(
+              `/author/${foreignAuthorId}/inbox`,
+              {
+                type: "follow",
+                summary: `${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
+                actor: resp.data, //author,
+                object: this.state.selectedAuthor, //foreignAuthor
+              },
+              tokenConfig(store.getState)
+            )
             .then((resp) => {
-              axios
-                .post(
-                  `/author/${foreignAuthorId}/inbox`,
-                  {
-                    type: "follow",
-                    summary: `${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
-                    actor: resp.data, //author,
-                    object: this.state.selectedAuthor, //foreignAuthor
-                  },
-                  tokenConfig(store.getState)
-                )
-                .then((resp) => {
-                  console.log("Sent to Inbox");
-                });
+              this.setState({
+                open: false,
+              });
+              console.log("Sent to Inbox");
             });
         });
-    }
-  }
-
-  handleAcceptRequest() {
-    console.log("accepting request");
-    // redirect to inbox
   }
 
   handleDeleteFollower() {
@@ -302,7 +299,7 @@ export class Feed extends Component {
         <Dialog open={this.state.open} onClose={() => this.handleCloseDialog()}>
           <div className="d-flex flex-row">
             <div className="p-3">
-              {this.state.isFriend ? "Your friend" : (this.state.isFollower ? "Follows you": "Send a Request")}
+              {this.state.youFollow && this.state.isFollower? "Your friend" : (this.state.isFollower ? "Follows you": (this.state.youFollow ? "You follow": "Send a Request"))}
             </div>
             <div className="p-3">
               <div className="d-flex flex-row-reverse">
@@ -329,7 +326,7 @@ export class Feed extends Component {
                       <FaUserAlt />
                     </div>
                   </div>
-                  {!(this.state.isFollower || this.state.isFriend) && <div className="p-2">
+                  {!(this.state.isFriend || this.state.youFollow) && <div className="p-2">
                     <div onClick={() => this.handleFollow()}>
                       <FaUserPlus />
                     </div>
