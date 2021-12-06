@@ -160,23 +160,11 @@ export class Inbox extends Component {
   handleReject(request) {
     const foreignAuthorId = this.parseData(request.actor);
     const authorId = this.parseData(request.object);
-    axios
-      .delete(
-        `/author/${authorId}/followers/${foreignAuthorId}`,
-        tokenConfig(store.getState),
-        {}
-      )
-      .then((resp) => {
-        axios
-          .delete(
-            `/author/${authorId}/inbox/${foreignAuthorId}`,
-            tokenConfig(store.getState),
-            {}
-          )
-          .then((resp) => {
-            this.fetchRequests();
-          });
-      });
+    axios.delete(`/author/${authorId}/inbox/${foreignAuthorId}`,
+      tokenConfig(store.getState),{}
+      ).then((resp)=>{
+          this.fetchRequests();
+        });
   }
 
   handleClear() {

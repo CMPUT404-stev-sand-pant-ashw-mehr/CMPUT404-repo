@@ -251,7 +251,7 @@ class PostViewSet(viewsets.ModelViewSet):
         except:
             return Response({"detail": "author not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        posts_query = Post.objects.filter(author=author, unlisted=False)
+        posts_query = Post.objects.filter(author=author)
         
         return Response(self.get_post_from_query(posts_query=posts_query, request=request), status=status.HTTP_200_OK)
 
@@ -483,6 +483,8 @@ class PostViewSet(viewsets.ModelViewSet):
             unlisted = str(request_keys['unlisted']).strip().lower()
             if unlisted not in ["false", "true"]:
                 return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
+            elif(data['contentType'] == "image"):
+                data['unlisted'] = True
             elif unlisted == 'false':
                 data['unlisted'] = False
             else:

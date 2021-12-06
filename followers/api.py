@@ -28,13 +28,13 @@ class FollowerViewSet(viewsets.ModelViewSet):
         return super().initialize_request(request, *args, kwargs)
     
     def get_authenticators(self):
-        if self.action in ["list", "check_follower", "delete_follower"]:
+        if self.action in ["list", "list_followings", "check_follower", "delete_follower"]:
             return [CustomAuthentication()]
         else:
             return [TokenAuthentication()]
     
     def get_permissions(self):
-        if self.action in ["list", "check_follower", "delete_follower"]:
+        if self.action in ["list", "list_followings", "check_follower", "delete_follower"]:
             return [AccessPermission()]
         else:
             return [IsAuthenticated()]
@@ -131,6 +131,41 @@ class FollowerViewSet(viewsets.ModelViewSet):
         return Response({
                 "type": "followers",
                 "items": follower_items
+            }, status=status.HTTP_200_OK)
+        
+        
+    def list_followings(self, request, author_id=None):
+        # node check
+        valid = is_valid_node(request)
+        if not valid:
+            return Response({"message":"Node not allowed"}, status=status.HTTP_403_FORBIDDEN)
+        
+        get_object_or_404(Author, pk=author_id) # Check if user exists
+
+        following_rows = Followers.objects.filter(follower_id=author_id).values()
+        # check if follower_rows is empty
+        if not len(following_rows):
+            return Response({
+                "type": "follow",
+                "items":[{}]
+            }, status=status.HTTP_200_OK)
+        following_items = list()
+
+        # Get the updated information for each followers
+        for following in following_rows:
+            following_id = following["author_id"] # Django will add "_id" suffix for all Foreign key field and there is no trivial way of overriding that
+
+            # Remove potential trailing slash of the follower id. 
+            if following_id[-1] == '/':
+                following_id = following_id[:-1]
+
+            following_details = Author.objects.filter(id=following_id).values()[0]
+            following_details['id'] = following_details['url']
+            following_items.append(following_details)
+
+        return Response({
+                "type": "followings",
+                "items": following_items
             }, status=status.HTTP_200_OK)
 
 

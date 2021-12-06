@@ -29,7 +29,9 @@ class Author(models.Model):
 
     is_active = models.BooleanField(default=False)
 
-
+    def __str__(self):
+        return str(self.displayName)
+        
     # using this to get full path for author
     def get_full_path(self):
         return self.host + f"api/author/{self.id}/"

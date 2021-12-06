@@ -1,12 +1,18 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
+import store from "../../store";
+import { CREATE_ALERT } from "../../actions/types";
+import auth from "../../reducers/auth";
 
 class AuthorSearch extends Component {
   state = {
     authors: [],
     isLoading: false,
     loadingText: "",
+    followers: [],
+    followings: [],
 
     page: 1,
     offset: 0,
@@ -14,17 +20,38 @@ class AuthorSearch extends Component {
   };
 
   componentDidMount = () => {
+    const { auth } = this.props;
     this.setState({ isLoading: true, loadingText: "Loading ..." });
     axios
-      .get(`/authors`, {
-        auth: { username: "socialdistribution_t03", password: "c404t03" },
-      })
+      .get(`/authors`, tokenConfig(store.getState))
       .then((res) => {
         this.setState({
           authors: res.data.items,
-          isLoading: false,
-          loadingText: "",
         });
+
+        axios
+          .get(
+            `/author/${auth.user.author}/followings`,
+            tokenConfig(store.getState)
+          )
+          .then((resp) => {
+            this.setState({
+              followings: resp.data.items,
+            });
+
+            axios
+              .get(
+                `/author/${auth.user.author}/followers`,
+                tokenConfig(store.getState)
+              )
+              .then((respo) => {
+                this.setState({
+                  followers: respo.data.items,
+                  isLoading: false,
+                  loadingText: "",
+                });
+              });
+          });
       })
       .catch((err) => {
         console.log(err);
@@ -34,6 +61,98 @@ class AuthorSearch extends Component {
         });
       });
   };
+
+  isFollower(foreignAuthor) {
+    const { auth } = this.props.auth;
+
+    const foreignAuthorId = foreignAuthor.id.split("/").pop();
+
+    axios
+      .get(
+        `/author/${auth.user.author}/followers/${foreignAuthorId}`,
+        tokenConfig(store.getState)
+      )
+      .then((resp) => {
+        console.log(resp.data.detail);
+      });
+  }
+
+  handleFollow(author) {
+    if (this.determineType(author.id) == "Follow!") {
+      const foreignAuthorId = author.id.split("/").pop();
+      const authorId = this.props.auth.user.author;
+
+      axios
+        .put(
+          `/author/${foreignAuthorId}/followers/${authorId}`,
+          {},
+          tokenConfig(store.getState)
+        )
+        .then((response) => {
+          this.setState({
+            open: false,
+          });
+          axios
+            .get(`/author/${authorId}`, tokenConfig(store.getState))
+            .then((resp) => {
+              axios
+                .post(
+                  `/author/${foreignAuthorId}/inbox`,
+                  {
+                    type: "follow",
+                    summary: `${resp.data.displayName} wants to follow ${author.displayName}`,
+                    actor: resp.data, //author,
+                    object: author, //foreignAuthor
+                  },
+                  tokenConfig(store.getState)
+                )
+                .then((resp) => {
+                  store.dispatch({
+                    type: CREATE_ALERT,
+                    payload: {
+                      msg: { success: "Follow request has been sent!" },
+                      status: resp.status,
+                    },
+                  });
+                });
+            });
+        });
+    } else {
+      store.dispatch({
+        type: CREATE_ALERT,
+        payload: {
+          msg: { error: "You are already following that author!" },
+          status: 400,
+        },
+      });
+    }
+  }
+
+  determineType(authorId) {
+    let isFollower =
+      this.state.followers.filter((follower) => follower.id === authorId)
+        .length > 0;
+    let isFollowing =
+      this.state.followings.filter((following) => following.id === authorId)
+        .length > 0;
+
+    let type = "Follow!";
+    if (isFollower && !isFollowing) {
+      type = "Follower";
+    } else if (!isFollower && isFollowing) {
+      type = "Following";
+    } else if (isFollower && isFollowing) {
+      type = "Friends";
+    }
+
+    return type;
+  }
+
+  determineTypeClass(authorId) {
+    return this.determineType(authorId) == "Follow!"
+      ? "col-md-2 float-end btn btn-primary"
+      : "col-md-2 float-end btn btn-outline-primary";
+  }
 
   showPreviousAuthors() {
     this.setState({
@@ -52,8 +171,9 @@ class AuthorSearch extends Component {
   }
 
   render() {
-    const { authors, isLoading, offset, limit, page } = this.state;
-
+    const { authors, isLoading, offset, limit, page, followers, following } =
+      this.state;
+    const { auth } = this.props;
     return (
       <div>
         <h2>Find an Author</h2>
@@ -61,6 +181,7 @@ class AuthorSearch extends Component {
           <h4>{this.state.loadingText}</h4>
         ) : (
           authors
+            .filter((author) => author.id.split("/").pop() != auth.user.author)
             .map((author, index) => (
               <div
                 className="card"
@@ -71,9 +192,18 @@ class AuthorSearch extends Component {
                 }}
                 key={index}
               >
-                {author.displayName}
-                <br />
-                {author.host}
+                <div>{author.displayName}</div>
+
+                <div>
+                  <button
+                    class={this.determineTypeClass(author.id)}
+                    onClick={() => this.handleFollow(author)}
+                  >
+                    {this.determineType(author.id)}
+                  </button>
+                </div>
+
+                <div>{author.host}</div>
               </div>
             ))
             .slice(this.state.offset, this.state.limit)
