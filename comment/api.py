@@ -102,7 +102,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         tags=['Get Comments on a Post'],
     )
     def get_post_comments(self, request, author_id=None, post_id=None):
-        
         # node check
         valid = is_valid_node(request)
         if not valid:
