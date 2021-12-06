@@ -9,6 +9,7 @@ import { FiSend } from "react-icons/fi";
 import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
+import { BsPeople } from "react-icons/bs";
 
 export class Profile extends Component {
   constructor(props) {
@@ -25,9 +26,12 @@ export class Profile extends Component {
     newGitHub: "",
 
     friends: [],
-    open: false,
-    selectedFriends: {},
-    selectedPost: {},
+    openSendPost: false,
+    openShowFriends: false,
+    selectedFriendsSend: {},
+    selectedFriendsShow: {},
+    selectedPost:{},
+    currentUser: this.props.match.params.id,
   };
 
   toggleEdit = () => {
@@ -99,56 +103,88 @@ export class Profile extends Component {
       });
   };
 
-  handleSend() {
-    Object.keys(this.state.selectedFriends).map((friendId) => {
-      let id = this.parseData(this.state.selectedFriends[friendId]);
-      let postObj = {
-        type: "post",
-        title: this.state.selectedPost.title,
-        id: this.state.selectedPost.id,
-        source: this.state.selectedPost.source,
-        origin: this.state.selectedPost.origin,
-        description: this.state.selectedPost.description,
-        contentType: this.state.selectedPost.contentType,
-        content: this.state.selectedPost.content,
-        published: this.state.selectedPost.published,
-        author: this.state.selectedPost.author,
-        categories: this.state.selectedPost.categories,
-        visibility: this.state.selectedPost.visibility,
-        unlisted: this.state.selectedPost.unlisted,
-      };
-
-      axios
-        .post(`/author/${id}/inbox`, postObj, tokenConfig(store.getState))
-        .then((res) => {
-          this.setState({
-            open: false,
+  handleSend(){
+    Object.keys(this.state.selectedFriendsSend).map((friendId)=>{
+      let id = this.parseData(this.state.selectedFriendsSend[friendId]);
+      
+      axios.post(`/author/${id}/inbox`,
+            {
+              "type":"post",
+              "title":this.state.selectedPost.title ,
+              "id":this.state.selectedPost.id,
+              "source":this.state.selectedPost.source,
+              "origin":this.state.selectedPost.origin,
+              "description":this.state.selectedPost.description,
+              "contentType":this.state.selectedPost.contentType,
+              "content":this.state.selectedPost.content,
+              "published":this.state.selectedPost.published,
+              "author":this.state.selectedPost.author,
+              "categories":this.state.selectedPost.categories,
+              "visibility":this.state.selectedPost.visibility,
+              "unlisted":this.state.selectedPost.unlisted,
+            },
+            tokenConfig(store.getState)
+            )
+            .then((resp) => {
+                this.setState({
+                  openSendPost: false,
+                })
           });
-        });
     });
   }
 
-  handleSendPost(post) {
+  handleClose(){
+    // console.log(this.state.selectedFriendsShow);
+    this.setState({
+      openSendPost: false,
+      openShowFriends: false,
+      selectedFriendsSend:[],
+      selectedFriendsShow:[],
+    });
+  }
+
+  handleSendPost(post){
     this.setState({
       openSendPost: true,
       selectedPost: post,
     });
   }
 
-  handleSelection(friend) {
-    let selectedFriendsIds = Object.keys(this.state.selectedFriends);
-    if (selectedFriendsIds.includes(friend.id)) {
-      let selections = this.state.selectedFriends;
-      delete selections[friend.id];
-      this.setState({
-        selected: selections,
-      });
-    } else {
-      let selections = this.state.selectedFriends;
-      selections[friend.id] = friend;
-      this.setState({
-        selected: selections,
-      });
+  handleSelection(friend, mode){
+    let selectedIds = [], selectedObjs = [];
+    if(mode==="send"){
+      selectedIds = Object.keys(this.state.selectedFriendsSend);
+      selectedObjs = this.state.selectedFriendsSend;
+    }
+    else if(mode==="show"){
+      selectedIds = Object.keys(this.state.selectedFriendsShow);
+      selectedObjs = this.state.selectedFriendsShow;
+    }
+
+    if(selectedIds.includes(friend.id)){
+      delete selectedObjs[friend.id];
+      if(mode==="send"){
+        this.setState({
+          selectedFriendsSend: selectedObjs,
+        });
+      }
+      else if(mode==="show"){
+        this.setState({
+          selectedFriendsShow: selectedObjs,
+        });
+      }
+    }else{
+      selectedObjs[friend.id] = friend;
+      if(mode==="send"){
+        this.setState({
+          selectedFriendsSend: selectedObjs,
+        });
+      }
+      else if(mode==="show"){
+        this.setState({
+          selectedFriendsShow: selectedObjs,
+        });
+      }
     }
   }
 
@@ -182,27 +218,29 @@ export class Profile extends Component {
 
     return (
       <Fragment>
-        <h2>User Details</h2>
-        <div style={{ fontStyle: "italic", fontWeight: 500 }}>
-          <p>Welcome, {displayName} !</p>
-          <p>Author URL: {url}</p>
-          <p>Github: {github}</p>
-          <p>Host: {host}</p>
+        <div className="card mb-4">
+          <div className="card-body">
+            <h2 className="card-title h3">
+              User Details
+              <button type="button" className="btn btn-primary float-end" onClick={this.toggleEdit}>{showEdit ? "Cancel":"Edit"}</button>
+            </h2>
+            <div className="card mb-4">
+              <div className="card-body">
+                <p className="card-text">Welcome, {displayName}</p>
+                <p className="card-text">Author URL: {url}</p>
+                <p className="card-text">Github: {github}</p>
+                <p className="card-text">Host: {host}</p>
+              </div>
+            </div>
+            <button type="button" className="btn btn-primary float-end" onClick={()=>this.handleShowFriends()} data-bs-toggle="modal" data-bs-target="#showFriends">
+              Friends <BsPeople />
+            </button>
         </div>
-        <br />
-        <button className="btn btn-outline-primary" onClick={this.toggleEdit}>
-          {showEdit ? "Cancel" : "Edit"}
-        </button>
-        {showEdit ? (
-          <div
-            className="card"
-            style={{
-              borderRadius: "5px",
-              marginTop: "30px",
-              padding: "20px",
-            }}
-          >
-            <div>
+      </div>
+        {
+          showEdit ? 
+          <div style={{border:"1px solid #a7a7a7", borderRadius:'5px', margin: 25}}>
+            <div style={{margin:30}}>
               <label>Display Name:</label>
               <br />
               <input
@@ -225,17 +263,12 @@ export class Profile extends Component {
                 onChange={(e) => this.setState({ newGitHub: e.target.value })}
               />
             </div>
-            <br />
-
-            <button
-              style={{ margin: 30 }}
-              onClick={this.updateProfile}
-              className="btn btn-primary"
-            >
-              Submit Change
-            </button>
-          </div>
-        ) : null}
+            <br/>
+            <button style={{margin: 30}} onClick={this.updateProfile}>Submit Change</button>
+          </div> 
+          : 
+          null
+        }
         <hr />
         <br />
 
@@ -318,63 +351,60 @@ export class Profile extends Component {
           </ul>
         </nav>
 
-        {this.state.open && (
-          <div
-            className="modal fade"
-            id="sendPost"
-            tabIndex="-1"
-            aria-labelledby="exampleModalLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="exampleModalLabel">
-                    Send To:
-                  </h5>
-                </div>
-                <div className="modal-body">
-                  {friends.map((friend, i) => (
-                    <div className="card">
+        {this.state.openSendPost && <div className="modal fade" id="sendPost" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLabel">Send To:</h5>
+              </div>
+              <div className="modal-body">
+              {friends.map((friend,index) => <div className="card" key={index}>
                       <div className="card-body">
                         <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="friends"
-                            value={friend.displayName}
-                            id={friend.id}
-                            onClick={() => this.handleSelection(friend)}
-                          />
+                          <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend, "send")}/>
                           <label className="form-check-label" for={friend.id}>
                             @{friend.displayName}
                           </label>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
 
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => this.handleSend()}
-                  >
-                    Send
-                  </button>
-                </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={()=>this.handleClose()} data-bs-dismiss="modal">Close</button>
+                <button type="button" className="btn btn-primary" onClick={()=>this.handleSend()}>Send</button>
               </div>
             </div>
           </div>
-        )}
+        </div>}
+
+        {this.state.openShowFriends && <div className="modal fade" id="showFriends" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLabel">Friends</h5>
+              </div>
+              <div className="modal-body">
+              {friends.map((friend,i) => <div className="card" key={friend.id}>
+                      <div className="card-body">
+                        <div className="form-check">
+                          <input className="form-check-input" type="checkbox" name="friends" value={friend.displayName} id={friend.id} onClick={()=>this.handleSelection(friend, "show")}/>
+                          <label className="form-check-label" for={friend.id}>
+                            @{friend.displayName}
+                          </label>
+                        </div>
+                      </div>
+                  </div>)}
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={()=>this.handleClose()} data-bs-dismiss="modal">Close</button>
+                <button type="button" className="btn btn-danger" onClick={()=>this.handleRemoveFriends()} data-bs-dismiss="modal">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>}
       </Fragment>
     );
   }
