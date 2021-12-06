@@ -4,6 +4,7 @@ import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
 import { CREATE_ALERT } from "../../actions/types";
+import { Link } from "react-router-dom";
 import auth from "../../reducers/auth";
 
 class AuthorSearch extends Component {
@@ -195,7 +196,14 @@ class AuthorSearch extends Component {
                 }}
                 key={index}
               >
-                <div>{author.displayName}</div>
+                <div>
+                  <Link
+                    className="text-decoration-none text-dark"
+                    to={`/profile/${author.id.split("/").pop()}`}
+                  >
+                    {author.displayName}
+                  </Link>
+                </div>
 
                 <div>
                   <button
