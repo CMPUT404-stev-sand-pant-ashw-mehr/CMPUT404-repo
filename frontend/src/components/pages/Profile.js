@@ -199,13 +199,16 @@ export class Profile extends Component {
     Object.keys(friends).map((friendId) => {
       axios
         .delete(
-          `/author/${this.parseData(friends[friendId])}/followers/${
-            this.state.currentUser
-          }`,
+          `/author/${this.parseData(friends[friendId])}/followers/${this.state.currentUser}`,
           tokenConfig(store.getState),
           {}
         )
         .then(() => {
+          axios.delete(
+            `/author/${this.state.currentUser}/followers/${this.parseData(friends[friendId])}`,
+            tokenConfig(store.getState),
+            {}
+          )
           this.getUserProfile();
         });
     });
