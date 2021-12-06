@@ -93,7 +93,6 @@ export class Post extends Component {
         auth: { username: "socialdistribution_t03", password: "c404t03" },
       })
       .then((res) => {
-        console.log(res.data.comments);
         this.setState({ comments: res.data.comments });
       })
       .catch((err) => {
