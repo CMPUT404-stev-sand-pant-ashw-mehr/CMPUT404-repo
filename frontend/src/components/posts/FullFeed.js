@@ -40,7 +40,26 @@ export class FullFeed extends Component {
     likeListOpen: false,
     likeList: [],
     combinedPosts: [],
+    page: 1,
+    offset: 0,
+    limit: 5,
   };
+
+  showPreviousPosts() {
+    this.setState({
+      page: this.state.page - 1,
+      limit: this.state.offset,
+      offset: this.state.offset - 5,
+    });
+  }
+
+  showNextPosts() {
+    this.setState({
+      page: this.state.page + 1,
+      offset: this.state.limit,
+      limit: this.state.limit + 5,
+    });
+  }
 
   state = this.init_state;
 
@@ -259,14 +278,17 @@ export class FullFeed extends Component {
 
   render() {
     const { posts, deletePost, getPosts, user, foreignposts } = this.props;
+    const { page, limit } = this.state;
     let foreignpostsFeed = foreignposts.posts;
     let localpostsFeed = posts.posts;
-
-    let combinedposts = foreignpostsFeed
+    let combinedpostsFeed = foreignpostsFeed
       .concat(localpostsFeed)
+      .filter((post) => post.visibility.toLowerCase() == "public");
+    let combinedposts = combinedpostsFeed
       .sort(function (a, b) {
         return new Date(b.published) - new Date(a.published);
-      });
+      })
+      .slice(this.state.offset, this.state.limit);
 
     return (
       <Fragment>
@@ -276,121 +298,112 @@ export class FullFeed extends Component {
         )}
         {posts.posts.length > 1 &&
           foreignposts.posts.length > 1 &&
-          combinedposts
-            .filter((post) => post.visibility === "PUBLIC")
-            .map((post) => (
-              <div
-                className="card mb-4 flex-row"
-                key={post.id.split("/").pop()}
-              >
-                <div className="card-header mx-auto justify-content-center">
-                  <h2 className="text-primary mb-4">
-                    {post.likes && this.checkLikedPost(post.likes) ? (
-                      <FaThumbsUp />
-                    ) : (
-                      <div
-                        onClick={() => {
-                          this.likePost(post);
-                        }}
-                      >
-                        <FaRegThumbsUp />
-                      </div>
-                    )}
-                  </h2>
-
-                  <h2 className="text-secondary mt-4">
+          combinedposts.map((post) => (
+            <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
+              <div className="card-header mx-auto justify-content-center">
+                <h2 className="text-primary mb-4">
+                  {post.likes && this.checkLikedPost(post.likes) ? (
+                    <FaThumbsUp />
+                  ) : (
                     <div
                       onClick={() => {
-                        this.openLikeList(post);
+                        this.likePost(post);
                       }}
                     >
-                      {post.likes && post.likes.length}
-                      {post.likeCount && post.likeCount}
-                      {!post.likes && !post.likeCount ? "0" : ""}
+                      <FaRegThumbsUp />
                     </div>
-                  </h2>
-                </div>
-                <div className="card-body">
-                  <div className="small text-muted">
-                    <span className="float-end">
-                      <FaRegClock />
-                      &nbsp;<Moment fromNow>{post.published}</Moment>
-                    </span>
-                    <span onClick={() => this.onAuthorClick(post.author)}>
-                      @{post.author.displayName}
-                    </span>
-                  </div>
-                  <h2 className="card-title h4">{post.title}</h2>
-                  <p className="card-text">
-                    {post.contentType.includes("image") ? (
-                      <img
-                        className="img img-fluid"
-                        src={post.content}
-                        alt="Unavailable"
-                      />
-                    ) : (
-                      post.description
-                    )}
-                  </p>
-                  <Link
-                    to={
-                      this.renderHost(post.author.host) == ""
-                        ? `/posts/${post.author_id}/${post.id.split("/").pop()}`
-                        : `/foreign/posts/${post.id.split("/").pop()}`
-                    }
-                    className="btn btn-outline-primary"
-                  >
-                    View post →
-                  </Link>
-                  <span className="badge bg-secondary float-end">
-                    {this.renderHost(post.author.host)}
-                  </span>
-                  {post.author_id == user.user.author ? (
-                    <button
-                      className="btn btn-danger float-end"
-                      onClick={deletePost.bind(this, post.id)}
-                    >
-                      <FaTrashAlt />
-                    </button>
-                  ) : (
-                    ""
                   )}
-                </div>
+                </h2>
+
+                <h2 className="text-secondary mt-4">
+                  <div
+                    onClick={() => {
+                      this.openLikeList(post);
+                    }}
+                  >
+                    {post.likes && post.likes.length}
+                    {post.likeCount && post.likeCount}
+                    {!post.likes && !post.likeCount ? "0" : ""}
+                  </div>
+                </h2>
               </div>
-            ))}
+              <div className="card-body">
+                <div className="small text-muted">
+                  <span className="float-end">
+                    <FaRegClock />
+                    &nbsp;<Moment fromNow>{post.published}</Moment>
+                  </span>
+                  <span onClick={() => this.onAuthorClick(post.author)}>
+                    @{post.author.displayName}
+                  </span>
+                </div>
+                <h2 className="card-title h4">{post.title}</h2>
+                <p className="card-text">
+                  {post.contentType.includes("image") ? (
+                    <img
+                      className="img img-fluid mh-30"
+                      src={post.content}
+                      alt="Unavailable"
+                    />
+                  ) : (
+                    post.description
+                  )}
+                </p>
+                <Link
+                  to={
+                    this.renderHost(post.author.host) == ""
+                      ? `/posts/${post.author_id}/${post.id.split("/").pop()}`
+                      : `/foreign/posts/${post.id.split("/").pop()}`
+                  }
+                  className="btn btn-outline-primary"
+                >
+                  View post →
+                </Link>
+                <span className="badge bg-secondary float-end">
+                  {this.renderHost(post.author.host)}
+                </span>
+                {post.author_id == user.user.author ? (
+                  <button
+                    className="btn btn-danger float-end"
+                    onClick={deletePost.bind(this, post.id)}
+                  >
+                    <FaTrashAlt />
+                  </button>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+          ))}
         {posts.posts.length > 1 && foreignposts.posts.length > 1 && (
           <nav aria-label="Posts pagination">
             <ul className="pagination">
-              <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
-                <a
+              <li className={`page-item ${page == 1 ? "disabled" : ""}`}>
+                <button
                   className="page-link"
-                  href="#"
-                  aria-label="Previous"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    getPosts(posts.previous);
-                  }}
+                  aria-label="Next"
+                  onClick={this.showPreviousPosts.bind(this)}
                 >
                   <span aria-hidden="true">&laquo;</span>
-                </a>
+                </button>
               </li>
               <li className="page-item active">
                 <a className="page-link" href="#">
-                  {posts.page}
+                  {page}
                 </a>
               </li>
-              <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
-                <a
+              <li
+                className={`page-item ${
+                  combinedpostsFeed.length < limit ? "disabled" : ""
+                }`}
+              >
+                <button
                   className="page-link"
-                  href="#"
                   aria-label="Next"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    getPosts(posts.next);
-                  }}
+                  onClick={this.showNextPosts.bind(this)}
                 >
                   <span aria-hidden="true">&raquo;</span>
-                </a>
+                </button>
               </li>
             </ul>
           </nav>

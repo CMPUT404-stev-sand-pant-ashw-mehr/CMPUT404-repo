@@ -22,7 +22,7 @@ export const getPosts =
   (page = 1) =>
   (dispatch, getState) => {
     axios
-      .get(`/posts?page=${page}`, tokenConfig(getState))
+      .get(`/posts`, tokenConfig(getState))
       .then((res) => {
         dispatch({
           type: GET_POSTS,
