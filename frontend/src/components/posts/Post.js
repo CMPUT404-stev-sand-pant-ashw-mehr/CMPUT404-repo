@@ -89,10 +89,13 @@ export class Post extends Component {
 
   getComments = () => {
     axios
-      .get(this.props.post.comments, {
-        auth: { username: "socialdistribution_t03", password: "c404t03" },
-      })
+      .get(
+        this.props.post.comments,
+        { auth: { username: "socialdistribution_t03", password: "c404t03" } },
+        { currentUser: this.props.auth.user.author }
+      )
       .then((res) => {
+        console.log(res.data.comments);
         this.setState({ comments: res.data.comments });
       })
       .catch((err) => {

@@ -9,7 +9,6 @@ import { FiSend } from "react-icons/fi";
 import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
-import { BsPeople } from "react-icons/bs";
 
 export class Profile extends Component {
   constructor(props) {
@@ -188,24 +187,27 @@ export class Profile extends Component {
     }
   }
 
-  handleShowFriends(){
+  handleShowFriends() {
     this.setState({
       openShowFriends: true,
     });
   }
 
-  handleRemoveFriends(){
-    let friends=this.state.selectedFriendsShow;
+  handleRemoveFriends() {
+    let friends = this.state.selectedFriendsShow;
 
-    Object.keys(friends).map((friendId)=>{
+    Object.keys(friends).map((friendId) => {
       axios
         .delete(
-          `/author/${this.parseData(friends[friendId])}/followers/${this.state.currentUser}`,
+          `/author/${this.parseData(friends[friendId])}/followers/${
+            this.state.currentUser
+          }`,
           tokenConfig(store.getState),
           {}
-        ).then(()=>{
+        )
+        .then(() => {
           this.getUserProfile();
-        })
+        });
     });
   }
 
@@ -271,48 +273,47 @@ export class Profile extends Component {
 
         <div className="card mb-4">
           <div className="card-body">
-          <h2 className="card-title h3">Your Posts</h2>
-          {posts.posts.map((post) => (
-          <div className="card mb-4" key={post.id.split("/").pop()}>
-            <div className="card-body">
-              <div className="small text-muted">
-                <span className="float-end">
-                  <FaRegClock />
-                  &nbsp;<Moment fromNow>{post.published}</Moment>
-                </span>
-                @{post.author.displayName}
+            <h2 className="card-title h3">Your Posts</h2>
+            {posts.posts.map((post) => (
+              <div className="card mb-4" key={post.id.split("/").pop()}>
+                <div className="card-body">
+                  <div className="small text-muted">
+                    <span className="float-end">
+                      <FaRegClock />
+                      &nbsp;<Moment fromNow>{post.published}</Moment>
+                    </span>
+                    @{post.author.displayName}
+                  </div>
+                  <h2 className="card-title h4">{post.title}</h2>
+                  <p className="card-text">{post.description}</p>
+                  <Link
+                    to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
+                    className="btn btn-outline-primary"
+                  >
+                    View full post →
+                  </Link>
+                  <button
+                    style={{ marginLeft: 20 }}
+                    type="button"
+                    className="btn btn-primary float-end"
+                    onClick={() => this.handleSendPost(post)}
+                    data-bs-toggle="modal"
+                    data-bs-target="#sendPost"
+                  >
+                    <FiSend />
+                  </button>
+                  <button
+                    className="btn btn-danger float-end"
+                    onClick={deletePost.bind(this, post.id)}
+                  >
+                    <FaTrashAlt />
+                  </button>
+                </div>
               </div>
-              <h2 className="card-title h4">{post.title}</h2>
-              <p className="card-text">{post.description}</p>
-              <Link
-                to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
-                className="btn btn-outline-primary"
-              >
-                View full post →
-              </Link>
-              <button
-                style={{ marginLeft: 20 }}
-                type="button"
-                className="btn btn-primary float-end"
-                onClick={() => this.handleSendPost(post)}
-                data-bs-toggle="modal"
-                data-bs-target="#sendPost"
-              >
-                <FiSend />
-              </button>
-              <button
-                className="btn btn-danger float-end"
-                onClick={deletePost.bind(this, post.id)}
-              >
-                <FaTrashAlt />
-              </button>
-            </div>
-          </div>
-        ))}
+            ))}
           </div>
         </div>
 
-        
         <nav aria-label="Posts pagination">
           <ul className="pagination">
             <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
