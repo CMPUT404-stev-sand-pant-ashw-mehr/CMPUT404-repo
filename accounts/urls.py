@@ -1,6 +1,6 @@
 from django.urls import path, include, re_path
 
-from .api import LoginAPI, ProfileAPI, RegisterAPI, get_foregin_authors_view, get_foregin_author_detail_view, get_foregin_posts_view, get_foregin_post_detail_view, github_view, send_friend_request, like_foregin_post, comment_foregin_post
+from .api import LoginAPI, ProfileAPI, RegisterAPI, get_foregin_authors_view, get_foregin_author_detail_view, get_foregin_posts_view, get_foregin_post_detail_view, github_view, send_friend_request, like_foregin_post, comment_foregin_post, view_comment_foreign_post
 from knox import views as knox_views 
 
 urlpatterns = [
@@ -9,6 +9,7 @@ urlpatterns = [
     path('auth/login', LoginAPI.as_view()),
     path('auth/profile', ProfileAPI.as_view()),
     path('auth/logout', knox_views.LogoutView.as_view()),
+    path('connection/comments', view_comment_foreign_post),
     path('connection/authors', get_foregin_authors_view),
     path('connection/posts', get_foregin_posts_view),
     path('connection/author-detail/<str:author_id>', get_foregin_author_detail_view),
