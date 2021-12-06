@@ -102,7 +102,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         tags=['Get Comments on a Post'],
     )
     def get_post_comments(self, request, author_id=None, post_id=None):
-        
+        current_user = request.GET.get('user', '')
+
         # node check
         valid = is_valid_node(request)
         if not valid:
@@ -132,16 +133,18 @@ class CommentViewSet(viewsets.ModelViewSet):
         return_list = list()
         for comment in comment_query:
             comment_author_id = comment.pop('author_id', None)
-            if(this_post.visibility == 'FRIENDS') and (author_id != comment_author_id.split('/')[4]):
-                continue
+            visible = True
+            if(current_user!='' and this_post.visibility == 'FRIENDS' and current_user != comment_author_id.split('/')[4] and current_user != author_id):
+                visible = False
+            if(visible):
+                author_details = model_to_dict(Author.objects.get(id=comment_author_id))
 
-            author_details = model_to_dict(Author.objects.get(id=comment_author_id))
+                author_details['id'] = author_details['url']
+                comment['author'] = author_details
+                comment["id"] = str(request.build_absolute_uri()) + '/' + comment['id']
+                return_list.append(comment)
+    
 
-            author_details['id'] = author_details['url']
-            comment['author'] = author_details
-            comment["id"] = author_details["url"] + '/posts/' + post_id + '/comments/' + comment['id']
-            return_list.append(comment)
-        
         return Response({
             "type": "comments",
             "page": page,
@@ -241,6 +244,10 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"detail": f"Invalid author JSON: {e.msg}"}, status=status.HTTP_400_BAD_REQUEST)
 
         author_validation = AuthorSerializer(data=author_dict)
+        print("from here")
+        print("post authorID -",author_id)
+        print("comment authorId -",author_dict["id"])
+        print(request.build_absolute_uri())
         if not author_validation.is_valid():
             return Response(author_validation.error_messages, status=status.HTTP_400_BAD_REQUEST)
         else:
