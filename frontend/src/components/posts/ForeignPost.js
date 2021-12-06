@@ -6,10 +6,18 @@ import { getForeignPost } from "../../actions/posts";
 import Moment from "react-moment";
 import { FaRegClock } from "react-icons/fa";
 import ReactMarkDown from "react-markdown";
+import axios from "axios";
+import { tokenConfig } from "../../actions/auth";
+import store from "../../store";
+import { CREATE_ALERT } from "../../actions/types";
+import post from "../../reducers/post";
 
 export class ForeignPost extends Component {
   state = {
     commentContent: "",
+    author: null,
+    showComments: false,
+    comments: [],
   };
 
   renderPostContent = () => {
@@ -38,12 +46,39 @@ export class ForeignPost extends Component {
     });
   }
 
+  getComments = () => {
+    axios
+      .post(
+        `/connection/comments`,
+        { commentsUrl: this.props.post.comments },
+        tokenConfig(store.getState)
+      )
+      .then((res) => {
+        this.setState({ comments: res.data });
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+
+  toggleComment = () => {
+    const { showComments } = this.state;
+    if (showComments) {
+      this.setState({ showComments: !showComments, comments: [] });
+    } else {
+      this.getComments();
+      this.setState({ showComments: !showComments });
+    }
+  };
+
   onChange = (e) =>
     this.setState({
       [e.target.name]: e.target.value,
     });
 
   onSubmit = (e) => {
+    const { post } = this.props;
+
     e.preventDefault();
     const { commentContent } = this.state;
     const comment = {
@@ -52,8 +87,34 @@ export class ForeignPost extends Component {
       comment: commentContent,
     };
 
-    // this.props.createPostComment(this.props.match.params.postId, comment);
-    console.log("send to inbox");
+    axios
+      .post(
+        `/connection/${this.props.auth.user.author}/comment/${post.id
+          .split("/")
+          .pop()}/${comment.comment}`,
+        null,
+        tokenConfig(store.getState)
+      )
+      .then((res) => {
+        store.dispatch({
+          type: CREATE_ALERT,
+          payload: {
+            msg: { success: "Comment sent to foreign author!" },
+            status: res.status,
+          },
+        });
+      })
+      .catch((e) => {
+        store.dispatch({
+          type: CREATE_ALERT,
+          payload: {
+            msg: { error: "Failed to comment on post." },
+            status: 500,
+          },
+        });
+        console.log(e);
+      });
+
     this.resetForm();
     this.forceUpdate();
   };
@@ -108,6 +169,33 @@ export class ForeignPost extends Component {
               </form>
             </div>
           </div>
+          <div>
+            <button
+              className="btn btn-primary"
+              style={{ margin: 20 }}
+              onClick={this.toggleComment}
+            >
+              {" "}
+              show comments{" "}
+            </button>
+            {this.state.comments.map((item, index) => (
+              <div
+                style={{ margin: 10, border: "1px solid #a6a6a6" }}
+                key={index}
+                className="card"
+              >
+                <div className="card-header">@{item.authorId.displayName}</div>
+                <div className="card-body">
+                  <p className="card-text" style={{ fontSize: 25 }}>
+                    {item.text}
+                  </p>
+                  <p className="card-text secondary" style={{ fontSize: 10 }}>
+                    Created at {item.publishedOn}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </Fragment>
       )
     );
@@ -121,6 +209,7 @@ export class ForeignPost extends Component {
 
 const mapStateToProps = (state) => ({
   post: state.foreignpost.post,
+  auth: state.auth,
 });
 
 export default connect(mapStateToProps, {
