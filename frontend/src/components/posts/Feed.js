@@ -262,7 +262,17 @@ export class Feed extends Component {
                   </span>
                 </div>
                 <h2 className="card-title h4">{post.title}</h2>
-                <p className="card-text">{post.description}</p>
+                <p className="card-text">
+                  {post.contentType.includes("image") ? (
+                    <img
+                      className="img img-fluid"
+                      src={post.content}
+                      alt="Unavailable"
+                    />
+                  ) : (
+                    post.description
+                  )}
+                </p>
                 <Link
                   to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
                   className="btn btn-outline-primary"

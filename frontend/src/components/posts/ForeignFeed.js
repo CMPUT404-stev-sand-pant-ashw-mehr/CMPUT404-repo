@@ -114,7 +114,17 @@ export class ForeignFeed extends Component {
                 @{post.author.displayName}
               </div>
               <h2 className="card-title h4">{post.title}</h2>
-              <p className="card-text">{post.description}</p>
+              <p className="card-text">
+                {post.contentType.includes("image") ? (
+                  <img
+                    className="img img-fluid mh-30"
+                    src={post.content}
+                    alt="Unavailable"
+                  />
+                ) : (
+                  post.description
+                )}
+              </p>
               <Link
                 to={`/foreign/posts/${post.id.split("/").pop()}`}
                 className="btn btn-outline-primary"
