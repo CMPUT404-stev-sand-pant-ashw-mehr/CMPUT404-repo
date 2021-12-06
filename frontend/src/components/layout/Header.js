@@ -6,7 +6,7 @@ import { logout } from "../../actions/auth";
 
 export class Header extends Component {
   render() {
-    const { isAuthenticated, user } = this.props.auth;
+    const { isAuthenticated, user, author } = this.props.auth;
     const authNavLinks = (
       <Fragment>
         <NavLink
@@ -53,7 +53,12 @@ export class Header extends Component {
           data-bs-toggle="dropdown"
           aria-expanded="false"
         >
-          {user ? user.username : ""}
+          {user ? user.username + " " : ""}
+          <img
+            src={user ? author.github + ".png" : ""}
+            style={{ height: 25 }}
+            className="img rounded-circle"
+          ></img>
         </a>
         <ul
           className="dropdown-menu dropdown-menu-dark"
