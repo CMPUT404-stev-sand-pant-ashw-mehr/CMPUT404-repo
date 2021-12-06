@@ -78,7 +78,6 @@ class AuthorSearch extends Component {
   }
 
   handleFollow(author) {
-    console.log(this.determineType(author.id));
     if (this.determineType(author.id) == "Follow!") {
       const foreignAuthorId = author.id.split("/").pop();
       const authorId = this.props.auth.user.author;
@@ -118,6 +117,14 @@ class AuthorSearch extends Component {
                 });
             });
         });
+    } else {
+      store.dispatch({
+        type: CREATE_ALERT,
+        payload: {
+          msg: { error: "You are already following that author!" },
+          status: 400,
+        },
+      });
     }
   }
 
@@ -139,6 +146,12 @@ class AuthorSearch extends Component {
     }
 
     return type;
+  }
+
+  determineTypeClass(authorId) {
+    return this.determineType(authorId) == "Follow!"
+      ? "col-md-2 float-end btn btn-primary"
+      : "col-md-2 float-end btn btn-outline-primary";
   }
 
   showPreviousAuthors() {
@@ -183,7 +196,7 @@ class AuthorSearch extends Component {
 
                 <div>
                   <button
-                    class="col-2 btn btn-outline-primary float-end"
+                    class={this.determineTypeClass(author.id)}
                     onClick={() => this.handleFollow(author)}
                   >
                     {this.determineType(author.id)}
