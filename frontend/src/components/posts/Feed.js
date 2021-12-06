@@ -38,6 +38,8 @@ export class Feed extends Component {
     isFriend: false,
     open: false,
     redirect: "",
+    likeListOpen: false,
+    likeList: [],
   };
 
   state = this.init_state;
@@ -49,7 +51,7 @@ export class Feed extends Component {
 
   componentDidMount() {
     this.setState({
-      currentUser: this.props.auth.user
+      currentUser: this.props.auth.user,
     });
     this.props.getPosts();
   }
@@ -58,7 +60,7 @@ export class Feed extends Component {
     let authorId = this.state.currentUser.author;
     let foreignAuthorId = this.parseData(foreignAuthor);
 
-    if(authorId!==foreignAuthorId){
+    if (authorId !== foreignAuthorId) {
       this.setState({
         selectedAuthor: foreignAuthor,
       });
@@ -76,14 +78,15 @@ export class Feed extends Component {
             isFollower: resp.data.detail,
           });
           axios
-          .get(
-            `/author/${foreignAuthorId}/followers/${auth.user.author}`,
-            tokenConfig(store.getState)
-          )
-          .then((resp) => {
-            this.setState({
-              youFollow: resp.data.detail,
-              open: true,
+            .get(
+              `/author/${foreignAuthorId}/followers/${auth.user.author}`,
+              tokenConfig(store.getState)
+            )
+            .then((resp) => {
+              this.setState({
+                youFollow: resp.data.detail,
+                open: true,
+              });
             });
               axios.get(`/author/${foreignAuthorId}/inbox/check/${auth.user.author}`,
               tokenConfig(store.getState))
@@ -92,17 +95,15 @@ export class Feed extends Component {
                   sentRequest: resp.data.details,
                 });
             })
-          });
         });
-    }
-    else {
+    } else {
       this.setState(this.init_state);
     }
   }
 
   handleFollow() {
-      const foreignAuthorId = this.parseData(this.state.selectedAuthor);
-      const authorId = this.props.auth.user.author;
+    const foreignAuthorId = this.parseData(this.state.selectedAuthor);
+    const authorId = this.props.auth.user.author;
 
       axios
         .get(`/author/${authorId}`, tokenConfig(store.getState))
@@ -123,24 +124,37 @@ export class Feed extends Component {
                 open: false,
               });
             });
-        });
+            console.log("Sent to Inbox");
+          });
   }
 
   handleDeleteFollower() {
-      const foreignAuthorId = this.parseData(request.actor);
-      const authorId = this.parseData(request.object);
-      axios
+    const foreignAuthorId = this.parseData(request.actor);
+    const authorId = this.parseData(request.object);
+    axios
       .delete(
         `/author/${authorId}/followers/${foreignAuthorId}`,
         tokenConfig(store.getState),
         {}
-      ).then((resp)=>{
-        axios.delete(`/author/${authorId}/inbox/${foreignAuthorId}`,
-              tokenConfig(store.getState),{}
-            ).then((resp)=>{
-              this.fetchRequests();
-            });
-      }) 
+      )
+      .then((resp) => {
+        axios
+          .delete(
+            `/author/${authorId}/inbox/${foreignAuthorId}`,
+            tokenConfig(store.getState),
+            {}
+          )
+          .then((resp) => {
+            this.fetchRequests();
+          });
+      });
+  }
+
+  openLikeList(post) {
+    this.setState({
+      likeListOpen: true,
+      likeList: post.likes,
+    });
   }
 
   redirectToProfile(data) {
@@ -215,94 +229,118 @@ export class Feed extends Component {
       <Fragment>
         {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
         <h2>Local Public Feed</h2>
+        {!posts.posts.length && <h5 className="mt-3">Loading...</h5>}
+        {posts.posts.length > 1 &&
+          posts.posts
+            .filter((post) => post.visibility === "PUBLIC")
+            .map((post) => (
+              <div
+                className="card mb-4 flex-row"
+                key={post.id.split("/").pop()}
+              >
+                <div className="card-header mx-auto justify-content-center">
+                  <h2 className="text-primary mb-4">
+                    {this.checkLikedPost(post.likes) ? (
+                      <FaThumbsUp />
+                    ) : (
+                      <div
+                        onClick={() => {
+                          this.likePost(post);
+                        }}
+                      >
+                        <FaRegThumbsUp />
+                      </div>
+                    )}
+                  </h2>
 
-        {posts.posts
-          .filter((post) => post.visibility === "PUBLIC")
-          .map((post) => (
-            <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
-              <div className="card-header mx-auto justify-content-center">
-                <h2 className="text-primary mb-4">
-                  {this.checkLikedPost(post.likes) ? (
-                    <FaThumbsUp />
-                  ) : (
+                  <h2 className="text-secondary mt-4">
                     <div
                       onClick={() => {
-                        this.likePost(post);
+                        this.openLikeList(post);
                       }}
                     >
-                      <FaRegThumbsUp />
+                      {post.likes.length}
                     </div>
-                  )}
-                </h2>
-
-                <h2 className="text-secondary mt-4">{post.likes.length}</h2>
-              </div>
-              <div className="card-body">
-                <div className="small text-muted">
-                  <span className="float-end">
-                    <FaRegClock />
-                    &nbsp;<Moment fromNow>{post.published}</Moment>
-                  </span>
-                  <span onClick={() => this.onAuthorClick(post.author)}>
-                    @{post.author.displayName}
-                  </span>
+                  </h2>
                 </div>
-                <h2 className="card-title h4">{post.title}</h2>
-                <p className="card-text">{post.description}</p>
-                <Link
-                  to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
-                  className="btn btn-outline-primary"
-                >
-                  View post →
-                </Link>
-                {post.author_id == user.user.author ? (
-                  <button
-                    className="btn btn-danger float-end"
-                    onClick={deletePost.bind(this, post.id)}
+                <div className="card-body">
+                  <div className="small text-muted">
+                    <span className="float-end">
+                      <FaRegClock />
+                      &nbsp;<Moment fromNow>{post.published}</Moment>
+                    </span>
+                    <span onClick={() => this.onAuthorClick(post.author)}>
+                      @{post.author.displayName}
+                    </span>
+                  </div>
+                  <h2 className="card-title h4">{post.title}</h2>
+                  <p className="card-text">
+                    {post.contentType.includes("image") ? (
+                      <img
+                        className="img img-fluid"
+                        src={post.content}
+                        alt="Unavailable"
+                      />
+                    ) : (
+                      post.description
+                    )}
+                  </p>
+                  <Link
+                    to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
+                    className="btn btn-outline-primary"
                   >
-                    <FaTrashAlt />
-                  </button>
-                ) : (
-                  ""
-                )}
+                    View post →
+                  </Link>
+                  {post.author_id == user.user.author ? (
+                    <button
+                      className="btn btn-danger float-end"
+                      onClick={deletePost.bind(this, post.id)}
+                    >
+                      <FaTrashAlt />
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        <nav aria-label="Posts pagination">
-          <ul className="pagination">
-            <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
-              <a
-                className="page-link"
-                href="#"
-                aria-label="Previous"
-                onClick={(e) => {
-                  e.preventDefault();
-                  getPosts(posts.previous);
-                }}
-              >
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            <li className="page-item active">
-              <a className="page-link" href="#">
-                {posts.page}
-              </a>
-            </li>
-            <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
-              <a
-                className="page-link"
-                href="#"
-                aria-label="Next"
-                onClick={(e) => {
-                  e.preventDefault();
-                  getPosts(posts.next);
-                }}
-              >
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+            ))}
+        {posts.posts.length > 1 && (
+          <nav aria-label="Posts pagination">
+            <ul className="pagination">
+              <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  href="#"
+                  aria-label="Previous"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    getPosts(posts.previous);
+                  }}
+                >
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              <li className="page-item active">
+                <a className="page-link" href="#">
+                  {posts.page}
+                </a>
+              </li>
+              <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  href="#"
+                  aria-label="Next"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    getPosts(posts.next);
+                  }}
+                >
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        )}
         <Dialog open={this.state.open} onClose={() => this.handleCloseDialog()}>
           <div className="d-flex flex-row">
             <div className="p-3">
@@ -317,30 +355,49 @@ export class Feed extends Component {
             </div>
           </div>
 
-          
+          <div className="d-flex flex-row justify-content-center">
+            <DialogContent>
+              @{this.state.selectedAuthor.displayName}
+            </DialogContent>
             <div className="d-flex flex-row justify-content-center">
-              <DialogContent>
-                @{this.state.selectedAuthor.displayName}
-              </DialogContent>
-              <div className="d-flex flex-row justify-content-center">
-                <DialogActions>
-                  <div className="p-2">
-                    <div
-                      onClick={() =>
-                        this.redirectToProfile(this.state.selectedAuthor)
-                      }
-                    >
-                      <FaUserAlt />
-                    </div>
+              <DialogActions>
+                <div className="p-2">
+                  <div
+                    onClick={() =>
+                      this.redirectToProfile(this.state.selectedAuthor)
+                    }
+                  >
+                    <FaUserAlt />
+                  </div>
                   </div>
                   {!(this.state.isFriend || this.state.youFollow || this.state.sentRequest) && <div className="p-2">
                     <div onClick={() => this.handleFollow()}>
                       <FaUserPlus />
                     </div>
                   </div>}
-                </DialogActions>
+              </DialogActions>
+            </div>
+          </div>
+        </Dialog>
+
+        <Dialog
+          open={this.state.likeListOpen}
+          onClose={() => this.handleCloseDialog()}
+        >
+          <div className="d-flex flex-row">
+            <div className="p-3">
+              {this.state.likeList.map((like) => (
+                <div>{like.author.displayName}</div>
+              ))}
+            </div>
+            <div className="p-3">
+              <div className="d-flex flex-row-reverse">
+                <div onClick={() => this.handleCloseDialog()}>
+                  <FaWindowClose />
+                </div>
               </div>
             </div>
+          </div>
         </Dialog>
       </Fragment>
     );

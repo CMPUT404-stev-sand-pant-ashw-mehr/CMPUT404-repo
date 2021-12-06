@@ -4,6 +4,7 @@ import { tokenConfig } from "../../actions/auth";
 import axios from "axios";
 import store from "../../store";
 import { CREATE_ALERT } from "../../actions/types";
+import { Link } from "react-router-dom";
 import auth from "../../reducers/auth";
 
 class AuthorSearch extends Component {
@@ -21,7 +22,7 @@ class AuthorSearch extends Component {
 
   componentDidMount = () => {
     const { auth } = this.props;
-    this.setState({ isLoading: true, loadingText: "Loading ..." });
+    this.setState({ isLoading: true, loadingText: "Loading..." });
     axios
       .get(`/authors`, tokenConfig(store.getState))
       .then((res) => {
@@ -181,7 +182,7 @@ class AuthorSearch extends Component {
       <div>
         <h2>Find an Author</h2>
         {isLoading ? (
-          <h4>{this.state.loadingText}</h4>
+          <h5 className="mt-3">{this.state.loadingText}</h5>
         ) : (
           authors
             .filter((author) => author.id.split("/").pop() != auth.user.author)
@@ -195,7 +196,14 @@ class AuthorSearch extends Component {
                 }}
                 key={index}
               >
-                <div>{author.displayName}</div>
+                <div>
+                  <Link
+                    className="text-decoration-none text-dark"
+                    to={`/profile/${author.id.split("/").pop()}`}
+                  >
+                    {author.displayName}
+                  </Link>
+                </div>
 
                 <div>
                   <button
@@ -212,37 +220,39 @@ class AuthorSearch extends Component {
             .slice(this.state.offset, this.state.limit)
         )}
 
-        <nav aria-label="Posts pagination">
-          <ul className="pagination">
-            <li className={`page-item ${page == 1 ? "disabled" : ""}`}>
-              <button
-                className="page-link"
-                aria-label="Next"
-                onClick={this.showPreviousAuthors.bind(this)}
+        {!isLoading && (
+          <nav aria-label="Posts pagination">
+            <ul className="pagination">
+              <li className={`page-item ${page == 1 ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  aria-label="Next"
+                  onClick={this.showPreviousAuthors.bind(this)}
+                >
+                  <span aria-hidden="true">&laquo;</span>
+                </button>
+              </li>
+              <li className="page-item active">
+                <a className="page-link" href="#">
+                  {page}
+                </a>
+              </li>
+              <li
+                className={`page-item ${
+                  authors.length < limit ? "disabled" : ""
+                }`}
               >
-                <span aria-hidden="true">&laquo;</span>
-              </button>
-            </li>
-            <li className="page-item active">
-              <a className="page-link" href="#">
-                {page}
-              </a>
-            </li>
-            <li
-              className={`page-item ${
-                authors.length < limit ? "disabled" : ""
-              }`}
-            >
-              <button
-                className="page-link"
-                aria-label="Next"
-                onClick={this.showNextAuthors.bind(this)}
-              >
-                <span aria-hidden="true">&raquo;</span>
-              </button>
-            </li>
-          </ul>
-        </nav>
+                <button
+                  className="page-link"
+                  aria-label="Next"
+                  onClick={this.showNextAuthors.bind(this)}
+                >
+                  <span aria-hidden="true">&raquo;</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        )}
       </div>
     );
   }

@@ -12,6 +12,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 import json
+from urllib.parse import urlparse
 
 class PostLikeViewSet(viewsets.ModelViewSet):
     authentication_classes = (CustomAuthentication,)
@@ -386,7 +387,16 @@ def add_author_to_database(request):
     if not author_validation.is_valid():
         return False, author_validation.error_messages
     else:
-        author, created = Author.objects.get_or_create(id = author_dict["id"])
+        if urlparse(author_dict["id"]).hostname in ("social-dis.herokuapp.com", "127.0.0.1"):
+            author_path = urlparse(author_dict["id"]).path
+            if author_path[-1] == '/':
+                author_path = author_path[:-1]
+            author_id = author_path.split("/")[-1]
+        else:
+            author_id = author_dict["id"]
+
+        author, created = Author.objects.get_or_create(id = author_id)
+
         author_dict.pop("id")
 
         if not created:

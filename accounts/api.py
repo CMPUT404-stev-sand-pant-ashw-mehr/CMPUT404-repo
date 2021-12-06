@@ -23,6 +23,44 @@ class RegisterAPI(generics.GenericAPIView):
     User & Author Registration
     """
     serializer_class = RegisterSerializer
+    
+    @swagger_auto_schema(
+        operation_description="POST /auth/register/",
+        properties={
+            "email": openapi.Schema(type=openapi.TYPE_STRING),
+            "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+            "username": openapi.Schema(type=openapi.TYPE_STRING),
+            "github": openapi.Schema(type=openapi.TYPE_STRING),
+            "password": openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "user": {
+                            "id": 1,
+                            "username": "abc",
+                            "author": "b0463cf2aabe4ef88e9332aa018142e5"
+                        }
+                    }
+                }
+                
+            ),
+            "400": openapi.Response(
+                description="Bad Reequest",
+                examples={
+                    "application/json":{
+                        "username": [
+                            "A user with that username already exists."
+                        ]
+                    }
+                }
+                
+            )
+        },
+        tags=['Login'],
+    )
     def post(self, request):
         # node check
         valid = is_valid_node(request)
@@ -64,6 +102,60 @@ class LoginAPI(generics.GenericAPIView):
     '''
     serializer_class = LoginSerializer
 
+    @swagger_auto_schema(
+        operation_description="POST /auth/register/",
+        properties={
+            "email": openapi.Schema(type=openapi.TYPE_STRING),
+            "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+            "username": openapi.Schema(type=openapi.TYPE_STRING),
+            "github": openapi.Schema(type=openapi.TYPE_STRING),
+            "password": openapi.Schema(type=openapi.TYPE_STRING),
+        },
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "user": {
+                            "id": 1,
+                            "username": "abc",
+                            "author": "90d16d62804347cb806cb9812f617a7f"
+                        },
+                        "author": {
+                            "id": "http://127.0.0.1:8000/author/90d16d62804347cb806cb9812f617a7f",
+                            "type": "author",
+                            "host": "http://127.0.0.1:8000",
+                            "url": "http://127.0.0.1:8000/author/90d16d62804347cb806cb9812f617a7f",
+                            "displayName": "abc",
+                            "github": "abc@github.com",
+                            "profileImage": ""
+                        },
+                        "token": "cfcf3c9aa1f4858e8de8502762a7d3aea4727e16b1585a67c4ca1d3e0ad35178"
+                    }
+                }
+                
+            ),
+            "400": openapi.Response(
+                description="Bad Reequest",
+                examples={
+                    "application/json":{
+                        "non_field_errors": [
+                            "Incorrect username or password."
+                        ]
+                    }
+                }
+            ),
+            "401": openapi.Response(
+                description="Unauthorized",
+                examples={
+                    "application/json":{
+                        "message": "Unauthorized User"
+                    }
+                }
+            )
+        },
+        tags=['Register'],
+    )
     def post(self, request, *args, **kwargs):
         
         # node check
@@ -103,22 +195,28 @@ class ProfileAPI(generics.RetrieveAPIView):
             'author': AuthorSerializer(User.objects.select_related('author').get(username=request.user.username).author).data
         }, status=status.HTTP_200_OK)
 
-
-@api_view(['GET'])
-@authentication_classes([CustomAuthentication])
-@permission_classes([AccessPermission])
 @swagger_auto_schema(
+    method='get',
     operation_description="GET /connection/authors",
     responses={
             "200": openapi.Response(
                 description="OK",
                 examples={
-                   "application/json": {"detail": True}
+                   "application/json": {"foregin authors": []}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
                 }
             )
     },
     tags=['Get all foreign authors'],
 )
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
 def get_foregin_authors_view(request):
     if request.method == "GET":
         foreign_authors = get_list_foregin_authors()
@@ -127,22 +225,28 @@ def get_foregin_authors_view(request):
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
-
-@api_view(['GET'])
-@authentication_classes([CustomAuthentication])
-@permission_classes([AccessPermission])
 @swagger_auto_schema(
+    method='get',
     operation_description="GET /connection/posts",
     responses={
             "200": openapi.Response(
                 description="OK",
                 examples={
-                   "application/json": {"detail": True}
+                   "application/json": {"items": []}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
                 }
             )
     },
     tags=['Get all foreign posts'],
 )
+@api_view(['GET'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
 def get_foregin_posts_view(request):
     if request.method == "GET":
         foreign_posts = get_list_foregin_posts()
@@ -154,7 +258,31 @@ def get_foregin_posts_view(request):
 '''
 get foreign author/post detail
 '''
-
+@swagger_auto_schema(
+    method='get',
+    operation_description="GET connection/author-detail/<str:author_id>",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"items": []}
+                }
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                   "application/json": {"detail": "can't find this author"}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
+                }
+            )
+    },
+    tags=['Get all foreign author details'],
+)
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
@@ -169,6 +297,32 @@ def get_foregin_author_detail_view(request, author_id):
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
+    
+@swagger_auto_schema(
+    method='get',
+    operation_description="GET connection/post-detail/<str:post_id>",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"items": []}
+                }
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                   "application/json": {"detail": "can't find this post"}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
+                }
+            )
+    },
+    tags=['Get all foreign post details'],
+)
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
@@ -185,7 +339,26 @@ def get_foregin_post_detail_view(request, post_id):
 '''
 get author's github activities
 '''   
-    
+@swagger_auto_schema(
+    method='get',
+    operation_description="GET author/<str:author_id>/github",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"detail": "view"}
+                }
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                   "application/json": {"detail": "github not provided!"},
+                   "application/json": {"detail": "github not found!"}
+                }
+            )
+    },
+    tags=['Github View'],
+)
 @api_view([ 'GET'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
@@ -206,7 +379,31 @@ def github_view(request, author_id):
 '''
 send friend request to other teams
 '''       
-
+@swagger_auto_schema(
+    method='post',
+    operation_description="POST connection/friend-request/<str:local_author_id>/<str:foreign_author_id>",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"message": "incoming response text"}
+                }
+            ),
+            "404": openapi.Response(
+                description="Not Found",
+                examples={
+                   "application/json": {"detail": "incoming response"}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
+                }
+            )
+    },
+    tags=['Send Friend Request'],
+)
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
@@ -223,7 +420,26 @@ def send_friend_request(request, local_author_id, foreign_author_id):
 '''
 comment & like foreign posts
 '''    
-
+@swagger_auto_schema(
+    method='post',
+    operation_description="POST connection/<str:author_id>/like/<str:post_id>",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"detail": f"author has already liked a foreign post"},
+                   "application/json": {"detail": f"author liked a foreign post"}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
+                }
+            )
+    },
+    tags=['Like Foreign Posts'],
+)
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
@@ -238,6 +454,27 @@ def like_foregin_post(request, post_id, author_id):
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+
+@swagger_auto_schema(
+    method='post',
+    operation_description="POST connection/<str:author_id>/comment/<str:post_id>/<str:content>",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"detail": f"author has already commented on a foreign post"},
+                   "application/json": {"detail": f"author commented a foreign post"}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
+                }
+            )
+    },
+    tags=['Comment Foreign Posts'],
+)
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
@@ -246,11 +483,31 @@ def comment_foregin_post(request, post_id, author_id, content):
     if request.method == "POST":
         res = comment_foreign_posts(post_id, author, content)
         if res.text ==  '{"succ":false}':
-            return Response({"detail": f"{author.displayName} has already liked a foreign post"}, status=status.HTTP_200_OK)
-        return Response({"detail": f"{author.displayName} liked a foreign post"}, status=status.HTTP_200_OK)
+            return Response({"detail": f"{author.displayName} has already commented a foreign post"}, status=status.HTTP_200_OK)
+        return Response({"detail": f"{author.displayName} commented on a foreign post"}, status=status.HTTP_200_OK)
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+
+@swagger_auto_schema(
+    method='post',
+    operation_description="POST connection/comments",
+    responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                   "application/json": {"detail": "incoming response"}
+                }
+            ),
+            "405": openapi.Response(
+                description="Method Not Allowed",
+                examples={
+                   "application/json": {"message": "Method Not Allowed"}
+                }
+            )
+    },
+    tags=['View Comment Foreign Posts'],
+)
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
 @permission_classes([AccessPermission])
