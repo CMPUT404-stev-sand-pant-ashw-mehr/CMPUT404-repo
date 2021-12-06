@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getForeignPost } from "../../actions/posts";
 import Moment from "react-moment";
-import { FaRegClock } from "react-icons/fa";
+import { FaRegClock, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import ReactMarkDown from "react-markdown";
 import axios from "axios";
 import { tokenConfig } from "../../actions/auth";
@@ -133,84 +133,89 @@ export class ForeignPost extends Component {
     return (
       post && (
         <Fragment>
-          <div className="card">
-            <div className="card-header">
-              @{post.author.displayName}
-              <span className="float-end">
-                <FaRegClock />
-                &nbsp;<Moment fromNow>{post.published}</Moment>
-              </span>
-            </div>
-            <div className="card-body">
-              <h5 className="card-title">{post.title}</h5>
-              <p className="card-text">{post.description}</p>
-              {this.renderPostContent()}
-              <a href="#" className="btn btn-primary">
-                Go somewhere
-              </a>
-            </div>
-            <div className="card-footer">
-              Source: <em>{post.source}</em>
-            </div>
-          </div>
-          <br />
-          <div className="card">
-            <div className="card-body">
-              <form onSubmit={this.onSubmit}>
-                <h5 className="card-title">Add a comment</h5>
-                <p className="card-text">
-                  <input
-                    className="form-control"
-                    placholder="Add a comment"
-                    type="text"
-                    name="commentContent"
-                    onChange={this.onChange}
-                    value={commentContent}
-                  />
-                </p>
-                <button type="submit" className="btn btn-primary">
-                  Post
-                </button>
-              </form>
-            </div>
-          </div>
-          <div>
-            <button
-              className="btn btn-outline-primary mt-4 btn-sm"
-              onClick={this.toggleComment}
-            >
-              {!showComments ? (
-                <div>
-                  Show Comments <FaArrowDown />
+          {!post.author.displayName && <h5>Loading...</h5>}
+          {post.author.displayName && (
+            <div>
+              <div className="card">
+                <div className="card-header">
+                  @{post.author.displayName}
+                  <span className="float-end">
+                    <FaRegClock />
+                    &nbsp;<Moment fromNow>{post.published}</Moment>
+                  </span>
                 </div>
-              ) : (
-                <div>
-                  Hide Comments <FaArrowUp />
+                <div className="card-body">
+                  <h5 className="card-title">{post.title}</h5>
+                  <p className="card-text">{post.description}</p>
+                  {this.renderPostContent()}
+                  <a href="#" className="btn btn-primary">
+                    Go somewhere
+                  </a>
                 </div>
-              )}
-            </button>
-            {showComments &&
-              this.state.comments.map((item, index) => (
-                <div
-                  key={index}
-                  className={
-                    index == this.state.comments.length - 1
-                      ? "card mt-2 mb-5"
-                      : "card mt-2"
-                  }
+                <div className="card-footer">
+                  Source: <em>{post.source}</em>
+                </div>
+              </div>
+              <br />
+              <div className="card">
+                <div className="card-body">
+                  <form onSubmit={this.onSubmit}>
+                    <h5 className="card-title">Add a comment</h5>
+                    <p className="card-text">
+                      <input
+                        className="form-control"
+                        placholder="Add a comment"
+                        type="text"
+                        name="commentContent"
+                        onChange={this.onChange}
+                        value={commentContent}
+                      />
+                    </p>
+                    <button type="submit" className="btn btn-primary">
+                      Post
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div>
+                <button
+                  className="btn btn-outline-primary mt-4 btn-sm"
+                  onClick={this.toggleComment}
                 >
-                  <div className="card-header">
-                    @{item.authorId.displayName}
-                    <h6 className="card-text secondary float-end">
-                      <Moment fromNow>{item.publishedOn}</Moment>
-                    </h6>
-                  </div>
-                  <div className="card-body">
-                    <p className="card-text">{item.text}</p>
-                  </div>
-                </div>
-              ))}
-          </div>
+                  {!showComments ? (
+                    <div>
+                      Show Comments <FaArrowDown />
+                    </div>
+                  ) : (
+                    <div>
+                      Hide Comments <FaArrowUp />
+                    </div>
+                  )}
+                </button>
+                {showComments &&
+                  this.state.comments.map((item, index) => (
+                    <div
+                      key={index}
+                      className={
+                        index == this.state.comments.length - 1
+                          ? "card mt-2 mb-5"
+                          : "card mt-2"
+                      }
+                    >
+                      <div className="card-header">
+                        @{item.authorId.displayName}
+                        <h6 className="card-text secondary float-end">
+                          <Moment fromNow>{item.publishedOn}</Moment>
+                        </h6>
+                      </div>
+                      <div className="card-body">
+                        <p className="card-text">{item.text}</p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </Fragment>
       )
     );
