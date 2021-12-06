@@ -34,6 +34,7 @@ export class Feed extends Component {
     selectedAuthor: {},
     isFollower: false,
     youFollow: false,
+    sentRequest: false,
     isFriend: false,
     open: false,
     redirect: "",
@@ -87,6 +88,13 @@ export class Feed extends Component {
                 open: true,
               });
             });
+              axios.get(`/author/${foreignAuthorId}/inbox/check/${auth.user.author}`,
+              tokenConfig(store.getState))
+              .then((resp)=>{
+                this.setState({
+                  sentRequest: resp.data.details,
+                });
+            })
         });
     } else {
       this.setState(this.init_state);
@@ -97,27 +105,27 @@ export class Feed extends Component {
     const foreignAuthorId = this.parseData(this.state.selectedAuthor);
     const authorId = this.props.auth.user.author;
 
-    axios
-      .get(`/author/${authorId}`, tokenConfig(store.getState))
-      .then((resp) => {
-        axios
-          .post(
-            `/author/${foreignAuthorId}/inbox`,
-            {
-              type: "follow",
-              summary: `${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
-              actor: resp.data, //author,
-              object: this.state.selectedAuthor, //foreignAuthor
-            },
-            tokenConfig(store.getState)
-          )
-          .then((resp) => {
-            this.setState({
-              open: false,
+      axios
+        .get(`/author/${authorId}`, tokenConfig(store.getState))
+        .then((resp) => {
+          axios
+            .post(
+              `/author/${foreignAuthorId}/inbox`,
+              {
+                type: "follow",
+                summary: `${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
+                actor: resp.data, //author,
+                object: this.state.selectedAuthor, //foreignAuthor
+              },
+              tokenConfig(store.getState)
+            )
+            .then((resp) => {
+              this.setState({
+                open: false,
+              });
             });
             console.log("Sent to Inbox");
           });
-      });
   }
 
   handleDeleteFollower() {
@@ -336,13 +344,7 @@ export class Feed extends Component {
         <Dialog open={this.state.open} onClose={() => this.handleCloseDialog()}>
           <div className="d-flex flex-row">
             <div className="p-3">
-              {this.state.youFollow && this.state.isFollower
-                ? "Your friend"
-                : this.state.isFollower
-                ? "Follows you"
-                : this.state.youFollow
-                ? "You follow"
-                : "Send a Request"}
+              {this.state.youFollow && this.state.isFollower? "Your friend" : this.state.sentRequest ? "Request Pending" : (this.state.isFollower ? "Follows you": (this.state.youFollow ? "You follow": "Send a Request"))}
             </div>
             <div className="p-3">
               <div className="d-flex flex-row-reverse">
@@ -367,14 +369,12 @@ export class Feed extends Component {
                   >
                     <FaUserAlt />
                   </div>
-                </div>
-                {!(this.state.isFriend || this.state.youFollow) && (
-                  <div className="p-2">
+                  </div>
+                  {!(this.state.isFriend || this.state.youFollow || this.state.sentRequest) && <div className="p-2">
                     <div onClick={() => this.handleFollow()}>
                       <FaUserPlus />
                     </div>
-                  </div>
-                )}
+                  </div>}
               </DialogActions>
             </div>
           </div>
