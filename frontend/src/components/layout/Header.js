@@ -55,7 +55,7 @@ export class Header extends Component {
         >
           {user ? user.username + " " : ""}
           <img
-            src={user ? author.github + ".png" : ""}
+            src={user && author ? author.github + ".png" : ""}
             style={{ height: 25 }}
             className="img rounded-circle"
           ></img>
