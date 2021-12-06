@@ -78,7 +78,10 @@ class AuthorSearch extends Component {
   }
 
   handleFollow(author) {
-    if (this.determineType(author.id) == "Follow!") {
+    if (
+      this.determineType(author.id) == "Follow!" ||
+      this.determineType(author.id) == "Follower"
+    ) {
       const foreignAuthorId = author.id.split("/").pop();
       const authorId = this.props.auth.user.author;
 
