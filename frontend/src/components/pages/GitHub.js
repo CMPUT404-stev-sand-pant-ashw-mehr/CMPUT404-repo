@@ -56,7 +56,6 @@ class GitHub extends Component {
 
     return (
       <div>
-        <h1>Github Activity</h1>
         {isLoading ? (
           <h5 className="mt-3">{this.state.loadingText}</h5>
         ) : (

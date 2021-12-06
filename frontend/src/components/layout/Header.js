@@ -155,6 +155,7 @@ export class Header extends Component {
                     </g>
                   </g>
                 </svg>
+                <span className="fs-5">Social Distribution</span>
               </NavLink>
               <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto">
                 {isAuthenticated ? authNavLinks : guestNavLinks}
