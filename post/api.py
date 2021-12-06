@@ -483,8 +483,6 @@ class PostViewSet(viewsets.ModelViewSet):
             unlisted = str(request_keys['unlisted']).strip().lower()
             if unlisted not in ["false", "true"]:
                 return Response({"detail": "unlisted must be boolean"}, status=status.HTTP_400_BAD_REQUEST)
-            elif(data['contentType'] == "image"):
-                data['unlisted'] = True
             elif unlisted == 'false':
                 data['unlisted'] = False
             else:

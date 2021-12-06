@@ -18,7 +18,7 @@ export class Create extends Component {
       contentType: "text/plain",
       content: "",
       visibility: "PUBLIC",
-      unlisted: false,
+      unlisted: "false",
       imagePreview: null,
       img: null,
       base64: null,
@@ -66,7 +66,7 @@ export class Create extends Component {
       contentType: "",
       content: "",
       visibility: "",
-      unlisted: false,
+      unlisted: "false",
     });
   }
 
@@ -81,6 +81,7 @@ export class Create extends Component {
       description,
       contentType,
       content,
+      unlisted,
       visibility,
     } = this.state;
 
@@ -93,7 +94,7 @@ export class Create extends Component {
       contentType,
       content,
       visibility,
-      unlisted: false,
+      unlisted,
       categories: ["web"],
     };
     axios
@@ -119,6 +120,7 @@ export class Create extends Component {
       contentType,
       content,
       visibility,
+      unlisted,
     } = this.state;
 
     const { createPost } = this.props;
@@ -197,6 +199,21 @@ export class Create extends Component {
               />
             </div>
           )}
+        </div>
+        <div className="form-group">
+          <label>Unlisted</label>
+          <select
+            className="form-control"
+            type="text"
+            name="unlisted"
+            onChange={(e) => {
+              this.setState({ unlisted: e.target.value });
+            }}
+            value={unlisted}
+          >
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
         </div>
         <div className="form-group">
           <label>Visibility</label>
