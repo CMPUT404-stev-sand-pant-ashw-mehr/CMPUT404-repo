@@ -264,7 +264,15 @@ class AuthorSearch extends Component {
               </li>
               <li
                 className={`page-item ${
-                  authors.length < limit ? "disabled" : ""
+                  authors
+                    .filter(
+                      (author) => author.id.split("/").pop() != auth.user.author
+                    )
+                    .filter((author) =>
+                      author.displayName.includes(this.state.search)
+                    ).length < limit
+                    ? "disabled"
+                    : ""
                 }`}
               >
                 <button
