@@ -4,7 +4,11 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { getPosts, getForeignPosts, deletePost } from "../../actions/posts";
 import { addFollower } from "../../actions/followers";
-import { CREATE_ALERT, LIKE_POST } from "../../actions/types";
+import {
+  CREATE_ALERT,
+  LIKE_POST,
+  LIKE_FOREIGN_POST,
+} from "../../actions/types";
 // import ReactMarkDown from "react-markdown";
 
 import Moment from "react-moment";
@@ -203,9 +207,17 @@ export class FullFeed extends Component {
   }
 
   likePost(post) {
-    if (this.renderHost(post.author.host) == "") {
-      const { user } = this.props;
+    const { user } = this.props;
 
+    let likeObj = {
+      type: "Like",
+      author: user.author,
+      object: post.id,
+      "@context": "https://www.w3.org/ns/activitystreams",
+      summary: `${user.user.username} Likes your post`,
+    };
+
+    if (this.renderHost(post.author.host) == "") {
       axios
         .post(
           `/author/${post.author_id}/post/${post.id.split("/").pop()}/likes`,
@@ -213,13 +225,6 @@ export class FullFeed extends Component {
           tokenConfig(store.getState)
         )
         .then((resp) => {
-          let likeObj = {
-            type: "Like",
-            author: user.author,
-            object: post.id,
-            "@context": "https://www.w3.org/ns/activitystreams",
-            summary: `${user.user.username} Likes your post`,
-          };
           axios
             .post(
               `/author/${post.author_id}/inbox`,
@@ -255,6 +260,11 @@ export class FullFeed extends Component {
           tokenConfig(store.getState)
         )
         .then((res) => {
+          post.likes = [likeObj];
+          store.dispatch({
+            type: LIKE_FOREIGN_POST,
+            payload: post,
+          });
           store.dispatch({
             type: CREATE_ALERT,
             payload: {
