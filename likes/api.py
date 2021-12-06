@@ -391,7 +391,7 @@ def add_author_to_database(request):
             author_path = urlparse(author_dict["id"]).path
             if author_path[-1] == '/':
                 author_path = author_path[:-1]
-            author_id = author_path.split("/author/")[-1]
+            author_id = author_path.split("/")[-1]
         else:
             author_id = author_dict["id"]
 
