@@ -333,7 +333,11 @@ export class FullFeed extends Component {
                     )}
                   </p>
                   <Link
-                    to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
+                    to={
+                      this.renderHost(post.author.host) == ""
+                        ? `/posts/${post.author_id}/${post.id.split("/").pop()}`
+                        : `/foreign/posts/${post.id.split("/").pop()}`
+                    }
                     className="btn btn-outline-primary"
                   >
                     View post →
