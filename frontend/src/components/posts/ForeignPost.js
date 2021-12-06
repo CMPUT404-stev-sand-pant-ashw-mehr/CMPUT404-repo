@@ -128,6 +128,8 @@ export class ForeignPost extends Component {
 
   render() {
     const { post, commentContent } = this.props;
+    const { showComments } = this.state;
+
     return (
       post && (
         <Fragment>
@@ -174,29 +176,40 @@ export class ForeignPost extends Component {
           </div>
           <div>
             <button
-              className="btn btn-primary"
-              style={{ margin: 20 }}
+              className="btn btn-outline-primary mt-4 btn-sm"
               onClick={this.toggleComment}
             >
-              Show Comments
-            </button>
-            {this.state.comments.map((item, index) => (
-              <div
-                style={{ margin: 10, border: "1px solid #a6a6a6" }}
-                key={index}
-                className="card"
-              >
-                <div className="card-header">@{item.authorId.displayName}</div>
-                <div className="card-body">
-                  <p className="card-text" style={{ fontSize: 25 }}>
-                    {item.text}
-                  </p>
-                  <p className="card-text secondary" style={{ fontSize: 10 }}>
-                    Created at {item.publishedOn}
-                  </p>
+              {!showComments ? (
+                <div>
+                  Show Comments <FaArrowDown />
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div>
+                  Hide Comments <FaArrowUp />
+                </div>
+              )}
+            </button>
+            {showComments &&
+              this.state.comments.map((item, index) => (
+                <div
+                  key={index}
+                  className={
+                    index == this.state.comments.length - 1
+                      ? "card mt-2 mb-5"
+                      : "card mt-2"
+                  }
+                >
+                  <div className="card-header">
+                    @{item.authorId.displayName}
+                    <h6 className="card-text secondary float-end">
+                      <Moment fromNow>{item.publishedOn}</Moment>
+                    </h6>
+                  </div>
+                  <div className="card-body">
+                    <p className="card-text">{item.text}</p>
+                  </div>
+                </div>
+              ))}
           </div>
         </Fragment>
       )

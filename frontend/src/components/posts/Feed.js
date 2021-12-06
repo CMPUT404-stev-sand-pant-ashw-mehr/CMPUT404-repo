@@ -37,6 +37,8 @@ export class Feed extends Component {
     isFriend: false,
     open: false,
     redirect: "",
+    likeListOpen: false,
+    likeList: [],
   };
 
   state = this.init_state;
@@ -48,7 +50,7 @@ export class Feed extends Component {
 
   componentDidMount() {
     this.setState({
-      currentUser: this.props.auth.user
+      currentUser: this.props.auth.user,
     });
     this.props.getPosts();
   }
@@ -57,7 +59,7 @@ export class Feed extends Component {
     let authorId = this.state.currentUser.author;
     let foreignAuthorId = this.parseData(foreignAuthor);
 
-    if(authorId!==foreignAuthorId){
+    if (authorId !== foreignAuthorId) {
       this.setState({
         selectedAuthor: foreignAuthor,
       });
@@ -75,65 +77,76 @@ export class Feed extends Component {
             isFollower: resp.data.detail,
           });
           axios
-          .get(
-            `/author/${foreignAuthorId}/followers/${auth.user.author}`,
-            tokenConfig(store.getState)
-          )
-          .then((resp) => {
-            this.setState({
-              youFollow: resp.data.detail,
-              open: true,
+            .get(
+              `/author/${foreignAuthorId}/followers/${auth.user.author}`,
+              tokenConfig(store.getState)
+            )
+            .then((resp) => {
+              this.setState({
+                youFollow: resp.data.detail,
+                open: true,
+              });
             });
-          });
         });
-    }
-    else {
+    } else {
       this.setState(this.init_state);
     }
   }
 
   handleFollow() {
-      const foreignAuthorId = this.parseData(this.state.selectedAuthor);
-      const authorId = this.props.auth.user.author;
+    const foreignAuthorId = this.parseData(this.state.selectedAuthor);
+    const authorId = this.props.auth.user.author;
 
-      axios
-        .get(`/author/${authorId}`, tokenConfig(store.getState))
-        .then((resp) => {
-          axios
-            .post(
-              `/author/${foreignAuthorId}/inbox`,
-              {
-                type: "follow",
-                summary: `${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
-                actor: resp.data, //author,
-                object: this.state.selectedAuthor, //foreignAuthor
-              },
-              tokenConfig(store.getState)
-            )
-            .then((resp) => {
-              this.setState({
-                open: false,
-              });
-              console.log("Sent to Inbox");
+    axios
+      .get(`/author/${authorId}`, tokenConfig(store.getState))
+      .then((resp) => {
+        axios
+          .post(
+            `/author/${foreignAuthorId}/inbox`,
+            {
+              type: "follow",
+              summary: `${resp.data.displayName} wants to follow ${this.state.selectedAuthor.displayName}`,
+              actor: resp.data, //author,
+              object: this.state.selectedAuthor, //foreignAuthor
+            },
+            tokenConfig(store.getState)
+          )
+          .then((resp) => {
+            this.setState({
+              open: false,
             });
-        });
+            console.log("Sent to Inbox");
+          });
+      });
   }
 
   handleDeleteFollower() {
-      const foreignAuthorId = this.parseData(request.actor);
-      const authorId = this.parseData(request.object);
-      axios
+    const foreignAuthorId = this.parseData(request.actor);
+    const authorId = this.parseData(request.object);
+    axios
       .delete(
         `/author/${authorId}/followers/${foreignAuthorId}`,
         tokenConfig(store.getState),
         {}
-      ).then((resp)=>{
-        axios.delete(`/author/${authorId}/inbox/${foreignAuthorId}`,
-              tokenConfig(store.getState),{}
-            ).then((resp)=>{
-              this.fetchRequests();
-            });
-      }) 
+      )
+      .then((resp) => {
+        axios
+          .delete(
+            `/author/${authorId}/inbox/${foreignAuthorId}`,
+            tokenConfig(store.getState),
+            {}
+          )
+          .then((resp) => {
+            this.fetchRequests();
+          });
+      });
+  }
+
+  openLikeList(post) {
+    this.setState({
+      likeListOpen: true,
+      likeList: post.likes,
+    });
   }
 
   redirectToProfile(data) {
@@ -228,7 +241,15 @@ export class Feed extends Component {
                   )}
                 </h2>
 
-                <h2 className="text-secondary mt-4">{post.likes.length}</h2>
+                <h2 className="text-secondary mt-4">
+                  <div
+                    onClick={() => {
+                      this.openLikeList(post);
+                    }}
+                  >
+                    {post.likes.length}
+                  </div>
+                </h2>
               </div>
               <div className="card-body">
                 <div className="small text-muted">
@@ -299,7 +320,13 @@ export class Feed extends Component {
         <Dialog open={this.state.open} onClose={() => this.handleCloseDialog()}>
           <div className="d-flex flex-row">
             <div className="p-3">
-              {this.state.youFollow && this.state.isFollower? "Your friend" : (this.state.isFollower ? "Follows you": (this.state.youFollow ? "You follow": "Send a Request"))}
+              {this.state.youFollow && this.state.isFollower
+                ? "Your friend"
+                : this.state.isFollower
+                ? "Follows you"
+                : this.state.youFollow
+                ? "You follow"
+                : "Send a Request"}
             </div>
             <div className="p-3">
               <div className="d-flex flex-row-reverse">
@@ -310,30 +337,51 @@ export class Feed extends Component {
             </div>
           </div>
 
-          
+          <div className="d-flex flex-row justify-content-center">
+            <DialogContent>
+              @{this.state.selectedAuthor.displayName}
+            </DialogContent>
             <div className="d-flex flex-row justify-content-center">
-              <DialogContent>
-                @{this.state.selectedAuthor.displayName}
-              </DialogContent>
-              <div className="d-flex flex-row justify-content-center">
-                <DialogActions>
-                  <div className="p-2">
-                    <div
-                      onClick={() =>
-                        this.redirectToProfile(this.state.selectedAuthor)
-                      }
-                    >
-                      <FaUserAlt />
-                    </div>
+              <DialogActions>
+                <div className="p-2">
+                  <div
+                    onClick={() =>
+                      this.redirectToProfile(this.state.selectedAuthor)
+                    }
+                  >
+                    <FaUserAlt />
                   </div>
-                  {!(this.state.isFriend || this.state.youFollow) && <div className="p-2">
+                </div>
+                {!(this.state.isFriend || this.state.youFollow) && (
+                  <div className="p-2">
                     <div onClick={() => this.handleFollow()}>
                       <FaUserPlus />
                     </div>
-                  </div>}
-                </DialogActions>
+                  </div>
+                )}
+              </DialogActions>
+            </div>
+          </div>
+        </Dialog>
+
+        <Dialog
+          open={this.state.likeListOpen}
+          onClose={() => this.handleCloseDialog()}
+        >
+          <div className="d-flex flex-row">
+            <div className="p-3">
+              {this.state.likeList.map((like) => (
+                <div>{like.author.displayName}</div>
+              ))}
+            </div>
+            <div className="p-3">
+              <div className="d-flex flex-row-reverse">
+                <div onClick={() => this.handleCloseDialog()}>
+                  <FaWindowClose />
+                </div>
               </div>
             </div>
+          </div>
         </Dialog>
       </Fragment>
     );
