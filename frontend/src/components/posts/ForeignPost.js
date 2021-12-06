@@ -54,7 +54,10 @@ export class ForeignPost extends Component {
         tokenConfig(store.getState)
       )
       .then((res) => {
-        this.setState({ comments: res.data });
+        this.setState({
+          comments:
+            res.data != "There are no comments on the post" ? res.data : [],
+        });
       })
       .catch((err) => {
         console.log(err.message);
@@ -175,8 +178,7 @@ export class ForeignPost extends Component {
               style={{ margin: 20 }}
               onClick={this.toggleComment}
             >
-              {" "}
-              show comments{" "}
+              Show Comments
             </button>
             {this.state.comments.map((item, index) => (
               <div
