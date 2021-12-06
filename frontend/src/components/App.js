@@ -11,6 +11,7 @@ import Alert from "./layout/Alert";
 import Header from "./layout/Header";
 import Feed from "./posts/Feed";
 import ForeignFeed from "./posts/ForeignFeed";
+import FullFeed from "./posts/FullFeed";
 import Create from "./posts/Create";
 import Post from "./posts/Post";
 import ForeignPost from "./posts/ForeignPost";
@@ -55,6 +56,7 @@ class App extends Component {
                   <AuthRoute exact path="/inbox" component={Inbox} />
                   <AuthRoute exact path="/posts" component={Feed} />
                   <AuthRoute exact path="/foreign" component={ForeignFeed} />
+                  <AuthRoute exact path="/feed" component={FullFeed} />
                   <AuthRoute exact path="/authors" component={AuthorSearch} />
                   <AuthRoute exact path="/posts/create" component={Create} />
                   <AuthRoute

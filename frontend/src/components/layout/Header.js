@@ -10,6 +10,13 @@ export class Header extends Component {
     const authNavLinks = (
       <Fragment>
         <NavLink
+          to="/feed"
+          activeClassName="text-decoration-underline"
+          className="me-3 py-2 text-dark text-decoration-none"
+        >
+          Full Feed
+        </NavLink>
+        <NavLink
           to="/posts"
           exact={true}
           activeClassName="text-decoration-underline"
