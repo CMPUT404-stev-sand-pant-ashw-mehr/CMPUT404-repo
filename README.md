@@ -37,18 +37,20 @@ NOTE: Postgres is required
 On Linux:
 
 1. Install postgres using:
+
 ```bash
  $ sudo apt-get install libpq-dev postgresql postgresql-contrib
 
 ```
 
 2. Restart psql service with
+
 ```bash
 $ sudo service postgresql restart
 ```
 
-
 3. To set up the database for postgres:
+
 ```bash
 
    $ sudo su - postgres
@@ -59,11 +61,8 @@ $ sudo service postgresql restart
    $ Quit psql with `\q` then `exit';
 
 ```
-        
 
 NOTE: It is recommended to use a virtual environment.
-
-
 
 1. Clone the repository.
 2. Install required packages.
@@ -115,14 +114,14 @@ https://social-dis.herokuapp.com/docs/
 ```
 
 ## Basic Auth
+
 1. Register
 2. Fill out required fields: Username, Displayname, Email, Password
 3. Login
 
 
-
-
 ## Remote user Login
+
 1. username: socialdistribution_t03
 2. password: c404t03
 
@@ -196,4 +195,6 @@ Below is a list of our front-end React code where we used Ajax:
 
 ##### [Django Custom Permissions](https://docs.djangoproject.com/en/3.2/topics/auth/customizing/)
 
+
 #### [Github Events API](https://developer.github.com/v3/activity/events/types/)  
+##### [SVG Text Generation](https://maketext.io/)
