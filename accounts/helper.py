@@ -154,7 +154,12 @@ def comment_foreign_posts(post_id, author, content):
                              },
                              headers={'Referer': 'https://social-dis.herokuapp.com/'})
     return like_req
-    
+
+def view_comments_foreign_post(commentsUrl):
+    return requests.get(commentsUrl, 
+    auth=('a08b0c4d-8af0-4fed-a1ad-f64505c5aa4b','123456'),
+    headers={'Referer': 'https://social-dis.herokuapp.com/'}).json()
+
     
 def send_friend_request_helper(local_author_id, foreign_author_id):
     try:

@@ -9,12 +9,14 @@ from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper, like_foreign_posts, comment_foreign_posts
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper, like_foreign_posts, comment_foreign_posts, view_comments_foreign_post
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import uuid, requests
+import json
+
 
 class RegisterAPI(generics.GenericAPIView):
     """
@@ -246,5 +248,17 @@ def comment_foregin_post(request, post_id, author_id, content):
         if res.text ==  '{"succ":false}':
             return Response({"detail": f"{author.displayName} has already liked a foreign post"}, status=status.HTTP_200_OK)
         return Response({"detail": f"{author.displayName} liked a foreign post"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['POST'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def view_comment_foreign_post(request):
+    commentsUrl = request.data['commentsUrl']
+
+    if request.method == "POST":
+        res = view_comments_foreign_post(commentsUrl)
+        return Response(res, status=status.HTTP_200_OK)
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
