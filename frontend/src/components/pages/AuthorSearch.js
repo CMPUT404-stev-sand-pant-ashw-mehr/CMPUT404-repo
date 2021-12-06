@@ -10,10 +10,11 @@ import auth from "../../reducers/auth";
 class AuthorSearch extends Component {
   state = {
     authors: [],
-    isLoading: false,
-    loadingText: "",
+    isLoading: true,
+    loadingText: "Loading...",
     followers: [],
     followings: [],
+    search: "",
 
     page: 1,
     offset: 0,
@@ -22,14 +23,9 @@ class AuthorSearch extends Component {
 
   componentDidMount = () => {
     const { auth } = this.props;
-    this.setState({ isLoading: true, loadingText: "Loading..." });
     axios
       .get(`/authors`, tokenConfig(store.getState))
       .then((res) => {
-        this.setState({
-          authors: res.data.items,
-        });
-
         axios
           .get(
             `/author/${auth.user.author}/followings`,
@@ -48,9 +44,17 @@ class AuthorSearch extends Component {
               .then((respo) => {
                 this.setState({
                   followers: respo.data.items,
-                  isLoading: false,
-                  loadingText: "",
                 });
+
+                axios
+                  .get(`/connection/authors`, tokenConfig(store.getState))
+                  .then((respon) => {
+                    const allauthors = res.data.items.concat(respon.data.items);
+                    this.setState({
+                      authors: allauthors,
+                      isLoading: false,
+                    });
+                  });
               });
           });
       })
@@ -77,6 +81,12 @@ class AuthorSearch extends Component {
         console.log(resp.data.detail);
       });
   }
+
+  updateSearch = (e) => {
+    this.setState({
+      search: e.target.value,
+    });
+  };
 
   handleFollow(author) {
     if (
@@ -180,12 +190,25 @@ class AuthorSearch extends Component {
     const { auth } = this.props;
     return (
       <div>
-        <h2>Find an Author</h2>
+        {!isLoading ? (
+          <input
+            type="text"
+            class="form-control"
+            onChange={(e) => {
+              e.preventDefault();
+              this.updateSearch(e);
+            }}
+            placeholder="Search..."
+          />
+        ) : (
+          ""
+        )}
         {isLoading ? (
           <h5 className="mt-3">{this.state.loadingText}</h5>
         ) : (
           authors
             .filter((author) => author.id.split("/").pop() != auth.user.author)
+            .filter((author) => author.displayName.includes(this.state.search))
             .map((author, index) => (
               <div
                 className="card"
@@ -214,7 +237,9 @@ class AuthorSearch extends Component {
                   </button>
                 </div>
 
-                <div>{author.host}</div>
+                <div>
+                  <span className="badge bg-secondary">{author.host}</span>
+                </div>
               </div>
             ))
             .slice(this.state.offset, this.state.limit)
@@ -222,7 +247,7 @@ class AuthorSearch extends Component {
 
         {!isLoading && (
           <nav aria-label="Posts pagination">
-            <ul className="pagination">
+            <ul className="pagination mt-3">
               <li className={`page-item ${page == 1 ? "disabled" : ""}`}>
                 <button
                   className="page-link"
