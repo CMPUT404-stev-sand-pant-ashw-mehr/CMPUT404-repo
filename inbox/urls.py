@@ -7,5 +7,8 @@ urlpatterns = [
             name="inbox_url"),
     re_path(r"^author/(?P<author_id>[a-z0-9-\.-]+)/inbox/(?P<foreign_id>[a-z0-9-\.-]+)/?$", 
             InboxViewSet.as_view({"delete": "delete_from_inbox"}),
-            name="inbox_delete_url")
+            name="inbox_delete_url"),
+   re_path(r"^author/(?P<author_id>[a-z0-9-\.-]+)/inbox/check/(?P<foreign_id>[a-z0-9-\.-]+)/?$", 
+            InboxViewSet.as_view({"get": "check_in_inbox"}),
+            name="inbox_check_url")
 ]
