@@ -259,33 +259,7 @@ class InboxViewSet(viewsets.ModelViewSet):
             except:
                 return Response({"detail": "could not update"}, status=status.HTTP_404_NOT_FOUND)
 
-
-    def check_in_inbox(self, request, author_id=None, foreign_id=None):
-        result1, author= self.check_author_exists(author_id)
-        result2, foreign_author = self.check_author_exists(foreign_id)
-
-        if(result1 and result2):
-
-            items = list(Inbox.objects.filter(inbox_author_id=author_id).values())
-            
-            if(len(items)>0):
-                inbox = items[0]["items"]
-                try:
-                    for i in range(len(inbox)):
-                        item = inbox[i]
-                        if(item['type']=="follow"):
-                            temp = item['actor']['id'].split('/')
-                            id=temp[len(temp)-1]
-                            if id==foreign_id:
-                                return Response({"details":"true"}, status=status.HTTP_200_OK)
-
-                    return Response({"detail": "false"}, status=status.HTTP_200_OK)
-                    
-                except:
-                    return Response({"detail": "could not update"}, status=status.HTTP_404_NOT_FOUND)
-            return Response({"details":"false"}, status=status.HTTP_200_OK)
-            
-
+    
     def check_author_exists(self, author_id=None):
         # Check if an author exist given the author id. If it is, return the author. If not, return 404 Response
         try:
