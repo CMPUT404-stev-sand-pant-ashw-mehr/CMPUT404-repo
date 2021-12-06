@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { logout } from "../../actions/auth";
@@ -7,36 +7,56 @@ import { logout } from "../../actions/auth";
 export class Header extends Component {
   render() {
     const { isAuthenticated, user } = this.props.auth;
-    const authLinks = (
+    const authNavLinks = (
       <Fragment>
-        <Link
+        <NavLink
+          to="/posts"
+          exact={true}
+          activeClassName="text-decoration-underline"
+          className="me-3 py-2 text-dark text-decoration-none"
+        >
+          Feed
+        </NavLink>
+        <NavLink
           to="/foreign"
+          activeClassName="text-decoration-underline"
           className="me-3 py-2 text-dark text-decoration-none"
         >
           Foreign Posts
-        </Link>
-        <Link 
-          to="/github-activities" 
+        </NavLink>
+        <NavLink
+          to="/authors"
+          activeClassName="text-decoration-underline"
+          className="me-3 py-2 text-dark text-decoration-none"
+        >
+          Authors
+        </NavLink>
+        <NavLink
+          to="/github-activities"
+          activeClassName="text-decoration-underline"
           className="me-3 py-2 text-dark text-decoration-none"
         >
           GitHub Activity
-          </Link>
-        <Link to="/posts" className="me-3 py-2 text-dark text-decoration-none">
-          Feed
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           to="/posts/create"
+          activeClassName="text-decoration-underline"
           className="me-3 py-2 text-dark text-decoration-none"
         >
           Create Post
-        </Link>
-        <Link to="/inbox" className="me-3 py-2 text-dark text-decoration-none">
+        </NavLink>
+        <NavLink
+          to="/inbox"
+          activeClassName="text-decoration-underline"
+          className="me-3 py-2 text-dark text-decoration-none"
+        >
           Inbox
-        </Link>
+        </NavLink>
         <a
-          className="nav-link me-3 py-2 dropdown-toggle text-dark text-decoration-none"
+          activeClassName="text-decoration-underline"
+          className="nav-NavLink me-3 py-2 dropdown-toggle text-dark text-decoration-none"
           href="#"
-          id="navbarDarkDropdownMenuLink"
+          id="navbarDarkDropdownMenuNavLink"
           role="button"
           data-bs-toggle="dropdown"
           aria-expanded="false"
@@ -45,15 +65,15 @@ export class Header extends Component {
         </a>
         <ul
           className="dropdown-menu dropdown-menu-dark"
-          aria-labelledby="navbarDarkDropdownMenuLink"
+          aria-labelledby="navbarDarkDropdownMenuNavLink"
         >
           <li>
-            <Link
+            <NavLink
               to={`/profile/${user ? user.author : ""}`}
               className="dropdown-item btn btn-outline-primary me-2"
             >
               My Profile
-            </Link>
+            </NavLink>
           </li>
           <li>
             <a
@@ -68,7 +88,7 @@ export class Header extends Component {
       </Fragment>
     );
 
-    const guestLinks = (
+    const guestNavLinks = (
       <Fragment>
         <Link to="/login" className="btn btn-outline-primary me-2">
           Login
@@ -84,7 +104,7 @@ export class Header extends Component {
         <div className="col-lg-6 mx-auto pt-4">
           <header>
             <div className="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-              <Link
+              <NavLink
                 to={isAuthenticated ? "/posts" : "/"}
                 className="d-flex align-items-center text-dark text-decoration-none"
               >
@@ -105,9 +125,9 @@ export class Header extends Component {
                   ></path>
                 </svg>
                 <span className="fs-4">Social Distribution</span>
-              </Link>
+              </NavLink>
               <nav className="d-inline-flex mt-2 mt-md-0 ms-md-auto">
-                {isAuthenticated ? authLinks : guestLinks}
+                {isAuthenticated ? authNavLinks : guestNavLinks}
               </nav>
             </div>
           </header>

@@ -4,8 +4,6 @@ from likes.models import Like
 from post.models import Post
 from rest_framework import viewsets, status
 from rest_framework.response import Response 
-from knox.auth import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 from .serializers import LikeSerializer
 from author.serializer import AuthorSerializer
 from accounts.permissions import CustomAuthentication, AccessPermission
@@ -16,23 +14,9 @@ from drf_yasg import openapi
 import json
 
 class PostLikeViewSet(viewsets.ModelViewSet):
+    authentication_classes = (CustomAuthentication,)
+    permission_classes = (AccessPermission,)
     serializer_class = LikeSerializer
-    
-    def initialize_request(self, request, *args, **kwargs):
-     self.action = self.action_map.get(request.method.lower())
-     return super().initialize_request(request, *args, kwargs)
-    
-    def get_authenticators(self):
-        if self.action in ["get_post_likes"]:
-            return [CustomAuthentication()]
-        else:
-            return [TokenAuthentication()]
-    
-    def get_permissions(self):
-        if self.action in ["get_post_likes"]:
-            return [AccessPermission()]
-        else:
-            return [IsAuthenticated()]
         
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/post/< POST_ID >/likes",
@@ -160,24 +144,9 @@ class PostLikeViewSet(viewsets.ModelViewSet):
         
         
 class CommentLikeViewSet(viewsets.ModelViewSet):
+    authentication_classes = (CustomAuthentication,)
+    permission_classes = (AccessPermission,)
     serializer_class = LikeSerializer
-    
-    def initialize_request(self, request, *args, **kwargs):
-        self.action = self.action_map.get(request.method.lower())
-        return super().initialize_request(request, *args, kwargs)
-    
-    def get_authenticators(self):
-        if self.action in ["get_comment_likes"]:
-            return [CustomAuthentication()]
-        else:
-            return [TokenAuthentication()]
-    
-    def get_permissions(self):
-        if self.action in ["get_comment_likes"]:
-            return [AccessPermission()]
-        else:
-            return [IsAuthenticated()]
-    
     
     @swagger_auto_schema(
         operation_description="GET /service/author/< AUTHOR_ID >/post/< POST_ID >/comments/{ COMMENT_ID }/likes",
@@ -394,19 +363,20 @@ class AuthorLikeViewSet(viewsets.ModelViewSet):
 
 def add_author_to_database(request):
     try:
-        author_json = request.POST["author"]
+        request_data = json.loads(request.body.decode('utf-8'))
+        author_json = request_data["author"]
         if type(author_json) == dict:
             author_dict = author_json
         else:
             author_dict = json.loads(author_json)
-    except KeyError:
+    except json.JSONDecodeError as e:
+        return False, {"detail": f"Invalid author JSON: {e.msg}"}
+    except:
         try:
             author = Author.objects.get(user = request.user)
             return True, author
         except:
             return False, {"detail": "JSON author missing"}
-    except json.JSONDecodeError as e:
-        return False, {"detail": f"Invalid author JSON: {e.msg}"}
 
     author_validation = AuthorSerializer(data=author_dict)
     if not author_validation.is_valid():

@@ -3,6 +3,7 @@ from followers.api import FollowerViewSet, FriendViewSet
 
 urlpatterns = [
     re_path(r'^author/(?P<author_id>[a-z0-9:\.-]+)/followers/?$', FollowerViewSet.as_view({"get": "list"})),
+    re_path(r'^author/(?P<author_id>[a-z0-9:\.-]+)/followings/?$', FollowerViewSet.as_view({"get": "list_followings"})),
     re_path(r'^author/(?P<author_id>[a-z0-9:\.-]+)/followers/(?P<foreign_author_id>[a-z0-9/:\.-]+)/?$', FollowerViewSet.as_view({
         "get": "check_follower", 
         "put": "put_follower", 

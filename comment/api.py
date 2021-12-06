@@ -29,13 +29,13 @@ class CommentViewSet(viewsets.ModelViewSet):
      return super().initialize_request(request, *args, kwargs)
     
     def get_authenticators(self):
-        if self.action in ["get_post_comments", ]:
+        if self.action in ["get_post_comments", "add_comment_to_post"]:
             return [CustomAuthentication()]
         else:
             return [TokenAuthentication()]
     
     def get_permissions(self):
-        if self.action in ["get_post_comments",]:
+        if self.action in ["get_post_comments", "add_comment_to_post"]:
             return [AccessPermission()]
         else:
             return [IsAuthenticated()]
@@ -227,7 +227,8 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
         
         try:
-            author_json = request.data["author"]
+            request_data = json.loads(request.body.decode('utf-8'))
+            author_json = request_data["author"]
             if type(author_json) == dict:
                 author_dict = author_json
             else:

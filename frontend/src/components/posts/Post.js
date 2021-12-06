@@ -12,11 +12,10 @@ export class Post extends Component {
     commentContent: "",
     author: null,
     showComments: false,
-    comments:[]
+    comments: [],
   };
 
   renderPostContent = () => {
-    
     const { post } = this.props;
     switch (post.contentType) {
       case "text/plain":
@@ -24,11 +23,13 @@ export class Post extends Component {
       case "text/markdown":
         return <ReactMarkDown>{post.content}</ReactMarkDown>;
       case "image":
-        return <img style={{width:'80%'}} src={post.content} alt="Unavailable" />
+        return (
+          <img style={{ width: "80%" }} src={post.content} alt="Unavailable" />
+        );
       default:
         return <p>{post.content}</p>;
     }
-  }
+  };
 
   // resetForm() {
   //   this.setState({
@@ -40,25 +41,28 @@ export class Post extends Component {
     this.setState({
       [e.target.name]: e.target.value,
     });
-  
+
   getAuhorDetail = () => {
-    axios.get(`/author/${this.props.auth.user.author}`, {auth:{username:'socialdistribution_t03', password:'c404t03'}})
-    .then((res)=>{
-      // console.log("data: ");
-      // console.log(res.data);
-      this.setState({
-        author: res.data
+    axios
+      .get(`/author/${this.props.auth.user.author}`, {
+        auth: { username: "socialdistribution_t03", password: "c404t03" },
       })
-    }).catch((error)=>{
-      console.log("error: ", error);
-    })
-  }
-  
+      .then((res) => {
+        // console.log("data: ");
+        // console.log(res.data);
+        this.setState({
+          author: res.data,
+        });
+      })
+      .catch((error) => {
+        console.log("error: ", error);
+      });
+  };
 
   onSubmit = (e) => {
     e.preventDefault();
     const { commentContent } = this.state;
-    console.log("author: ", this.state.author)
+    console.log("author: ", this.state.author);
     const comment = {
       author: this.state.author,
       type: "comment",
@@ -66,20 +70,25 @@ export class Post extends Component {
       comment: commentContent,
     };
 
-    this.props.createPostComment(this.props.match.params.authorId, this.props.match.params.postId, comment);
+    this.props.createPostComment(
+      this.props.match.params.authorId,
+      this.props.match.params.postId,
+      comment
+    );
     // this.forceUpdate();
-    this.setState({commentContent:""});
+    this.setState({ commentContent: "" });
   };
 
   componentDidMount() {
     this.props.getPost(
       this.props.match.params.authorId,
-      this.props.match.params.postId,
+      this.props.match.params.postId
     );
-    this.getAuhorDetail()
+    this.getAuhorDetail();
   }
 
   getComments = () => {
+<<<<<<< HEAD
     axios.get(this.props.post.comments, {auth:{username:'socialdistribution_t03',password:'c404t03'}}, {"currentUser":this.props.auth.user.author})
     .then(res => {
       console.log(res.data.comments);
@@ -89,20 +98,32 @@ export class Post extends Component {
       console.log(err.message);
     });
   }
+=======
+    axios
+      .get(this.props.post.comments, {
+        auth: { username: "socialdistribution_t03", password: "c404t03" },
+      })
+      .then((res) => {
+        this.setState({ comments: res.data.comments });
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+>>>>>>> Development
 
   toggleComment = () => {
     const { showComments } = this.state;
     if (showComments) {
-      this.setState({ showComments:!showComments, comments:[] });
+      this.setState({ showComments: !showComments, comments: [] });
     } else {
       this.getComments();
-      this.setState({ showComments:!showComments });
+      this.setState({ showComments: !showComments });
     }
-  }
+  };
 
   render() {
     const { post, commentContent } = this.props;
-    
     return (
       post && (
         <Fragment>
@@ -148,17 +169,31 @@ export class Post extends Component {
             </div>
           </div>
           <div>
-          <button className="btn btn-primary" style={{margin:20}} onClick={this.toggleComment}> show comments </button>
-          {this.state.comments.map((item, index)=> 
-            <div style={{margin:10, border:'1px solid #a6a6a6'}} key={index} className="card">
-              <div className="card-header">@{item.author.displayName}</div>
-              <div className="card-body">
-                <p className="card-text" style={{fontSize:25}}>{item.comment}</p>
-                <p className="card-text secondary" style={{fontSize:10}}>Created at {item.published}</p>
+            <button
+              className="btn btn-primary"
+              style={{ margin: 20 }}
+              onClick={this.toggleComment}
+            >
+              {" "}
+              show comments{" "}
+            </button>
+            {this.state.comments.map((item, index) => (
+              <div
+                style={{ margin: 10, border: "1px solid #a6a6a6" }}
+                key={index}
+                className="card"
+              >
+                <div className="card-header">@{item.author.displayName}</div>
+                <div className="card-body">
+                  <p className="card-text" style={{ fontSize: 25 }}>
+                    {item.comment}
+                  </p>
+                  <p className="card-text secondary" style={{ fontSize: 10 }}>
+                    Created at {item.published}
+                  </p>
+                </div>
               </div>
-            </div>
-          )
-          }
+            ))}
           </div>
           <br />
           {post.commentsSrc.comments &&

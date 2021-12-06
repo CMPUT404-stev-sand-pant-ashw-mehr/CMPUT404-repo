@@ -7,7 +7,6 @@ import { tokenConfig } from "../../actions/auth";
 import store from "../../store";
 import { Redirect } from "react-router-dom";
 
-
 export class Create extends Component {
   constructor(props) {
     super(props);
@@ -23,43 +22,40 @@ export class Create extends Component {
       imagePreview: null,
       img: null,
       base64: null,
-
-      redirect:"",
+      redirect: "",
     };
 
     this.onImageChange = this.onImageChange.bind(this);
     this.chooseFile = React.createRef();
   }
 
-  onImageChange = e => {
+  onImageChange = (e) => {
     e.preventDefault();
     if (e.target.files && e.target.files[0]) {
       this.setState({ img: e.target.files[0] }, () => {
-        console.log('img: ', this.state.img);
-        
         this.getBase64(this.state.img)
           .then((res) => {
-            this.setState({ content: res })
+            this.setState({ content: res });
           })
-          .catch(err => {
-            console.log('failed', err);
-          })
+          .catch((err) => {
+            console.log("failed", err);
+          });
         this.setState({ imagePreview: URL.createObjectURL(this.state.img) });
-      })
+      });
     }
   };
 
   getBase64 = (file) => {
     var reader = new FileReader();
     reader.readAsDataURL(file);
-    return new Promise(resolve => {
-      reader.onload = e => {
+    return new Promise((resolve) => {
+      reader.onload = (e) => {
         resolve(e.target.result);
-      }
-    })
+      };
+    });
   };
 
-  showOpenFileDlg = () => this.chooseFile.current.click()
+  showOpenFileDlg = () => this.chooseFile.current.click();
 
   resetForm() {
     this.setState({
@@ -72,11 +68,11 @@ export class Create extends Component {
       visibility: "",
       unlisted: false,
     });
-  };
+  }
 
-  onChange = (e) => this.setState({ [e.target.name]: e.target.value, });
+  onChange = (e) => this.setState({ [e.target.name]: e.target.value });
 
-  onSubmit =  (e) => {
+  onSubmit = (e) => {
     e.preventDefault();
     const {
       title,
@@ -87,7 +83,7 @@ export class Create extends Component {
       content,
       visibility,
     } = this.state;
-    
+
     const post = {
       type: "POST",
       title,
@@ -100,14 +96,19 @@ export class Create extends Component {
       unlisted: false,
       categories: ["web"],
     };
-    axios.post(`/author/${this.props.auth.user.author}/posts/`, post, tokenConfig(store.getState))
-        .then((res) => {
-          this.resetForm();
-          this.setState({
-            redirect:"/posts",
-          });
+    axios
+      .post(
+        `/author/${this.props.auth.user.author}/posts/`,
+        post,
+        tokenConfig(store.getState)
+      )
+      .then((res) => {
+        this.resetForm();
+        this.setState({
+          redirect: "/posts",
         });
-    }
+      });
+  };
 
   render() {
     const {
@@ -120,88 +121,104 @@ export class Create extends Component {
       visibility,
     } = this.state;
 
-    const {createPost } = this.props;
+    const { createPost } = this.props;
 
     return (
       <div>
         {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
 
-          <div className="form-group">
-            <label>Title</label>
-            <input
+        <div className="form-group">
+          <label>Title</label>
+          <input
+            className="form-control"
+            type="text"
+            name="title"
+            onChange={this.onChange}
+            value={title}
+          />
+        </div>
+        <div className="form-group">
+          <label>Description</label>
+          <input
+            className="form-control"
+            type="text"
+            name="description"
+            onChange={this.onChange}
+            value={description}
+          />
+        </div>
+        <div className="form-group">
+          <label>Content Type</label>
+          <select
+            className="form-control"
+            type="text"
+            name="contentType"
+            onChange={this.onChange}
+            value={contentType}
+          >
+            <option value="text/plain">text/plain</option>
+            <option value="text/markdown">text/markdown</option>
+            <option value="image">image</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Content</label>
+          {contentType === "text/plain" || contentType === "text/markdown" ? (
+            <textarea
               className="form-control"
-              type="text"
-              name="title"
+              id="content"
+              name="content"
               onChange={this.onChange}
-              value={title}
+              rows="4"
+              value={content}
             />
-          </div>
-          <div className="form-group">
-            <label>Description</label>
-            <input
-              className="form-control"
-              type="text"
-              name="description"
-              onChange={this.onChange}
-              value={description}
-            />
-          </div>
-          <div className="form-group">
-            <label>Content Type</label>
-            <select
-              className="form-control"
-              type="text"
-              name="contentType"
-              onChange={this.onChange}
-              value={contentType}
-            >
-              <option value="text/plain">text/plain</option>
-              <option value="text/markdown">text/markdown</option>
-              <option value="image">image</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Content</label>
-            {
-              contentType === "text/plain" || contentType === "text/markdown"
-              ?
-              <textarea
-                className="form-control"
-                id="content"
-                name="content"
-                onChange={this.onChange}
-                rows="4"
-                value={content}
+          ) : (
+            <div>
+              <button
+                className="btn btn-outline-primary"
+                variant="outlined"
+                color="primary"
+                onClick={this.showOpenFileDlg}
+              >
+                Choose Image
+              </button>
+              <br />
+              <input
+                type="file"
+                ref={this.chooseFile}
+                onChange={this.onImageChange}
+                style={{ display: "none" }}
+                accept="image/png, image/jpeg"
               />
-              :
-              <div>
-                <button variant="outlined" color="primary" onClick={this.showOpenFileDlg}>Choose Image</button>
-                <br />
-                <input type="file" ref={this.chooseFile} onChange={this.onImageChange} style={{ display: 'none' }} accept="image/png, image/jpeg" />
-                <img style={{width:'50%'}} src={this.state.imagePreview} alt="Unavailable" />
-              </div>
-            }
-            
-          </div>
-          <div className="form-group">
-            <label>Visibility</label>
-            <select
-              className="form-control"
-              type="text"
-              name="visibility"
-              onChange={(e) => {this.setState({visibility: e.target.value})}}
-              value={visibility}
-            >
-              <option value="PUBLIC">PUBLIC</option>
-              <option value="FRIENDS">FRIENDS</option>
-            </select>
-          </div>
-          <br></br>
-          <div className="form-group">
-            <button onClick={this.onSubmit} className="btn btn-primary">
-              Submit
-            </button>
-          </div>
+              <img
+                style={{ width: "50%" }}
+                src={this.state.imagePreview}
+                alt="Unavailable"
+              />
+            </div>
+          )}
+        </div>
+        <div className="form-group">
+          <label>Visibility</label>
+          <select
+            className="form-control"
+            type="text"
+            name="visibility"
+            onChange={(e) => {
+              this.setState({ visibility: e.target.value });
+            }}
+            value={visibility}
+          >
+            <option value="PUBLIC">PUBLIC</option>
+            <option value="FRIENDS">FRIENDS</option>
+          </select>
+        </div>
+        <br></br>
+        <div className="form-group">
+          <button onClick={this.onSubmit} className="btn btn-primary">
+            Submit
+          </button>
+        </div>
       </div>
     );
   }
@@ -216,6 +233,4 @@ const mapStateToProps = (state) => ({
   auth: state.auth,
 });
 
-export default connect(mapStateToProps, {createPost})(
-  Create
-);
+export default connect(mapStateToProps, { createPost })(Create);

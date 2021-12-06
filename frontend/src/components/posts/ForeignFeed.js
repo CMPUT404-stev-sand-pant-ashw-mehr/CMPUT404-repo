@@ -2,9 +2,13 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getForeignPosts, deletePost } from "../../actions/posts";
+import { getForeignPosts } from "../../actions/posts";
+import { CREATE_ALERT } from "../../actions/types";
 import Moment from "react-moment";
-import { FaRegClock, FaTrashAlt } from "react-icons/fa";
+import { FaRegClock, FaRegThumbsUp } from "react-icons/fa";
+import axios from "axios";
+import { tokenConfig } from "../../actions/auth";
+import store from "../../store";
 
 export class ForeignFeed extends Component {
   constructor(props) {
@@ -42,6 +46,36 @@ export class ForeignFeed extends Component {
     return url.host;
   }
 
+  likePost(post) {
+    axios
+      .post(
+        `/connection/${this.props.auth.user.author}/like/${post.id
+          .split("/")
+          .pop()}`,
+        null,
+        tokenConfig(store.getState)
+      )
+      .then((res) => {
+        store.dispatch({
+          type: CREATE_ALERT,
+          payload: {
+            msg: { success: "Post has been liked!" },
+            status: res.status,
+          },
+        });
+      })
+      .catch((e) => {
+        store.dispatch({
+          type: CREATE_ALERT,
+          payload: {
+            msg: { error: "Failed to like post." },
+            status: 500,
+          },
+        });
+        console.log(e);
+      });
+  }
+
   render() {
     const { posts } = this.props;
     const { offset, limit, page } = this.state;
@@ -56,7 +90,21 @@ export class ForeignFeed extends Component {
         <h2>Foreign Feed</h2>
 
         {paginatedposts.map((post) => (
-          <div className="card mb-4" key={post.id.split("/").pop()}>
+          <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
+            <div className="card-header mx-auto justify-content-center">
+              <h2 className="text-primary mb-4">
+                <div
+                  onClick={() => {
+                    this.likePost(post);
+                  }}
+                >
+                  <FaRegThumbsUp />
+                </div>
+              </h2>
+              <h2 className="text-secondary mt-4">
+                {post.likeCount ? post.likeCount : 0}
+              </h2>
+            </div>
             <div className="card-body">
               <div className="small text-muted">
                 <span className="float-end">
@@ -67,7 +115,13 @@ export class ForeignFeed extends Component {
               </div>
               <h2 className="card-title h4">{post.title}</h2>
               <p className="card-text">{post.description}</p>
-              <span className="badge bg-secondary">
+              <Link
+                to={`/foreign/posts/${post.id.split("/").pop()}`}
+                className="btn btn-outline-primary"
+              >
+                View full post →
+              </Link>
+              <span className="badge bg-secondary float-end">
                 {this.renderHost(post.author.host)}
               </span>
             </div>
@@ -116,6 +170,7 @@ export class ForeignFeed extends Component {
 
 const mapStateToProps = (state) => ({
   posts: state.foreignposts,
+  auth: state.auth,
 });
 
 export default connect(mapStateToProps, { getForeignPosts })(ForeignFeed);

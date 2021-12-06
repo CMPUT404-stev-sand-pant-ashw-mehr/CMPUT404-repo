@@ -108,11 +108,14 @@ export const register =
         dispatch({
           type: CREATE_ALERT,
           payload: {
-            msg: "Activate request sent to server admin.",
-            status: 200,
-
+            msg: {
+              success:
+                "Success! Please wait to login until you are superadmin approved.",
+            },
+            status: res.status,
           },
         });
+        window.location.href = "#/login";
       })
       .catch((err) => {
         dispatch({

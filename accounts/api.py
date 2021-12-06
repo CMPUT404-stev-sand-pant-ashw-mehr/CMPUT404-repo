@@ -3,17 +3,20 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response 
 from knox.models import AuthToken
+from knox.auth import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .serializers import LoginSerializer, UserSerializer, RegisterSerializer
 from author.serializer import AuthorSerializer
 from django.contrib.auth.models import User
 from author.models import Author
-from knox.models import AuthToken
-from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper
+from .helper import get_list_foregin_authors, get_list_foregin_posts, is_valid_node, get_foregin_author_detail, get_foregin_public_post_detail, send_friend_request_helper, like_foreign_posts, comment_foreign_posts, view_comments_foreign_post
 from author.models import Author
 from .permissions import AccessPermission, CustomAuthentication
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import uuid, requests
+import json
+
 
 class RegisterAPI(generics.GenericAPIView):
     """
@@ -88,9 +91,17 @@ class LoginAPI(generics.GenericAPIView):
 
 class ProfileAPI(generics.RetrieveAPIView):
     serializer_class = UserSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
-    def get_object(self):
-        return self.request.user 
+    def get_queryset(self):
+        return self.request.user
+
+    def retrieve(self, request):
+        return Response({
+            'user': UserSerializer(self.get_queryset()).data,
+            'author': AuthorSerializer(User.objects.select_related('author').get(username=request.user.username).author).data
+        }, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -140,7 +151,9 @@ def get_foregin_posts_view(request):
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-
+'''
+get foreign author/post detail
+'''
 
 @api_view(['GET'])
 @authentication_classes([CustomAuthentication])
@@ -169,7 +182,9 @@ def get_foregin_post_detail_view(request, post_id):
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    
+'''
+get author's github activities
+'''   
     
 @api_view([ 'GET'])
 @authentication_classes([CustomAuthentication])
@@ -187,7 +202,10 @@ def github_view(request, author_id):
         if type(git_msg) != list:
             return Response({"detail": "github not found!"}, status=status.HTTP_404_NOT_FOUND)
         return Response(git_msg, status=status.HTTP_200_OK)
-       
+
+'''
+send friend request to other teams
+'''       
 
 @api_view(['POST'])
 @authentication_classes([CustomAuthentication])
@@ -199,5 +217,48 @@ def send_friend_request(request, local_author_id, foreign_author_id):
             return Response({"detail": request_response}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"message": request_response.text}, status=request_response.status_code)
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+'''
+comment & like foreign posts
+'''    
+
+@api_view(['POST'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def like_foregin_post(request, post_id, author_id):
+    author = Author.objects.get(id=author_id)
+    if request.method == "POST":
+        res = like_foreign_posts(post_id, author)
+        if res.text ==  '{"succ":false}':
+            return Response({"detail": f"{author.displayName} has already liked a foreign post"}, status=status.HTTP_200_OK)
+        return Response({"detail": f"{author.displayName} liked a foreign post"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['POST'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def comment_foregin_post(request, post_id, author_id, content):
+    author = Author.objects.get(id=author_id)
+    if request.method == "POST":
+        res = comment_foreign_posts(post_id, author, content)
+        if res.text ==  '{"succ":false}':
+            return Response({"detail": f"{author.displayName} has already liked a foreign post"}, status=status.HTTP_200_OK)
+        return Response({"detail": f"{author.displayName} liked a foreign post"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['POST'])
+@authentication_classes([CustomAuthentication])
+@permission_classes([AccessPermission])
+def view_comment_foreign_post(request):
+    commentsUrl = request.data['commentsUrl']
+
+    if request.method == "POST":
+        res = view_comments_foreign_post(commentsUrl)
+        return Response(res, status=status.HTTP_200_OK)
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

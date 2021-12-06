@@ -13,11 +13,13 @@ import Feed from "./posts/Feed";
 import ForeignFeed from "./posts/ForeignFeed";
 import Create from "./posts/Create";
 import Post from "./posts/Post";
+import ForeignPost from "./posts/ForeignPost";
 
 import Landing from "./pages/Landing";
 import Profile from "./pages/Profile";
 import Inbox from "./pages/Inbox";
 import GitHub from "./pages/GitHub";
+import AuthorSearch from "./pages/AuthorSearch";
 
 import Login from "./auth/Login";
 import Register from "./auth/Register";
@@ -37,7 +39,7 @@ const options = {
 
 class App extends Component {
   componentDidMount() {
-    store.dispatch(loadUser());
+    if (localStorage.getItem("token") != null) store.dispatch(loadUser());
   }
 
   render() {
@@ -53,13 +55,23 @@ class App extends Component {
                   <AuthRoute exact path="/inbox" component={Inbox} />
                   <AuthRoute exact path="/posts" component={Feed} />
                   <AuthRoute exact path="/foreign" component={ForeignFeed} />
+                  <AuthRoute exact path="/authors" component={AuthorSearch} />
                   <AuthRoute exact path="/posts/create" component={Create} />
                   <AuthRoute
                     exact
                     path="/posts/:authorId/:postId"
                     component={Post}
                   />
-                  <AuthRoute exact path="/github-activities" component={GitHub} />
+                  <AuthRoute
+                    exact
+                    path="/foreign/posts/:postId"
+                    component={ForeignPost}
+                  />
+                  <AuthRoute
+                    exact
+                    path="/github-activities"
+                    component={GitHub}
+                  />
                   <AuthRoute exact path="/profile/:id" component={Profile} />
                   <Route exact path="/" component={Landing} />
                   <Route exact path="/login" component={Login} />
