@@ -132,12 +132,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         return_list = list()
         for comment in comment_query:
             comment_author_id = comment.pop('author_id', None)
-            print(comment_author_id.split('/')[4])
             if(this_post.visibility == 'FRIENDS') and (author_id != comment_author_id.split('/')[4]):
                 continue
 
             author_details = model_to_dict(Author.objects.get(id=comment_author_id))
-            print("author comment id- ", comment_author_id)
 
             author_details['id'] = author_details['url']
             comment['author'] = author_details
@@ -227,8 +225,12 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"detail": "post not found"}, status=status.HTTP_404_NOT_FOUND)
         
         try:
-            request_data = json.loads(request.body.decode('utf-8'))
-            author_json = request_data["author"]
+            if hasattr(request, "data") and "author" in request.data:
+                author_json = request.data["author"]
+            else:
+                request_data = json.loads(request.body.decode('utf-8'))
+                author_json = request_data["author"]
+                
             if type(author_json) == dict:
                 author_dict = author_json
             else:
