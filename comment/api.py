@@ -252,7 +252,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         if not author_validation.is_valid():
             return Response(author_validation.error_messages, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if urlparse(author_dict["host"]).hostname == "social-dis.herokuapp.com":
+            if urlparse(author_dict["id"]).hostname == "social-dis.herokuapp.com":
                 author_path = urlparse(author_dict["id"]).path
                 if author_path[-1] == '/':
                     author_path = author_path[:-1]
