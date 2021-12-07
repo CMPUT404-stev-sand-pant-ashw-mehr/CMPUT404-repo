@@ -140,7 +140,7 @@ export class Inbox extends Component {
 
     axios
       .put(
-        `/author/${foreignAuthorId}/followers/${authorId}`,
+        `/author/${authorId}/followers/${foreignAuthorId}`,
         {},
         tokenConfig(store.getState)
       )

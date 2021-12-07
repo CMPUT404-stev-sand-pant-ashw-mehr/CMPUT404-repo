@@ -10,6 +10,7 @@ export const CREATE_POST = "CREATE_POST";
 export const CREATE_POST_COMMENT = "CREATE_POST_COMMENT";
 export const UPDATE_POST = "UPDATE_POST";
 export const LIKE_POST = "LIKE_POST";
+export const LIKE_FOREIGN_POST = "LIKE_FOREIGN_POST";
 export const LIKE_POST_COMMENT = "LIKE_POST_COMMENT";
 
 export const GET_ALERTS = "GET_ALERTS";

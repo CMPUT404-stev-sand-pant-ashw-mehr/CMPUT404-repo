@@ -221,7 +221,7 @@ def get_foregin_authors_view(request):
     if request.method == "GET":
         foreign_authors = get_list_foregin_authors()
         print(foreign_authors)
-        return Response({"foregin authors": foreign_authors})
+        return Response({"items": foreign_authors})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
