@@ -198,7 +198,8 @@ class PostViewSet(viewsets.ModelViewSet):
                     "application/json": {"detail":"Node not allowed"}, 
                 }
             ),
-        }
+        },
+        tags=['Get public post']
     )
     # GET all public posts on this server
     def get_public_posts(self, request):

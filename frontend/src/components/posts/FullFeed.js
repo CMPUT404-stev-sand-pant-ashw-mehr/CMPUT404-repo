@@ -2,9 +2,13 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { getPosts, deletePost } from "../../actions/posts";
+import { getPosts, getForeignPosts, deletePost } from "../../actions/posts";
 import { addFollower } from "../../actions/followers";
-import { CREATE_ALERT, LIKE_POST } from "../../actions/types";
+import {
+  CREATE_ALERT,
+  LIKE_POST,
+  LIKE_FOREIGN_POST,
+} from "../../actions/types";
 // import ReactMarkDown from "react-markdown";
 
 import Moment from "react-moment";
@@ -29,7 +33,7 @@ import axios from "axios";
 import store from "../../store";
 import { ThemeConsumer } from "styled-components";
 
-export class Feed extends Component {
+export class FullFeed extends Component {
   init_state = {
     selectedAuthor: {},
     isFollower: false,
@@ -39,7 +43,27 @@ export class Feed extends Component {
     redirect: "",
     likeListOpen: false,
     likeList: [],
+    combinedPosts: [],
+    page: 1,
+    offset: 0,
+    limit: 5,
   };
+
+  showPreviousPosts() {
+    this.setState({
+      page: this.state.page - 1,
+      limit: this.state.offset,
+      offset: this.state.offset - 5,
+    });
+  }
+
+  showNextPosts() {
+    this.setState({
+      page: this.state.page + 1,
+      offset: this.state.limit,
+      limit: this.state.limit + 5,
+    });
+  }
 
   state = this.init_state;
 
@@ -48,11 +72,23 @@ export class Feed extends Component {
     return parseData[parseData.length - 1];
   }
 
+  renderHost(authorHost) {
+    var url = new URL(authorHost);
+    if (
+      authorHost.includes("127.0.0.1") ||
+      authorHost.includes("social-dis.herokuapp.com")
+    ) {
+      return "";
+    }
+    return url.host;
+  }
+
   componentDidMount() {
     this.setState({
       currentUser: this.props.auth.user,
     });
     this.props.getPosts();
+    this.props.getForeignPosts();
   }
 
   onAuthorClick(foreignAuthor) {
@@ -173,162 +209,214 @@ export class Feed extends Component {
   likePost(post) {
     const { user } = this.props;
 
-    axios
-      .post(
-        `/author/${post.author_id}/post/${post.id.split("/").pop()}/likes`,
-        null,
-        tokenConfig(store.getState)
-      )
-      .then((resp) => {
-        let likeObj = {
-          type: "Like",
-          author: user.author,
-          object: post.id,
-          "@context": "https://www.w3.org/ns/activitystreams",
-          summary: `${user.user.username} Likes your post`,
-        };
-        axios
-          .post(
-            `/author/${post.author_id}/inbox`,
-            likeObj,
-            tokenConfig(store.getState)
-          )
-          .then((res) => {
-            const likes = post.likes;
-            post.likes = [...likes, likeObj];
-            store.dispatch({
-              type: LIKE_POST,
-              payload: post,
+    let likeObj = {
+      type: "Like",
+      author: user.author,
+      object: post.id,
+      "@context": "https://www.w3.org/ns/activitystreams",
+      summary: `${user.user.username} Likes your post`,
+    };
+
+    if (this.renderHost(post.author.host) == "") {
+      axios
+        .post(
+          `/author/${post.author_id}/post/${post.id.split("/").pop()}/likes`,
+          null,
+          tokenConfig(store.getState)
+        )
+        .then((resp) => {
+          axios
+            .post(
+              `/author/${post.author_id}/inbox`,
+              likeObj,
+              tokenConfig(store.getState)
+            )
+            .then((res) => {
+              const likes = post.likes;
+              post.likes = [...likes, likeObj];
+              store.dispatch({
+                type: LIKE_POST,
+                payload: post,
+              });
+              store.dispatch({
+                type: CREATE_ALERT,
+                payload: {
+                  msg: { success: "Post has been liked!" },
+                  status: res.status,
+                },
+              });
             });
-            store.dispatch({
-              type: CREATE_ALERT,
-              payload: {
-                msg: { success: "Post has been liked!" },
-                status: res.status,
-              },
-            });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    } else {
+      axios
+        .post(
+          `/connection/${this.props.auth.user.author}/like/${post.id
+            .split("/")
+            .pop()}`,
+          null,
+          tokenConfig(store.getState)
+        )
+        .then((res) => {
+          post.likes = [likeObj];
+          store.dispatch({
+            type: LIKE_FOREIGN_POST,
+            payload: post,
           });
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+          store.dispatch({
+            type: CREATE_ALERT,
+            payload: {
+              msg: { success: "Post has been liked!" },
+              status: res.status,
+            },
+          });
+        })
+        .catch((e) => {
+          store.dispatch({
+            type: CREATE_ALERT,
+            payload: {
+              msg: { error: "Failed to like post." },
+              status: 500,
+            },
+          });
+          console.log(e);
+        });
+    }
   }
 
   render() {
-    const { posts, deletePost, getPosts, user } = this.props;
+    const { posts, deletePost, getPosts, user, foreignposts } = this.props;
+    const { page, limit } = this.state;
+    let foreignpostsFeed = foreignposts.posts;
+    let localpostsFeed = posts.posts;
+    let combinedpostsFeed = foreignpostsFeed
+      .concat(localpostsFeed)
+      .filter((post) => post.visibility.toLowerCase() == "public");
+    let combinedposts = combinedpostsFeed
+      .sort(function (a, b) {
+        return new Date(b.published) - new Date(a.published);
+      })
+      .slice(this.state.offset, this.state.limit);
 
     return (
       <Fragment>
         {this.state.redirect !== "" && <Redirect to={this.state.redirect} />}
-        <h2>Local Public Feed</h2>
-        {!posts.posts.length && <h5 className="mt-3">Loading...</h5>}
+        {(!posts.posts.length || !foreignposts.posts.length) && (
+          <h5 className="mt-3">Loading...</h5>
+        )}
         {posts.posts.length > 1 &&
-          posts.posts
-            .filter((post) => post.visibility === "PUBLIC")
-            .map((post) => (
-              <div
-                className="card mb-4 flex-row"
-                key={post.id.split("/").pop()}
-              >
-                <div className="card-header mx-auto justify-content-center">
-                  <h2 className="text-primary mb-4">
-                    {this.checkLikedPost(post.likes) ? (
-                      <FaThumbsUp />
-                    ) : (
-                      <div
-                        onClick={() => {
-                          this.likePost(post);
-                        }}
-                      >
-                        <FaRegThumbsUp />
-                      </div>
-                    )}
-                  </h2>
-
-                  <h2 className="text-secondary mt-4">
+          foreignposts.posts.length > 1 &&
+          combinedposts.map((post) => (
+            <div className="card mb-4 flex-row" key={post.id.split("/").pop()}>
+              <div className="card-header mx-auto justify-content-center">
+                <h2 className="text-primary mb-4">
+                  {post.likes && this.checkLikedPost(post.likes) ? (
+                    <FaThumbsUp />
+                  ) : (
                     <div
                       onClick={() => {
-                        this.openLikeList(post);
+                        this.likePost(post);
                       }}
                     >
-                      {post.likes.length}
+                      <FaRegThumbsUp />
                     </div>
-                  </h2>
-                </div>
-                <div className="card-body">
-                  <div className="small text-muted">
-                    <span className="float-end">
-                      <FaRegClock />
-                      &nbsp;<Moment fromNow>{post.published}</Moment>
-                    </span>
-                    <span onClick={() => this.onAuthorClick(post.author)}>
-                      @{post.author.displayName}
-                    </span>
-                  </div>
-                  <h2 className="card-title h4">{post.title}</h2>
-                  <p className="card-text">
-                    {post.contentType.includes("image") ? (
-                      <img
-                        className="img img-fluid"
-                        src={post.content}
-                        alt="Unavailable"
-                      />
-                    ) : (
-                      post.description
-                    )}
-                  </p>
-                  <Link
-                    to={`/posts/${post.author_id}/${post.id.split("/").pop()}`}
-                    className="btn btn-outline-primary"
-                  >
-                    View post →
-                  </Link>
-                  {post.author_id == user.user.author ? (
-                    <button
-                      className="btn btn-danger float-end"
-                      onClick={deletePost.bind(this, post.id)}
-                    >
-                      <FaTrashAlt />
-                    </button>
-                  ) : (
-                    ""
                   )}
-                </div>
+                </h2>
+
+                <h2 className="text-secondary mt-4">
+                  <div
+                    onClick={() => {
+                      this.openLikeList(post);
+                    }}
+                  >
+                    {post.likes && post.likeCount
+                      ? post.likes.length + post.likeCount
+                      : ""}
+                    {post.likes && !post.likeCount ? post.likes.length : ""}
+                    {post.likeCount && !post.likes ? post.likeCount : ""}
+                    {!post.likes && !post.likeCount ? "0" : ""}
+                  </div>
+                </h2>
               </div>
-            ))}
-        {posts.posts.length > 1 && (
+              <div className="card-body">
+                <div className="small text-muted">
+                  <span className="float-end">
+                    <FaRegClock />
+                    &nbsp;<Moment fromNow>{post.published}</Moment>
+                  </span>
+                  <span onClick={() => this.onAuthorClick(post.author)}>
+                    @{post.author.displayName}
+                  </span>
+                </div>
+                <h2 className="card-title h4">{post.title}</h2>
+                <p className="card-text">
+                  {post.contentType.includes("image") ? (
+                    <img
+                      className="img img-fluid mh-30"
+                      src={post.content}
+                      alt="Unavailable"
+                    />
+                  ) : (
+                    post.description
+                  )}
+                </p>
+                <Link
+                  to={
+                    this.renderHost(post.author.host) == ""
+                      ? `/posts/${post.author_id}/${post.id.split("/").pop()}`
+                      : `/foreign/posts/${post.id.split("/").pop()}`
+                  }
+                  className="btn btn-outline-primary"
+                >
+                  View post →
+                </Link>
+                <span className="badge bg-secondary float-end">
+                  {this.renderHost(post.author.host)}
+                </span>
+                {post.author_id == user.user.author ? (
+                  <button
+                    className="btn btn-danger float-end"
+                    onClick={deletePost.bind(this, post.id)}
+                  >
+                    <FaTrashAlt />
+                  </button>
+                ) : (
+                  ""
+                )}
+              </div>
+            </div>
+          ))}
+        {posts.posts.length > 1 && foreignposts.posts.length > 1 && (
           <nav aria-label="Posts pagination">
             <ul className="pagination">
-              <li className={`page-item ${!posts.previous ? "disabled" : ""}`}>
-                <a
+              <li className={`page-item ${page == 1 ? "disabled" : ""}`}>
+                <button
                   className="page-link"
-                  href="#"
-                  aria-label="Previous"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    getPosts(posts.previous);
-                  }}
+                  aria-label="Next"
+                  onClick={this.showPreviousPosts.bind(this)}
                 >
                   <span aria-hidden="true">&laquo;</span>
-                </a>
+                </button>
               </li>
               <li className="page-item active">
                 <a className="page-link" href="#">
-                  {posts.page}
+                  {page}
                 </a>
               </li>
-              <li className={`page-item ${!posts.next ? "disabled" : ""}`}>
-                <a
+              <li
+                className={`page-item ${
+                  combinedpostsFeed.length < limit ? "disabled" : ""
+                }`}
+              >
+                <button
                   className="page-link"
-                  href="#"
                   aria-label="Next"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    getPosts(posts.next);
-                  }}
+                  onClick={this.showNextPosts.bind(this)}
                 >
                   <span aria-hidden="true">&raquo;</span>
-                </a>
+                </button>
               </li>
             </ul>
           </nav>
@@ -406,6 +494,7 @@ export class Feed extends Component {
   static propTypes = {
     posts: PropTypes.object.isRequired,
     getPosts: PropTypes.func.isRequired,
+    getForeignPosts: PropTypes.func.isRequired,
     deletePost: PropTypes.func.isRequired,
     addFollower: PropTypes.func.isRequired,
     auth: PropTypes.object.isRequired,
@@ -414,11 +503,15 @@ export class Feed extends Component {
 
 const mapStateToProps = (state) => ({
   posts: state.posts,
+  foreignposts: state.foreignposts,
   followers: state.followers,
   user: state.auth,
   auth: state.auth,
 });
 
-export default connect(mapStateToProps, { getPosts, deletePost, addFollower })(
-  Feed
-);
+export default connect(mapStateToProps, {
+  getPosts,
+  deletePost,
+  getForeignPosts,
+  addFollower,
+})(FullFeed);
