@@ -334,8 +334,8 @@ export class FullFeed extends Component {
                     {post.likes && post.likeCount
                       ? post.likes.length + post.likeCount
                       : ""}
-                    {post.likes && !post.likeCount && post.likes.length}
-                    {post.likeCount && !post.likes && post.likeCount}
+                    {post.likes && !post.likeCount ? post.likes.length : ""}
+                    {post.likeCount && !post.likes ? post.likeCount : ""}
                     {!post.likes && !post.likeCount ? "0" : ""}
                   </div>
                 </h2>
